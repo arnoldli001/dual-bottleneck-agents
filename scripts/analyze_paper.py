@@ -367,7 +367,7 @@ def fig1_dual_bottleneck(out_png: Path,
     ax.set_xlim(0.5, 1.0)
     ax.set_ylim(0.0, 1.0)
     ax.set_xlabel("Judge Reliability τ", fontsize=12)
-    ax.set_ylabel("Generation Capability (1 − invalid rate)", fontsize=12)
+    ax.set_ylabel("Invalid Rate", fontsize=12)
     ax.set_title("ARGUS Dual-Bottleneck Diagram", fontsize=14)
     ax.grid(True, alpha=0.2)
     fig.tight_layout()

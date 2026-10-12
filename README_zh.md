@@ -12,7 +12,7 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 
 ![双重瓶颈概念图（τ–C 平面）](docs/images/fig1_dual_bottleneck.png)
 
-*fig1 — 只有同时满足 τ ≥ τ_c 且生成器有效任务率 ≥ 0.5，系统才落在安全区交集内。*
+*fig1 — 只有同时满足 τ ≥ τ_c（横轴）且生成器 invalid rate ≤ 0.5（纵轴），系统才落在安全区交集内。*
 
 ## 核心发现
 

@@ -14,9 +14,10 @@ figure appears in is noted alongside.
 
 ### Figure 1 — Dual-bottleneck concept (fig1_dual_bottleneck.png · §4.1)
 
-The safe region is the intersection of two conditions: judge reliability τ ≥ τ_c, and generator
-valid-task rate ≥ 0.5. Outside that intersection the loop still emits logs and still reports success
-on the rounds it completes — which is precisely why the failure is easy to miss.
+The safe region is the intersection of two conditions: judge reliability τ ≥ τ_c on the x axis, and
+generator invalid rate ≤ 0.5 on the y axis. Outside that intersection the loop still emits logs and
+still reports success on the rounds it completes — which is precisely why the failure is easy to
+miss.
 
 ![Figure 1 — Dual-bottleneck concept](images/fig1_dual_bottleneck.png)
 
