@@ -23,9 +23,9 @@ Under the valid-only caliber, condition A (LLM self-score) yields Δ_t = 0.150 w
 
 [Table 2c: Δ_t semantics — insert `tables/table2c_delta_t_semantics.md` here]
 
-[Figure 2: Δ_t of A vs B — insert `fig2_delta_t_AB.png` here]
+[Figure 2: per-round Δ_t across 4 conditions — insert `fig2b_delta_t_per_round.png` here]
 
-[Figure 2b: per-round Δ_t — insert `fig2b_delta_t_per_round.png` here]
+[Figure A.1: global-caliber Δ_t, A vs B — insert `fig2_delta_t_AB.png` here]
 
 ### 4.3 Generator-Side Bottleneck (C and D)
 
@@ -43,7 +43,7 @@ Importantly, the student is not the bottleneck. Among all 2400 rounds, every rou
 
 [Figure 2c: L1-phase Δ_t — insert `fig2c_delta_t_L1_only.png` here]
 
-> **Caption for Figure 2b.** Each panel shows one condition; invalid rounds are marked with gray crosses. C/D show the pseudo-difficulty trap after L2 transition. Vertical lines mark the first round at which the difficulty controller raises the task level.
+> **Caption for Figure 2.** Each panel shows one condition; invalid rounds are marked with gray crosses. C/D show the pseudo-difficulty trap after L2 transition. Vertical lines mark the first round at which the difficulty controller raises the task level.
 
 ### 4.4 The Dual-Bottleneck Picture
 

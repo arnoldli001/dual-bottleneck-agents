@@ -21,16 +21,17 @@ miss.
 
 ![Figure 1 — Dual-bottleneck concept](images/fig1_dual_bottleneck.png)
 
-### Figure 2 — Δ_t evolution, A vs B (fig2b_delta_t_per_round.png · §4.2)
+### Figure 2 — Δ_t evolution across 4 conditions, per-round (fig2b_delta_t_per_round.png · §4.2)
 
 Per-round Δ_t across all four conditions, one panel each; invalid rounds are marked with gray
 crosses, and vertical lines mark the first round at which the difficulty controller raises the task
-level. Conditions C and D show the pseudo-difficulty trap after the transition into L2.
+level. Conditions C and D show the pseudo-difficulty trap after the transition into L2. This is the
+valid-only caliber, which isolates judge behavior.
 
-> Sub-view: [fig2](images/fig2_delta_t_AB.png) is the 20-round bucket version;
-> [fig2c](images/fig2c_delta_t_L1_only.png) is the C/D L1-phase slice.
+> Sub-view: [fig2](images/fig2_delta_t_AB.png) is the global-caliber A/B view (Appendix A.1);
+> [fig2c](images/fig2c_delta_t_L1_only.png) is the C/D L1-phase slice (Appendix A.2).
 
-![Figure 2 — Δ_t evolution, A vs B](images/fig2b_delta_t_per_round.png)
+![Figure 2 — Δ_t evolution across 4 conditions, per-round](images/fig2b_delta_t_per_round.png)
 
 ### Figure 3 — Validity rate by condition (fig3_validity_rate.png · §4.3)
 
@@ -89,13 +90,13 @@ of which mechanisms are enabled.
 
 ## Appendix Figures
 
-### Figure A.1 — Δ_t overview, 20-round buckets (fig2_delta_t_AB.png)
+### Figure A.1 — Global-caliber Δ_t, A vs B (fig2_delta_t_AB.png)
 
-Δ_t evolution for conditions A and B, aggregated in 20-round buckets. A holds near 0.15 — a
-persistent gap between LLM self-scoring and Z3 ground truth — while B holds at 0.00, because the
-anchor's verdict *is* the ground truth whenever a task is well-formed.
+Global caliber (invalid rounds encoded as Δ_t = 1.0). Condition A averages 0.2435 and Condition B
+averages 0.2450; they appear similar because B's larger invalid rate offsets its zero valid-round
+bias. Compare with Figure 2 (valid-only caliber), which isolates judge behavior.
 
-![Figure A.1 — Δ_t overview](images/fig2_delta_t_AB.png)
+![Figure A.1 — Global-caliber Δ_t, A vs B](images/fig2_delta_t_AB.png)
 
 ### Figure A.2 — C/D Δ_t in L1 phase only (fig2c_delta_t_L1_only.png)
 

@@ -402,7 +402,7 @@ def fig2_delta_t_AB(records: list[dict], out_png: Path) -> bool:
         ax.plot(x_centers, ys, marker="o", linewidth=2, color=color, label=label)
     ax.set_xlabel("Round index")
     ax.set_ylabel("Avg Δ_t (per 20-round bucket)")
-    ax.set_title("Condition A vs B — judge-side bottleneck: Z3 anchor eliminates self-score drift",
+    ax.set_title("Global-caliber Δ_t: invalid rounds encoded as 1.0",
                  fontsize=12)
     ax.legend(loc="upper right")
     ax.grid(True, alpha=0.3)

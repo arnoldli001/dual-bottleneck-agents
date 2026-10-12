@@ -20,7 +20,7 @@ fact spinning in place. I call this the **pseudo-difficulty trap**.
 This led to a joint framing: self-evolution requires *both* a reliable judge (τ > τ_c) *and* a capable
 generator (V > V_c). Neither alone suffices.
 
-![Δ_t A vs B](docs/images/fig2b_delta_t_per_round.png)
+![Δ_t evolution across 4 conditions, per-round](docs/images/fig2b_delta_t_per_round.png)
 
 Z3 anchoring fully eliminates self-score drift: Condition A holds at Δ_t = 0.15, Condition B at
 Δ_t = 0.00.

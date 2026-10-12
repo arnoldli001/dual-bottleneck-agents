@@ -803,8 +803,8 @@ def render_paper_final(out_path: Path, metrics: dict,
     md.append("[Table 2a: Δ_t global caliber — insert `tables/table2a_delta_t_global.md` here]\n\n")
     md.append("[Table 2b: Δ_t valid-only caliber — insert `tables/table2b_delta_t_valid_only.md` here]\n\n")
     md.append("[Table 2c: Δ_t semantics — insert `tables/table2c_delta_t_semantics.md` here]\n\n")
-    md.append("[Figure 2: Δ_t of A vs B — insert `fig2_delta_t_AB.png` here]\n\n")
-    md.append("[Figure 2b: per-round Δ_t — insert `fig2b_delta_t_per_round.png` here]\n\n")
+    md.append("[Figure 2: per-round Δ_t across 4 conditions — insert `fig2b_delta_t_per_round.png` here]\n\n")
+    md.append("[Figure A.1: global-caliber Δ_t, A vs B — insert `fig2_delta_t_AB.png` here]\n\n")
 
     md.append("### 4.3 Generator-Side Bottleneck (C and D)\n\n")
     va = metrics.get("valid_rate_A", 0.0)
@@ -831,7 +831,7 @@ def render_paper_final(out_path: Path, metrics: dict,
     md.append("[Figure 3b: valid rate by difficulty level — insert `fig3b_validity_by_level.png` here]\n\n")
     md.append("[Figure 4: C/D difficulty trajectories — insert `fig4_difficulty_trajectory.png` here]\n\n")
     md.append("[Figure 2c: L1-phase Δ_t — insert `fig2c_delta_t_L1_only.png` here]\n\n")
-    md.append("> **Caption for Figure 2b.** Each panel shows one condition; invalid "
+    md.append("> **Caption for Figure 2.** Each panel shows one condition; invalid "
               "rounds are marked with gray crosses. C/D show the pseudo-difficulty "
               "trap after L2 transition. Vertical lines mark the first round at which "
               "the difficulty controller raises the task level.\n\n")
