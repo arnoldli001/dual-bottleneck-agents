@@ -22,8 +22,10 @@ generator (V > V_c). Neither alone suffices.
 
 ![Δ_t evolution across 4 conditions, per-round](docs/images/fig2b_delta_t_per_round.png)
 
-Z3 anchoring fully eliminates self-score drift: Condition A holds at Δ_t = 0.15, Condition B at
-Δ_t = 0.00.
+**Under the valid-only caliber, Z3 anchoring eliminates self-score drift entirely**: Condition A
+holds at Δ_t = 0.15, Condition B at Δ_t = 0.00. Under the global caliber the two look alike (0.2435
+vs 0.2450) because Condition B's invalid rounds are charged Δ_t = 1.0 — see Figure A.1 in the paper
+appendix.
 
 ## The Pseudo-Difficulty Trap
 
