@@ -98,7 +98,7 @@ python scripts/unify_paper_outputs.py
 ### 2.4 重跑实验（**需要 API key 与预算**）
 
 ```bash
-export DEEPSEEK_API_KEY="sk-..."     # Windows: $env:DEEPSEEK_API_KEY="sk-..."
+export DEEPSEEK_API_KEY="<your-api-key>"   # Windows: $env:DEEPSEEK_API_KEY="<your-api-key>"
 
 # τ 梯度扫描：800 轮，实测约 2.8 元 / 24 分钟
 python scripts/run_tau_sweep_real.py \
