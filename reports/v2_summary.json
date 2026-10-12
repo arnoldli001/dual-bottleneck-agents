@@ -1,0 +1,194 @@
+{
+  "A": {
+    "total": 200,
+    "valid": 179,
+    "invalid": 21,
+    "invalid_rate": 0.105,
+    "boundary_events": 0,
+    "boundary_event_details": [],
+    "llm_stats": {
+      "total_calls": 484,
+      "cache_hits": 105,
+      "cache_hit_rate": 0.2169,
+      "total_input_tokens": 161244,
+      "total_output_tokens": 909284,
+      "estimated_cost_cny": 1.9455
+    }
+  },
+  "B": {
+    "total": 200,
+    "valid": 171,
+    "invalid": 29,
+    "invalid_rate": 0.145,
+    "boundary_events": 0,
+    "boundary_event_details": [],
+    "llm_stats": {
+      "total_calls": 516,
+      "cache_hits": 145,
+      "cache_hit_rate": 0.281,
+      "total_input_tokens": 172040,
+      "total_output_tokens": 1099521,
+      "estimated_cost_cny": 2.3237
+    }
+  },
+  "C": {
+    "total": 200,
+    "valid": 103,
+    "invalid": 97,
+    "invalid_rate": 0.485,
+    "boundary_events": 10,
+    "boundary_event_details": [
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      }
+    ],
+    "llm_stats": {
+      "total_calls": 891,
+      "cache_hits": 588,
+      "cache_hit_rate": 0.6599,
+      "total_input_tokens": 305617,
+      "total_output_tokens": 2634930,
+      "estimated_cost_cny": 5.3778
+    }
+  },
+  "D": {
+    "total": 200,
+    "valid": 110,
+    "invalid": 90,
+    "invalid_rate": 0.45,
+    "boundary_events": 11,
+    "boundary_event_details": [
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      },
+      {
+        "from": 2,
+        "to": 1,
+        "consecutive_invalid": 5,
+        "rate": 0.8
+      }
+    ],
+    "llm_stats": {
+      "total_calls": 980,
+      "cache_hits": 560,
+      "cache_hit_rate": 0.5714,
+      "total_input_tokens": 318462,
+      "total_output_tokens": 2511249,
+      "estimated_cost_cny": 5.1626
+    }
+  }
+}

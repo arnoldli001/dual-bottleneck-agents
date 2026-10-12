@@ -1,0 +1,54 @@
+[
+  {
+    "condition": "A",
+    "n_legacy": 600,
+    "n_improved": 60,
+    "mean_legacy": 0.2435,
+    "mean_improved": 0.2333,
+    "std_legacy": 0.2662,
+    "std_improved": 0.4265,
+    "t": 0.1811,
+    "df": 63.7,
+    "p_value": 0.856257,
+    "cohens_d": 0.0358
+  },
+  {
+    "condition": "B",
+    "n_legacy": 600,
+    "n_improved": 60,
+    "mean_legacy": 0.245,
+    "mean_improved": 0.25,
+    "std_legacy": 0.4304,
+    "std_improved": 0.4367,
+    "t": -0.0847,
+    "df": 71.0,
+    "p_value": 0.932519,
+    "cohens_d": -0.0116
+  },
+  {
+    "condition": "C",
+    "n_legacy": 600,
+    "n_improved": 60,
+    "mean_legacy": 0.8823,
+    "mean_improved": 0.2667,
+    "std_legacy": 0.2911,
+    "std_improved": 0.4459,
+    "t": 10.4718,
+    "df": 64.1,
+    "p_value": 0.0,
+    "cohens_d": 1.9977
+  },
+  {
+    "condition": "D",
+    "n_legacy": 600,
+    "n_improved": 60,
+    "mean_legacy": 0.905,
+    "mean_improved": 0.2,
+    "std_legacy": 0.2935,
+    "std_improved": 0.4034,
+    "t": 13.1934,
+    "df": 65.4,
+    "p_value": 0.0,
+    "cohens_d": 2.312
+  }
+]

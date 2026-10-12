@@ -1,0 +1,10 @@
+# ARGUS 核心依赖（开发锁定版本）
+z3-solver==4.13.0.0
+openai>=2.0,<3.0
+faiss-cpu>=1.8
+numpy>=1.26
+pyyaml>=6.0
+pytest>=8.0
+pytest-cov>=5.0
+matplotlib>=3.10
+

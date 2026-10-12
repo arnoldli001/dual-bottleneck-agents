@@ -1,0 +1,91 @@
+# ARGUS 全局配置示例
+#
+# 使用方式：
+#   1. cp config.yaml.example config.yaml
+#   2. 填入你的 API key（或改用环境变量，推荐）
+#   3. 环境变量优先：DEEPSEEK_API_KEY / Deepseek_ARGUS
+#
+# 注意：config.yaml 已在 .gitignore 中，不会入库。
+
+api:
+  provider: "deepseek"
+  base_url: "https://api.deepseek.com/v1"
+  model: "deepseek-flash"
+  key: "your-api-key-here"   # 建议留空，改用环境变量 DEEPSEEK_API_KEY
+  timeout_seconds: 120
+  max_retries: 3
+  cache_db: "llm_cache.db"
+  max_input_tokens_per_call: 5000
+  max_output_tokens_per_call: 4000
+  max_output_tokens:
+    teacher: 4000
+    student: 3000
+    meta_mutate: 4000
+    roundtable: 2500
+    distill: 1500
+
+budget:
+  max_api_cost: 1000.0
+  max_gpu_hours: 0.0
+  alert_threshold: 0.8
+
+experiment:
+  conditions: ["A", "B", "C", "D"]
+  rounds_per_condition: 200
+  runs_per_condition: 3
+  random_seed: 42
+  smoke_rounds_per_condition: 20
+
+difficulty:
+  level_1:
+    max_variables: 10
+    theory: "LIA"
+  level_2:
+    max_variables: 20
+    theory: "BV"
+  level_3:
+    max_variables: 30
+    theory: "LIA+BV+Array"
+
+paths:
+  workspace: "argus-workspace"
+  tasks: "tasks"
+  solutions: "solutions"
+  logs: "logs"
+  checkpoints: "checkpoints"
+  memory: "memory"
+  constitution: "constitution"
+
+z3:
+  timeout_ms: 10000
+  max_latency_ms: 100
+
+# 约束生成框架 - 课程学习参数（第四层）
+curriculum:
+  enabled: true
+  sub_levels:
+    level_1: [3, 5, 8, 10]
+    level_2: [5, 10, 15]
+    level_3: [5, 10]
+  upgrade:
+    window: 5
+    valid_rate_threshold: 0.80
+  downgrade:
+    window: 3
+    valid_rate_threshold: 0.50
+  state_file: "state/difficulty_state.json"
+
+# 约束生成框架 - 教师 Agent 选项（第一/三层）
+teacher:
+  default_mode: "json"
+  initial_extra_constraints: []
+  error_code_to_symbolic:
+    "1": "所有变量必须先在 'variables' 中声明，类型只能从 Int/Bool/Real/Array/BitVec<W> 中选"
+    "3": "不要在 constraints 字符串中插入 Python import 或函数调用；只能写 Z3 表达式"
+    "4": "减少约束数量到 5 个以内；避免深层嵌套；移除位向量/数组"
+    "5": "约束中使用的所有标识符必须已声明；BitVec 与 Int 不可直接相加"
+
+# 裁判可靠度（τ）参数
+judge:
+  reliability: 1.0
+  noise_seed: null

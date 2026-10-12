@@ -1,0 +1,1 @@
+{"round": 7, "tau": 0.6, "condition": "D", "level": 1, "valid": true, "correct": true, "delta_t": 0.0, "z3_status": "unsat", "elapsed_seconds": 0.02183246612548828, "estimated_cost_cny": 0.0025, "cache_hit_rate": 0.6667}
