@@ -99,8 +99,11 @@ python scripts/analytical_fit_tau.py
 # 双重瓶颈合成律 → table4c
 python scripts/dual_bottleneck_law.py
 
-# τ_c 检测与反直觉现象分析 → tau_c_analysis_real.md, fig7
-python scripts/detect_tau_c.py --within-tau --raw_root logs/tau_sweep_real
+# τ_c 检测 → tau_c_analysis.md / .json / tau_c_curve.png
+# （summary.json 与 tau_* 同级，--raw_root 会自动取 summary 所在目录）
+python scripts/detect_tau_c.py --within-tau --summary logs/tau_sweep_real/summary.json
+
+# τ_c 反直觉现象分析 → tau_c_gap_analysis.md, fig7
 python scripts/analyze_tau_c_gap.py
 
 # L1 阶段曲线与分级有效任务率 → fig2c, fig3b
