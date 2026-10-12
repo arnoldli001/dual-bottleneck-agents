@@ -104,16 +104,12 @@ We began with the same premise. We built a self-evolving agent with formal ancho
 population-based difficulty adaptation, and experience distillation. We ran 2,400 rounds of
 controlled experiments (4 conditions $\times$ 200 rounds $\times$ 3 runs).
 
-\textbf{We expected to confirm that formal anchoring suppresses self-score drift.} Condition A (LLM
-self-score) would show $\Delta_t$ growing; Condition B (Z3 anchor) would show $\Delta_t$ stable near
-zero. \textbf{This is exactly what we found}: A's $\Delta_t = 0.15$ across 200 rounds, B's
-$\Delta_t = 0.00$.
-
-\textbf{But we also found something unexpected.} Conditions C (population only) and D (full system)
-had invalid task rates of 85.5\% and 90.5\%, respectively. The difficulty controller, seeing high
-success on Level 1, upgraded to Level 2/3---but the LLM could not generate valid Z3 code at those
-levels. The system spun without progress, burning API budget on tasks that never reached
-verification.
+\textbf{We expected to confirm that formal anchoring suppresses self-score drift, and we did}:
+condition A (LLM self-score) holds $\Delta_t = 0.15$ across 200 rounds while condition B (Z3 anchor)
+holds $0.00$. \textbf{But we also found something unexpected}: conditions C (population only) and D
+(full system) invalidate 85.5\% and 90.5\% of their tasks. The controller read high Level-1 success as
+readiness and upgraded to Level 2/3, where the LLM could not generate valid Z3 code --- so the system
+spun without progress, burning API budget on tasks that never reached verification.
 
 \textbf{This is the pseudo-difficulty trap.} It is not a judge failure---Z3 was perfectly reliable.
 It is a \textit{generator} failure. And it reveals that self-evolving systems face \textbf{two
@@ -177,7 +173,8 @@ could have helped before the four-layer constraint framework restored generator 
 \section{Related Work}
 
 \paragraph{Self-improving agents.}
-A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; Blind Curator~\cite{blind_curator} removes ground-truth labels from the curation loop entirely; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
+A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; Blind Curator~\cite{blind_curator} shows that on reference-free tasks a false-pass bias silently
+disables skill retirement altogether; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
 
 \paragraph{The judge-side bottleneck.}
 Two recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
@@ -294,16 +291,14 @@ This holds to machine precision on the 2400-round data (Table~\ref{tab:table4c})
   \label{fig:dual_bottleneck}
 \end{figure*}
 
-\subsection{Judge-Side Bottleneck}
+\subsection{Two Bottlenecks}
 
-Under the valid-only caliber, condition A (LLM self-score) yields $\Delta_t = 0.150$ while condition
-B (Z3 anchor) yields $\Delta_t = 0.000$. The formal anchor therefore eliminates the entire
-self-score drift: whenever a task is well-formed, the anchor's verdict \textit{is} the ground truth,
-so $\Delta_t$ is identically zero by construction. Under the global caliber the two conditions become
-A = 0.243 and B = 0.245, because B's invalid rounds (147 of 600) are charged $\Delta_t = 1.0$. The
-apparent contradiction between the two numbers is a caliber difference, not a data inconsistency ---
-see Appendix~\ref{app:data_consistency} for the formal definition. Table~\ref{tab:table3} reports the
-underlying valid and invalid counts per condition.
+Under the valid-only caliber, condition A (LLM self-score) gives $\Delta_t = 0.150$ and condition B
+(Z3 anchor) gives $0.000$: whenever a task is well-formed the anchor's verdict \textit{is} the ground
+truth, so self-score drift vanishes by construction. Under the global caliber the same conditions read
+A = 0.243 and B = 0.245, because B's 147 invalid rounds are charged $\Delta_t = 1.0$. That is a
+caliber difference, not a data inconsistency; see Appendix~\ref{app:data_consistency} and
+Table~\ref{tab:table3}.
 
 \begin{figure*}[t]
   \centering
@@ -331,19 +326,14 @@ underlying valid and invalid counts per condition.
   \end{tabularx}
 \end{table}
 
-\subsection{Generator-Side Bottleneck}
-
-Once the population game is enabled (C and D), the difficulty controller pushes tasks toward L2/L3.
-The teacher, however, cannot reliably author bit-vector and array constraints: valid rates collapse
-from 89.0\% (A) and 75.5\% (B) to 14.5\% (C) and 9.5\% (D). Critically, the failures are \textit{not}
-graded by difficulty --- they cluster at the moment of transition, because once the level is raised
-the teacher keeps failing and the controller keeps the level high. We call this the
-\textbf{pseudo-difficulty trap}: the system believes it is solving harder problems while in fact it
-spends its budget on unparseable or unsolvable task proposals.
-
-Importantly, the student is not the bottleneck. Among all 2400 rounds, every round that produced a
-valid task was solved correctly; all failures are attributable to task generation. Validity by
-condition is plotted in Figure~\ref{fig:validity_by_condition}.
+The judge is not the only bottleneck. Once the population game is enabled (C and D), the controller
+pushes tasks toward L2/L3 and the teacher cannot reliably author bit-vector and array constraints:
+valid rates collapse from 89.0\% (A) and 75.5\% (B) to 14.5\% (C) and 9.5\% (D). The failures are
+\textit{not} graded by difficulty --- they cluster at the transition, because the controller keeps the
+level high while the teacher keeps failing. We call this the \textbf{pseudo-difficulty trap}: the
+system believes it is solving harder problems while it spends its budget on tasks that never reach
+verification. The student is not at fault; every round with a valid task was solved correctly
+(Figure~\ref{fig:validity_by_condition}).
 
 \begin{figure*}[t]
   \centering
@@ -527,14 +517,12 @@ and therefore
   \boxed{\;\Delta_t(\tau) = 1 - P(\text{correct}) = \frac{1-\tau^2}{2}\;}
 \]
 
-\textbf{Where the $\tau^2$ comes from.} It is the sum of the two agreement terms: both-correct
-contributes $((1+\tau)/2)^2$ and both-flipped contributes $((1-\tau)/2)^2$. The cross terms cancel,
-leaving $(1+\tau^2)/2$. The exponent 2 is therefore the number of independent judgments per round
---- not any property of the judge alone.
-
-\textbf{Where the $1/2$ comes from.} At $\tau = 0$ the expression gives $\Delta_t = 1/2$: two
-independent random verdicts agree half the time. This is the binary symmetry of SAT/UNSAT tasks, and
-it is why the curve is anchored at 0.5 rather than 1.0 on the left.
+\textbf{Where the $\tau^2$ and the $1/2$ come from.} The $\tau^2$ is the sum of the two agreement
+terms --- both-correct contributes $((1+\tau)/2)^2$ and both-flipped contributes $((1-\tau)/2)^2$ ---
+whose cross terms cancel, leaving $(1+\tau^2)/2$; the exponent is therefore the number of independent
+judgments per round, not a property of the judge. The $1/2$ is the binary symmetry of SAT/UNSAT: at
+$\tau = 0$ two independent random verdicts agree half the time, which is why the curve is anchored at
+0.5 rather than 1.0 on the left.
 
 Across the eight swept $\tau$ values the measured per-cell means track the closed form with
 
@@ -847,32 +835,25 @@ behavior. In our case, the L1 sweep returned $\tau = \tau_c = 0.55$, and the L2/
 $\Delta_t^{\mathrm{gen}} \approx 0.9 > \Delta_t^{\max} = 0.6$, correctly predicting the
 pseudo-difficulty trap before it was observed in the full 2{,}400-round run.
 
-The composition law also suggests an architectural direction. Self-evolving systems should expose two
-measurements as first-class telemetry: a running estimate of $\Delta_t^{\mathrm{gen}}$ per difficulty
-level, and a calibrated estimate of $\tau$ per judge. With both available, a controller can decide
-per-round whether to escalate difficulty (gated by $\Delta_t^{\mathrm{gen}} < \Delta_t^{\max}$) or to
-spend budget on judge calibration. Our four-layer constraint framework is one instantiation of this
-idea: it reduces $\Delta_t^{\mathrm{gen}}$ until the generator stops consuming the entire budget, at
-which point $\tau_c$ becomes a meaningful operating threshold rather than a constant to be measured.
+The composition law also suggests an architectural direction: self-evolving systems should expose
+$\Delta_t^{\mathrm{gen}}$ and $\tau$ as first-class telemetry, gating difficulty escalation on
+$\Delta_t^{\mathrm{gen}} < \Delta_t^{\max}$. Our four-layer constraint framework is one instantiation
+--- it lowers $\Delta_t^{\mathrm{gen}}$ until the generator stops consuming the entire budget, at
+which point $\tau_c$ becomes a meaningful operating threshold.
 
 \section{Conclusion}
 
-We set out to measure how reliable a judge must be for a self-evolving agent to improve. We found
-that the answer is not a fixed number. It is a function of how much error budget the generator has
-already spent. The composition law
-$1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})$
-holds to machine precision on 2{,}400 real-API rounds, and it implies a closed form
-$\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$ with no fitted parameters. The practical consequence is that
-``how reliable must the judge be?'' and ``where should I invest?'' are the same question, answered by
-the same budget decomposition.
-
-Two results follow. First, the pseudo-difficulty trap: once the generator bottleneck exceeds the
-tolerance, no judge reliability can rescue the loop. Second, the judge threshold has a closed form
-that holds across mechanisms --- a system with population game, distillation, and
-round-table consensus returns the same $\tau_c$ as a minimal Z3-anchored loop. The formula does not
-care how many mechanisms you enable; it cares how much budget the generator leaves over. We hope this
-reframes the self-evolution problem from ``add more mechanisms'' to ``measure the budget split
-first.''
+We set out to measure how reliable a judge must be for a self-evolving agent to improve. The answer is
+not a fixed number but a function of how much error budget the generator has already spent: the
+composition law
+$1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})$ holds
+to machine precision on 2{,}400 real-API rounds and yields a closed form
+$\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$ with no fitted parameters. Two results follow. First, the
+pseudo-difficulty trap: once the generator bottleneck exceeds the tolerance, no judge reliability can
+rescue the loop. Second, $\tau_c$ is not a constant of the system --- a system with population game,
+distillation, and round-table consensus returns the same $\tau_c$ as a minimal Z3-anchored loop,
+because the formula cares only how much budget the generator leaves over. This reframes the
+self-evolution problem from ``add more mechanisms'' to ``measure the budget split first.''
 
 % ===========================================================================
 % REFERENCES
