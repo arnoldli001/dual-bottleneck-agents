@@ -183,7 +183,7 @@ four-layer constraint framework restored generator validity.
 A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
 
 \paragraph{The judge-side bottleneck.}
-Three recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Blind Curator~\cite{blind_curator} shows that a judge whose false-pass rate crosses roughly 0.45 silently disables skill retirement, even when the judge's overall accuracy looks acceptable. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
+Three recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Blind Curator~\cite{blind_curator} reports that a judge whose false-pass rate crosses roughly 0.45 \textit{in its own setting} silently disables skill retirement, even when the judge's overall accuracy looks acceptable. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
 
 \paragraph{Agent evaluation and constraint-guided generation.}
 AgentJudgeBench~\cite{agentjudgebench} provides a multi-difficulty benchmark for judging agent behaviour; our own difficulty levels are defined by Z3 theories instead, so the two stratifications are independent. TreeCoder~\cite{treecoder} constrains code generation through syntax-directed search and InstructFlow~\cite{instructflow} guides it with symbolic constraints---the same design principle behind the skeleton and renderer layers of our framework. Unlike benchmark-oriented work, we do not propose a new evaluation suite; we use existing formal signals to locate the threshold at which self-improvement becomes self-defeating.
@@ -236,8 +236,8 @@ the system still produces logs, still reports success on the rounds it can compl
 appears to run --- which is precisely why the failure is easy to miss.
 
 The intuition behind the second bottleneck is that the causal variable is not $\tau_c$ itself. A
-round succeeds only if a valid task exists \textit{and} the student judges it correctly, so by the
-chain rule
+round succeeds only if a valid task exists \textit{and} the student's answer is judged correctly, so
+by the chain rule
 
 \[
   1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
@@ -313,9 +313,8 @@ This section asks a single question: given a generator that can produce candidat
 \label{sec:noise}
 
 We model an unreliable judge by flipping each verdict with probability $p = (1-\tau)/2$,
-symmetrically for SAT and UNSAT. Two independent Z3 calls are noised per round --- the teacher's
-verdict on the generated task and the student's verdict on its encoding --- so they flip
-independently.
+symmetrically for SAT and UNSAT. Two independent Z3 calls are noised per round --- the verdict on
+the teacher's task and the verdict on the student's answer --- so they flip independently.
 
 \subsection{Empirical $\tau_c$}
 \label{sec:empirical_tau}
@@ -345,8 +344,8 @@ $\tau_c(B) = \tau_c(D) = 0.55$ across all three calibers (combined, $\Delta_t$, 
 \]
 
 \textbf{Assumption 2 (two independent judgments per round).} A round involves two separate Z3 calls:
-one validating the task the teacher produced (which becomes \texttt{expected}), and one validating
-the answer the student submitted. They are separate processes and flip independently.
+one producing the verdict on the teacher's task (which becomes \texttt{expected}), and one producing
+the verdict on the student's answer. They are separate processes and flip independently.
 
 A round is scored correct exactly when the two verdicts \textbf{agree} --- both unflipped, or both
 flipped:
