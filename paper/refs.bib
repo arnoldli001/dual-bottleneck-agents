@@ -1,0 +1,136 @@
+% ---------------------------------------------------------------------------
+% refs.bib -- Dual-Bottleneck Agents
+%
+% 10 entries. No self-citation (double-blind).
+%
+% Verification status (re-checked against arXiv / ICML / NeurIPS / OpenReview,
+% 2026-10-13). All 10 entries now carry a confirmed author list.
+%
+%   VERIFIED  : ratchet, agentjudgebench, populora, dgm, hyperagents
+%   RESOLVED  : self_verification_cliff, blind_curator, evolver, treecoder,
+%               instructflow
+%
+% The five RESOLVED entries were previously unverifiable and carried no author
+% field. They have now been located, and in every case the author-supplied
+% title was a paraphrase rather than the registered title, so the titles and
+% venues below were corrected to the published forms. Sources:
+%
+%   self_verification_cliff  https://ICML.cc/virtual/2026/82529
+%                            (ICML 2026 AI-for-Math workshop; single author)
+%   blind_curator            https://arxiv.org/abs/2607.07436
+%                            (COLM 2026 Agent Behavior workshop; same author
+%                             group as `ratchet`, which cross-checks the list)
+%   evolver                  https://icml.cc/virtual/2026/poster/65641
+%                            (ICML 2026; the system is named EvolveR in the
+%                             abstract, which is why the short title differed)
+%   treecoder                https://arxiv.org/abs/2511.22277
+%                            (ACM DOI 10.1145/3808347; not PLDI as previously
+%                             recorded -- cited here as the arXiv version)
+%   instructflow             https://neurips.cc/virtual/2025/loc/san-diego/poster/116092
+%                            (NeurIPS 2025)
+% ---------------------------------------------------------------------------
+
+% --- VERIFIED on arXiv ------------------------------------------------------
+
+@misc{ratchet,
+  title         = {Ratchet: How Reliable Must an {LLM} Judge Be to Retire a Skill?},
+  author        = {Zhang, Xing and Cui, Yanwei and Wang, Guanghui and Li, Ziyuan and Qiu, Wei and Zhu, Bing and He, Peiyang},
+  year          = {2026},
+  eprint        = {2605.22148},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+}
+
+@misc{populora,
+  title         = {PopuLoRA: Co-Evolving {LLM} Populations for Reasoning Self-Play},
+  author        = {Creus Castanyer, Roger and Bradway, Geoffrey and Wolf, Lorenz and Lin, Maxwill and Mavor-Parker, Augustine N. and Sargent, Matthew James},
+  year          = {2026},
+  eprint        = {2605.16727},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+}
+
+% NOTE: the author-supplied title is an abbreviation. The full arXiv title is
+% "AgentJudgeBench: A Multi-Difficulty Benchmark for Evaluating LLM Judges on
+% Agentic Tool-Calling". The full form is used below; restore the short form if
+% the conference version is titled differently.
+@misc{agentjudgebench,
+  title         = {AgentJudgeBench: A Multi-Difficulty Benchmark for Evaluating {LLM} Judges on Agentic Tool-Calling},
+  author        = {Verma, Abhigya and Saha, Amit Kumar and Subramanian, Seganrasan and Aluru, Sai Harshitha},
+  year          = {2026},
+  eprint        = {2608.26623},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+}
+
+% NOTE: arXiv title is simply "Hyperagents" (2603.19461, March 2026, Facebook
+% Research). The author-supplied subtitle "Meta-Level Self-Modification" is not
+% in the arXiv metadata and may be the camera-ready title.
+@inproceedings{hyperagents,
+  title         = {HyperAgents: Meta-Level Self-Modification},
+  author        = {Zhang, Jenny and Zhao, Bingchen and Yang, Wannan and Foerster, Jakob and Clune, Jeff and Jiang, Minqi and Devlin, Sam and Shavrina, Tatiana},
+  booktitle     = {ICLR},
+  year          = {2026},
+  eprint        = {2603.19461},
+  archivePrefix = {arXiv},
+}
+
+% NOTE: arXiv 2505.22954 (May 2025), published as a conference paper in 2026.
+@inproceedings{dgm,
+  title         = {Darwin G{\"o}del Machine: Open-Ended Evolution of Self-Improving Agents},
+  author        = {Zhang, Jenny and Hu, Shengran and Lu, Cong and Lange, Robert and Clune, Jeff},
+  booktitle     = {ICLR},
+  year          = {2026},
+  eprint        = {2505.22954},
+  archivePrefix = {arXiv},
+}
+
+% --- RESOLVED: authors, titles and venues confirmed on 2026-10-13 ------------
+
+% Registered title is longer than the author-supplied short form. This is a
+% workshop paper, not a main-conference paper.
+@inproceedings{self_verification_cliff,
+  title     = {The Self-Verification Cliff: Generation Outpaces Self-Selection in Frontier {LLM}s, and It Widens With Capability},
+  author    = {Jain, Arihant},
+  booktitle = {ICML Workshop on AI for Math: Toward Self-Evolving Scientific Agents},
+  year      = {2026},
+}
+
+% The author-supplied title ("When Self-Evaluation Fails") does not correspond
+% to any registered paper; this is the matching work by the Ratchet group.
+@misc{blind_curator,
+  title         = {The Blind Curator: How a Biased Judge Silently Disables Skill Retirement in Self-Evolving Agents},
+  author        = {Zhang, Xing and Cui, Yanwei and Wang, Guanghui and Li, Ziyuan and Qiu, Wei and Zhu, Bing and He, Peiyang},
+  year          = {2026},
+  eprint        = {2607.07436},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+}
+
+% Registered title is "From Interactions to Principles: ..."; the system is
+% named EvolveR in the abstract.
+@inproceedings{evolver,
+  title         = {From Interactions to Principles: Experience-Driven Self-Distillation for Evolving {LLM} Agents},
+  author        = {Wu, Rong and Wang, Xiaoman and Mei, Jianbiao and Cai, Pinlong and Fu, Daocheng and Yang, Cheng and Wen, Licheng and Yang, Xuemeng and Shen, Yufan and Wang, Yuxin and Shi, Botian},
+  booktitle     = {ICML},
+  year          = {2026},
+}
+
+% Previously recorded as PLDI with a different subtitle; the registered work
+% carries an ACM DOI (10.1145/3808347). Cited here as the arXiv version.
+@misc{treecoder,
+  title         = {TreeCoder: Systematic Exploration and Optimisation of Decoding and Constraints for {LLM} Code Generation},
+  author        = {Princis, Henrijs and Sharma, Arindam and David, Cristina},
+  year          = {2025},
+  eprint        = {2511.22277},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+}
+
+% Author-supplied title abbreviated the registered one.
+@inproceedings{instructflow,
+  title         = {InstructFlow: Adaptive Symbolic Constraint-Guided Code Generation for Long-Horizon Planning},
+  author        = {Chi, Haotian and Feng, Zeyu and Lyu, Yueming and Zheng, Chengqi and Luo, Linbo and Ong, Yew Soon and Tsang, Ivor and Chen, Hechang and Chang, Yi and Yin, Haiyan},
+  booktitle     = {NeurIPS},
+  year          = {2025},
+}

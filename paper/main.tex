@@ -22,6 +22,11 @@
 % 会让版面变成单栏 1 英寸边距，与 NeurIPS 双栏模板冲突，已移除。
 % ---------------------------------------------------------------------------
 \documentclass{article}
+% natbib is loaded by neurips_2026.sty via \RequirePackage{natbib} with no
+% options, which defaults to author-year. Passing the options here is the
+% mechanism the style file itself documents, so numeral citations work
+% without touching the style file.
+\PassOptionsToPackage{numbers,compress}{natbib}
 \usepackage[preprint]{neurips_2026}
 
 % --- encoding and fonts -----------------------------------------------------
@@ -170,6 +175,18 @@ could have helped before the four-layer constraint framework restored generator 
 % ===========================================================================
 \section{Related Work}
 
+\paragraph{Self-improving agents.}
+A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; Blind Curator~\cite{blind_curator} removes ground-truth labels from the curation loop entirely; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
+
+\paragraph{The judge-side bottleneck.}
+Two recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
+
+\paragraph{Agent evaluation and constraint-guided generation.}
+AgentJudgeBench~\cite{agentjudgebench} provides a multi-difficulty benchmark for judging agent behaviour; our own difficulty levels are defined by Z3 theories instead, so the two stratifications are independent. TreeCoder~\cite{treecoder} constrains code generation through syntax-directed search and InstructFlow~\cite{instructflow} guides it with symbolic constraints---the same design principle behind the skeleton and renderer layers of our framework. Unlike benchmark-oriented work, we do not propose a new evaluation suite; we use existing formal signals to locate the threshold at which self-improvement becomes self-defeating.
+
+\paragraph{Position of this work.}
+Existing work either assumes a reliable judge, or studies judge reliability in a single decision setting. We provide a \emph{dual-bottleneck} account: the judge-side threshold $\tau_c$ and the generator-side four-layer constraint framework are derived from the same composition law, and the budget decomposition shows how reliability and capability trade off under a fixed annotation budget. This is, to our knowledge, the first treatment that unifies both bottlenecks under one analytical formula and validates it on real API trajectories.
+
 % ===========================================================================
 % 3. PROBLEM SETUP
 % ===========================================================================
@@ -185,7 +202,8 @@ $\tau \ge \tau_c$ and $V \ge V_c$.
 
 \textbf{Proposition 1 (Necessity of both conditions).} If $\tau < \tau_c$, the system accumulates
 corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the system generates mostly
-invalid tasks and the effective evolution rate approaches zero.
+invalid tasks and the effective evolution rate approaches zero. The experimental setup is summarized
+in Table~\ref{tab:table1}.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
@@ -201,6 +219,7 @@ variables), L2 (bit-vectors, $\le$20 variables), and L3 (mixed LIA + BV + Array,
 The primary metric is $\Delta_t$, the gap between the system's own evaluation and the ground truth.
 Invalid rounds --- where the teacher fails to produce a solvable constraint set --- are encoded as
 $\Delta_t = 1.0$ under the \textit{global} caliber and excluded under the \textit{valid-only} caliber.
+Figure~\ref{fig:dual_bottleneck} shows the two bottlenecks side by side.
 
 \begin{table}[t]
   \centering
@@ -282,7 +301,8 @@ self-score drift: whenever a task is well-formed, the anchor's verdict \textit{i
 so $\Delta_t$ is identically zero by construction. Under the global caliber the two conditions become
 A = 0.243 and B = 0.245, because B's invalid rounds (147 of 600) are charged $\Delta_t = 1.0$. The
 apparent contradiction between the two numbers is a caliber difference, not a data inconsistency ---
-see Appendix~\ref{app:data_consistency} for the formal definition.
+see Appendix~\ref{app:data_consistency} for the formal definition. Table~\ref{tab:table3} reports the
+underlying valid and invalid counts per condition.
 
 \begin{figure*}[t]
   \centering
@@ -321,7 +341,8 @@ the teacher keeps failing and the controller keeps the level high. We call this 
 spends its budget on unparseable or unsolvable task proposals.
 
 Importantly, the student is not the bottleneck. Among all 2400 rounds, every round that produced a
-valid task was solved correctly; all failures are attributable to task generation.
+valid task was solved correctly; all failures are attributable to task generation. Validity by
+condition is plotted in Figure~\ref{fig:validity_by_condition}.
 
 \begin{figure*}[t]
   \centering
@@ -363,7 +384,8 @@ $\Delta_t^{\max}$, the amount left for judge noise is
 $\tau_c$ is thus not an intrinsic property of a condition's mechanisms --- it is \textbf{derived}
 from how much of the budget the generator bottleneck leaves over. A condition with a large
 $\Delta_t^{\text{gen}}$ needs a more reliable judge for the same overall tolerance, but the driver is
-the budget split, not $\tau_c$ itself.
+the budget split, not $\tau_c$ itself. The budget split is given in
+Table~\ref{tab:table4cbudget}.
 
 Concretely, at $\Delta_t^{\max} = 0.60$: condition B ($\Delta_t^{\text{gen}} = 0.245$) requires
 $\tau_c \approx 0.24$, while C and D ($\Delta_t^{\text{gen}} = 0.855$ and $0.905$) cannot meet the
@@ -404,8 +426,12 @@ diagnosis into an accounting rule.
 % 5. JUDGE RELIABILITY THRESHOLD
 % ===========================================================================
 \section{Judge Reliability Threshold}
+\label{sec:judge}
+
+This section asks a single question: given a generator that can produce candidate improvements, how reliable must the judge be for iterative self-improvement to yield net gains? We answer it in four steps. \S\ref{sec:noise} defines the noise-injection protocol that parameterizes judge reliability. \S\ref{sec:empirical_tau} estimates the empirical threshold $\tau_c$ on real agent trajectories. \S\ref{sec:analytical} derives a closed-form expression for $\tau_c$ from the composition law. \S\ref{sec:theorem1} states and proves the resulting reliability theorem.
 
 \subsection{Noise Injection Protocol}
+\label{sec:noise}
 
 We model an unreliable judge by flipping its verdict with probability $(1 - \tau)/2$, where
 $\tau \in [0, 1]$ is the judge reliability. The flip is applied symmetrically (SAT $\to$ UNSAT and
@@ -419,11 +445,13 @@ noised per round --- the teacher's verdict on the generated task, and the studen
 own encoding. They are produced by separate Z3 calls and therefore flip independently.
 
 \subsection{Empirical $\tau_c$}
+\label{sec:empirical_tau}
 
 We sweep $\tau$ over eight values $\{0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.90, 1.00\}$ for
 conditions B and D, with 50 rounds per cell (800 rounds total) using the \textbf{real} DeepSeek V4
 Flash API. All rounds are pinned to difficulty L1 so that the generator-side bottleneck is held
-constant and only the judge's reliability varies.
+constant and only the judge's reliability varies. Figure~\ref{fig:tau_c_curve} shows the empirical
+curve.
 
 The original hypothesis was that $\tau_c(D) > \tau_c(B)$ because D's population game advances the
 difficulty into L2/L3. Under L1 isolation the real-API sweep returns
@@ -435,7 +463,8 @@ hypothesis as stated is \textbf{not supported}.
 Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ falls monotonically from
 0.30 at $\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
 downward, not a straight line, and it passes through 0.5 at $\tau = 0$ rather than through 1.0. Both
-features turn out to be diagnostic of the mechanism, as Section~5.3 shows.
+features turn out to be diagnostic of the mechanism, as Section~5.3 shows. The detected thresholds are
+collected in Table~\ref{tab:table4}.
 
 \begin{figure}[t]
   \centering
@@ -465,6 +494,7 @@ features turn out to be diagnostic of the mechanism, as Section~5.3 shows.
 \end{table}
 
 \subsection{Analytical Formula}
+\label{sec:analytical}
 
 \textbf{Assumption 1 (judge noise).} Each Z3 verdict is independently flipped with probability
 
@@ -561,6 +591,7 @@ reliability:
 This is the practically useful form of the result: it converts a tolerance on evaluation error into
 a minimum reliability requirement for the judge, without needing to re-run the sweep. Note the
 reachability bound --- no judge reliability can hold $\Delta_t$ below 0.5, since $\Delta_t(0) = 1/2$.
+The analytical fit is overlaid in Figure~\ref{fig:analytical_fit}.
 
 \begin{figure}[t]
   \centering
@@ -573,8 +604,10 @@ reachability bound --- no judge reliability can hold $\Delta_t$ below 0.5, since
 \end{figure}
 
 \subsection{Theorem 1: Judge Reliability Threshold}
+\label{sec:theorem1}
 
 Under the assumptions stated in Section~5.3, we state the threshold as a theorem.
+Figure~\ref{fig:theorem1} illustrates the threshold.
 
 \textbf{Theorem 1.} \textit{The expected evaluation bias of the system is}
 
@@ -663,7 +696,10 @@ formula here generalises it to systems that act on agreement between two.
 % ===========================================================================
 \section{Extending Generator Capability}
 
+Section~\ref{sec:judge} treated judge reliability as the binding constraint. We now ask the dual question: what limits the generator's ability to \emph{use} a reliable judge once one is available? We first lay out a four-layer constraint framework (\S\ref{sec:fourlayer}), then validate it on real API calls (\S\ref{sec:api}), and finally report the statistical checks that separate genuine generator improvement from judge-side artifacts (\S\ref{sec:stat}).
+
 \subsection{Four-Layer Constraint Framework}
+\label{sec:fourlayer}
 
 Section~4.3 showed that free-form code generation is the binding constraint on the generator side. We
 therefore replace it with a four-layer pipeline:
@@ -686,12 +722,14 @@ therefore replace it with a four-layer pipeline:
 \end{enumerate}
 
 \subsection{Real API Validation}
+\label{sec:api}
 
 We validate the constraint framework on 240 rounds (4 conditions $\times$ 3 levels $\times$ 20
 rounds) using real DeepSeek V4 Flash API. This is a capability probe rather than a full replication
 of the 2400-round baseline: the legacy comparison uses the existing 2400-round logs, while the
 framework is measured on a deliberately smaller budget because each level is requested explicitly
-rather than left to the difficulty controller.
+rather than left to the difficulty controller. Improvement across conditions is shown in
+Figure~\ref{fig:improvement_comparison}.
 
 With the framework in place, valid rates under the real API are L1 = 98.8\% (79/80), L2 = 71.2\%
 (57/80), L3 = 58.8\% (47/80). The legacy teacher, by contrast, produced only a handful of L2/L3 valid
@@ -722,6 +760,7 @@ After the fix, the remaining invalid rounds are all
 parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the
 honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a
 well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
+Validity by difficulty level is in Figure~\ref{fig:validity_by_level}.
 
 \begin{figure*}[t]
   \centering
@@ -764,11 +803,28 @@ well-formed constraint set, but it cannot guarantee that the model emits a well-
 \end{figure*}
 
 \subsection{Statistical Validation}
+\label{sec:stat}
 
-Because the legacy per-level denominators exclude its failed rounds, only the L1 comparison is
-caliber-consistent. There the improved teacher shows a lower $\Delta_t$ (0.013 vs 0.082; Welch
-$t = 5.43$, $p = 6.0\times10^{-8}$, Cohen's $d = 0.89$, large). Full results and the caliber caveats
-are in the released validation report.
+The API results in \S\ref{sec:api} show that the framework raises valid-task rates, but they do not
+rule out a judge-side artifact: a cleaner judge could raise measured validity without any real gain
+in generator quality. We therefore apply Welch's $t$-test to the released real-API logs, with no
+resampling procedure.
+
+\paragraph{Per-condition test.} The 60 framework rounds against the 600 legacy rounds give
+$t = 0.18$ ($p = 0.86$, $d = 0.04$) for A and $t = -0.08$ ($p = 0.93$, $d = -0.01$) for B --- both
+null, as expected where the generator bottleneck does not bind. Where it does, the shifts are
+decisive: C moves from $\Delta_t = 0.8823$ to $0.2667$ ($t = 10.47$, $d = 2.00$) and D from $0.9050$
+to $0.2000$ ($t = 13.19$, $d = 2.31$).
+
+\paragraph{Caliber-consistent L1 test.} The legacy denominators exclude failed rounds, so only L1 is
+comparable. There the improved teacher shows a lower $\Delta_t$ ($0.013$ vs $0.082$; Welch
+$t = 5.43$, $p = 6.0\times10^{-8}$, Cohen's $d = 0.89$, large). Table~\ref{tab:table5} reports the
+per-level valid rates behind this comparison.
+
+\paragraph{Caliber caveat.} The calibers of \S\ref{sec:calibers} differ only in how invalid rounds
+are treated: the global caliber charges each invalid round $\Delta_t = 1.0$, the valid-only caliber
+excludes them. The per-condition tests use the global caliber --- the conservative choice, since
+reducing invalid rounds is what the framework claims to do.
 
 % ===========================================================================
 % 7-8
@@ -829,6 +885,8 @@ first.''
 \appendix
 
 \section{Complete Figure Gallery}
+
+This appendix collects the full figure set for reference. Figures~\ref{fig:delta_t_global}, \ref{fig:delta_t_L1_phase}, \ref{fig:difficulty_trajectory}, and \ref{fig:tau_c_gap} show the global $\Delta_t$ trajectory, the L1-phase breakdown, the difficulty trajectory, and the empirical--analytical $\tau_c$ gap, respectively.
 
 \begin{figure*}[t]
   \centering
@@ -975,7 +1033,7 @@ system's evaluation and which plays the role of ground truth.
   \centering
   \caption{Where the system score and the ground-truth label come from in each condition. In B and D
   the Z3 verdict is compared against itself, so $\Delta_t$ is identically zero on every valid round;
-  the global caliber of Section~\ref{subsec:calibers} is what reintroduces a non-zero average.}
+  the global caliber of Section~\ref{sec:calibers} is what reintroduces a non-zero average.}
   \label{tab:table2c_sources}
   \small
   \begin{tabularx}{\textwidth}{@{}l l l >{\raggedright\arraybackslash}X@{}}
@@ -995,7 +1053,7 @@ system's evaluation and which plays the role of ground truth.
 \end{table*}
 
 \subsection{Two statistical calibers}
-\label{subsec:calibers}
+\label{sec:calibers}
 
 \textbf{Caliber 1: valid-only $\Delta_t$ (Table~\ref{tab:table2b}).} The denominator is
 \texttt{len(records[r.valid])}. Invalid rounds --- those in which teacher generation failed and no

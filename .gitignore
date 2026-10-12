@@ -72,11 +72,16 @@ Thumbs.db
 paper_notes/
 
 # LaTeX 论文源码（paper/main.tex、refs.bib、checklist.tex、figures/）
-# NeurIPS 双盲期间不入库：源码与仓库绑定会泄露作者身份。
+# NeurIPS 双盲期间谨慎入库：源码与仓库绑定有泄露作者身份的风险。
 # 用 `paper/*` 而非 `paper/`：父目录被整体排除后，内部文件无法再被 `!` 重新包含。
-# main.tex 的 \author 仍是占位符，可以入库；refs.bib / checklist.tex / figures/ 仍排除。
+# main.tex 的 \author 仍是占位符，可以入库。
+# refs.bib 自 2026-10-13 起入库：已逐条核实 10 条文献全部为第三方工作、
+#   不含任何自引，双盲理由不成立；且 main.tex 里写着 \bibliography{refs}，
+#   只提交 main.tex 会让克隆者拿到一个无法编译的论文。
+# checklist.tex / figures/ 仍排除。
 paper/*
 !paper/main.tex
+!paper/refs.bib
 
 # 归档脚本（目录尚不存在，预留规则）
 archive/deprecated_scripts/
