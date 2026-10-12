@@ -1,78 +1,43 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>ARGUS 自进化智能体架构设计图</title>
+<title>ARGUS 架构图 v2 — 实际实现</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: #f5f6f8;
-    color: #1a1a2e;
-    padding: 30px;
-    line-height: 1.6;
+    background: #f5f6f8; color: #1a1a2e; padding: 30px; line-height: 1.6;
   }
   .container { max-width: 1400px; margin: 0 auto; }
-  h1 {
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 8px;
-    color: #0f3460;
-  }
-  .subtitle {
-    text-align: center;
-    color: #666;
-    margin-bottom: 40px;
-    font-size: 14px;
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; color: #0f3460; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 12px; font-size: 14px; }
+  .banner {
+    max-width: 900px; margin: 0 auto 36px; padding: 12px 18px;
+    background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;
+    font-size: 13px; color: #78350f;
   }
   h2 {
-    font-size: 20px;
-    margin: 40px 0 20px;
-    padding-left: 12px;
-    border-left: 4px solid #0f3460;
-    color: #0f3460;
+    font-size: 20px; margin: 44px 0 18px; padding-left: 12px;
+    border-left: 4px solid #0f3460; color: #0f3460;
   }
+  h3 { font-size: 16px; margin: 20px 0 10px; color: #334155; }
 
-  /* 五层架构 */
-  .layer-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 30px;
-  }
+  .layer-stack { display: flex; flex-direction: column; gap: 12px; }
   .layer {
-    border-radius: 10px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border-left: 6px solid;
+    border-radius: 10px; padding: 16px 20px; display: flex; align-items: flex-start;
+    gap: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 6px solid;
   }
-  .layer-label {
-    min-width: 130px;
-    font-weight: 700;
-    font-size: 15px;
-  }
-  .layer-modules {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    flex: 1;
-  }
+  .layer-label { min-width: 140px; font-weight: 700; font-size: 15px; }
+  .layer-label small { display: block; font-weight: 400; font-size: 11px; opacity: .75; }
+  .layer-modules { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
   .module {
-    background: rgba(255,255,255,0.9);
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid rgba(0,0,0,0.08);
-    white-space: nowrap;
+    background: rgba(255,255,255,0.92); border-radius: 6px; padding: 7px 12px;
+    font-size: 12.5px; border: 1px solid rgba(0,0,0,0.08);
   }
-  .module.p0 { border-left: 3px solid #e63946; }
-  .module.p1 { border-left: 3px solid #f4a261; }
-  .module.p2 { border-left: 3px solid #90be6d; }
+  .module code { font-family: Consolas, monospace; font-size: 11.5px; color: #475569; }
+  .module.done { border-left: 3px solid #16a34a; }
+  .module.plan { border-left: 3px solid #cbd5e1; opacity: .62; }
 
   .L5 { background: linear-gradient(135deg,#fff1f2,#ffe4e6); border-color:#e63946; }
   .L5 .layer-label { color:#e63946; }
@@ -87,603 +52,551 @@
   .L0 { background: linear-gradient(135deg,#f8fafc,#f1f5f9); border-color:#64748b; }
   .L0 .layer-label { color:#64748b; }
 
-  /* 三环图 */
-  .tri-loop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  .card {
+    background: white; padding: 24px; border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 16px;
   }
-  .loop-diagram {
-    position: relative;
-    width: 700px;
-    height: 500px;
-  }
-  .ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px dashed;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 8px;
-    font-weight: 700;
-    font-size: 13px;
-  }
-  .outer-ring {
-    width: 680px; height: 460px;
-    top: 20px; left: 10px;
-    border-color: #e63946;
-    color: #e63946;
-    background: rgba(255,241,242,0.4);
-  }
-  .middle-ring {
-    width: 460px; height: 320px;
-    top: 90px; left: 120px;
-    border-color: #f4a261;
-    color: #c77b3a;
-    background: rgba(254,243,242,0.5);
-  }
-  .inner-ring {
-    width: 260px; height: 180px;
-    top: 160px; left: 220px;
-    border-color: #2a9d8f;
-    color: #2a9d8f;
-    background: rgba(240,253,244,0.7);
-  }
-  .inner-content {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    font-size: 12px;
-    color: #333;
-  }
-  .inner-content strong { display: block; font-size: 14px; margin-bottom: 4px; }
-
-  /* 依赖关系图 */
-  .dep-graph {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: center;
-  }
-  .dep-row {
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .dep-node {
-    background: #f1f5f9;
-    border: 2px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: "Fira Code", monospace;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .dep-node:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  .dep-node.base { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
-  .dep-node.core { background: #dcfce7; border-color: #22c55e; color: #166534; }
-  .dep-node.eval { background: #fef9c3; border-color: #eab308; color: #854d0e; }
-  .dep-node.evolve { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
-  .dep-node.gov { background: #f3e8ff; border-color: #a855f7; color: #6b21a8; }
-  .dep-node.orchestrator { background: #0f3460; color: white; border-color: #0f3460; font-size: 15px; padding: 14px 30px; }
-  .arrow { font-size: 20px; color: #94a3b8; }
-
-  /* 四条件矩阵 */
-  .matrix {
-    background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    overflow-x: auto;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-  th, td {
-    padding: 12px 16px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-  }
-  th {
-    background: #0f3460;
-    color: white;
-    font-weight: 600;
-  }
-  tr:nth-child(even) { background: #f8fafc; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { padding: 10px 14px; text-align: left; border: 1px solid #e2e8f0; vertical-align: top; }
+  th { background: #0f3460; color: white; font-weight: 600; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  td.c, th.c { text-align: center; }
   .yes { color: #16a34a; font-weight: 700; }
-  .no { color: #dc2626; font-weight: 700; }
-  .cond-name { font-weight: 700; font-family: monospace; font-size: 15px; }
+  .no  { color: #94a3b8; }
+  code, .mono { font-family: Consolas, "Fira Code", monospace; font-size: 12.5px; }
+  .cond-name { font-weight: 700; font-family: Consolas, monospace; }
 
-  /* 数据流 */
-  .flow {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
+  .flow { display: flex; flex-direction: column; gap: 8px; }
   .flow-step {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 20px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 4px solid #0f3460;
-    position: relative;
+    display: flex; align-items: center; gap: 16px; padding: 12px 18px;
+    background: #f8fafc; border-radius: 8px; border-left: 4px solid #0f3460;
   }
-  .flow-step + .flow-step { margin-top: 8px; }
+  .flow-step.alt { border-left-color: #dc2626; background: #fef2f2; }
   .flow-num {
-    width: 30px; height: 30px;
-    background: #0f3460;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    flex-shrink: 0;
+    width: 28px; height: 28px; background: #0f3460; color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
   }
-  .flow-text { flex: 1; font-size: 14px; }
+  .flow-step.alt .flow-num { background: #dc2626; }
+  .flow-text { flex: 1; font-size: 13.5px; }
   .flow-file {
-    font-family: monospace;
-    font-size: 12px;
-    background: #e2e8f0;
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: #475569;
-    white-space: nowrap;
+    font-family: Consolas, monospace; font-size: 11.5px; background: #e2e8f0;
+    padding: 3px 9px; border-radius: 4px; color: #475569; white-space: nowrap;
   }
 
-  /* 目录结构 */
   .dir-tree {
-    background: #1e293b;
-    color: #e2e8f0;
-    padding: 24px;
-    border-radius: 12px;
-    font-family: "Fira Code", Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.8;
-    overflow-x: auto;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    background: #1e293b; color: #e2e8f0; padding: 22px; border-radius: 12px;
+    font-family: Consolas, "Fira Code", monospace; font-size: 12.5px;
+    line-height: 1.75; overflow-x: auto;
   }
   .dir-tree .folder { color: #60a5fa; font-weight: 600; }
   .dir-tree .file { color: #e2e8f0; }
   .dir-tree .comment { color: #64748b; font-style: italic; }
   .dir-tree .highlight { color: #fbbf24; }
+  .dir-tree .data { color: #4ade80; }
 
-  /* 图例 */
   .legend {
-    display: flex;
-    gap: 24px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin: 20px 0;
-    font-size: 13px;
+    display: flex; gap: 22px; justify-content: center; flex-wrap: wrap;
+    margin: 16px 0 8px; font-size: 13px;
   }
-  .legend-item { display: flex; align-items: center; gap: 8px; }
-  .legend-dot {
-    width: 14px; height: 14px; border-radius: 3px;
-  }
-  .dot-p0 { background: #e63946; }
-  .dot-p1 { background: #f4a261; }
-  .dot-p2 { background: #90be6d; }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+  .dot-done { background: #16a34a; }
+  .dot-plan { background: #cbd5e1; }
 
-  @media print {
-    body { background: white; padding: 10px; }
-    .layer { box-shadow: none; border: 1px solid #ddd; }
+  .metric-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .metric {
+    flex: 1; min-width: 190px; padding: 16px 18px; background: #f8fafc;
+    border-radius: 10px; border-left: 4px solid #0f3460;
   }
+  .metric .label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+  .metric .value { font-size: 20px; font-weight: 700; color: #0f3460; font-family: Consolas, monospace; }
+  .metric .note { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+
+  .formula {
+    background: #0f172a; color: #e2e8f0; padding: 16px 20px; border-radius: 8px;
+    font-family: Consolas, monospace; font-size: 14px; text-align: center;
+    margin: 14px 0; overflow-x: auto;
+  }
+  .formula .hl { color: #fbbf24; font-weight: 700; }
+
+  footer { text-align: center; margin-top: 44px; color: #94a3b8; font-size: 12.5px; }
+  @media print { body { background: white; padding: 10px; } .layer { box-shadow: none; border: 1px solid #ddd; } }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <h1>ARGUS 自进化智能体架构设计图</h1>
-  <p class="subtitle">Autonomous Recursive Generative Universal Scientist · v1.0 · 五层三环插件化架构</p>
+  <h1>ARGUS 架构图 v2</h1>
+  <p class="subtitle">Autonomous Recursive Generative Universal Scientist · v2.0 · 与实际实现对齐</p>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot dot-p0"></div>P0 必须实现</div>
-    <div class="legend-item"><div class="legend-dot dot-p1"></div>P1 重要实现</div>
-    <div class="legend-item"><div class="legend-dot dot-p2"></div>P2 扩展实现</div>
+  <div class="banner">
+    <strong>v2 修订说明</strong>：v1.0 是设计蓝图，与最终实现有较大出入（目录结构、模块归属、
+    实验规模、成本模型均不同）。本版按<strong>仓库实际代码</strong>重绘，并单列
+    「设计蓝图 vs 实际实现」对照表（第八节），未实现的规划项以灰色标注。
   </div>
 
-  <!-- ========== 1. 五层架构 ========== -->
-  <h2>一、五层架构总览</h2>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-done"></div>已实现（有对应代码与测试）</div>
+    <div class="legend-item"><div class="legend-dot dot-plan"></div>设计蓝图，未实现</div>
+  </div>
+
+  <!-- ================= 一、五层架构 ================= -->
+  <h2>一、五层架构（实际模块）</h2>
   <div class="layer-stack">
 
     <div class="layer L5">
-      <div class="layer-label">L5 治理层<br><small>Governance</small></div>
+      <div class="layer-label">L5 治理层<small>Governance</small></div>
       <div class="layer-modules">
-        <div class="module p0">分层宪法 (核心+适应)</div>
-        <div class="module p0">检查点管理 (git tag)</div>
-        <div class="module p0">回滚引擎</div>
-        <div class="module p1">风险信号网</div>
-        <div class="module p0">人类闸门 (仅核心规则)</div>
+        <div class="module done">分层宪法 <code>argus/constitution.py</code></div>
+        <div class="module done">检查点管理 <code>argus/checkpoint.py</code></div>
+        <div class="module done">成本硬上限 <code>argus/cost_monitor.py</code></div>
+        <div class="module done">日志落盘 <code>argus/log_write.py</code></div>
+        <div class="module plan">风险信号网</div>
+        <div class="module plan">人类闸门</div>
       </div>
     </div>
 
     <div class="layer L4">
-      <div class="layer-label">L4 进化层<br><small>Meta-Evolver</small></div>
+      <div class="layer-label">L4 进化层<small>Meta-Evolver</small></div>
       <div class="layer-modules">
-        <div class="module p0">HAP 种群博弈</div>
-        <div class="module p1">变异算子池</div>
-        <div class="module p1">元自修改器</div>
-        <div class="module p2">跨域迁移器</div>
-        <div class="module p2">假设空间扩展器</div>
+        <div class="module done">种群博弈 <code>argus/population.py</code></div>
+        <div class="module done">元自修改 <code>argus/meta_mutate.py</code></div>
+        <div class="module done">课程控制器 <code>scripts/difficulty_controller.py</code></div>
+        <div class="module done">能力边界检测 <code>population.py</code></div>
+        <div class="module plan">变异算子池</div>
+        <div class="module plan">跨域迁移器</div>
+        <div class="module plan">假设空间扩展器</div>
       </div>
     </div>
 
     <div class="layer L3">
-      <div class="layer-label">L3 评测层<br><small>Eval Foundry</small></div>
+      <div class="layer-label">L3 评测层<small>Eval Foundry</small></div>
       <div class="layer-modules">
-        <div class="module p0">Z3 硬锚定验证</div>
-        <div class="module p0">测试用例生成器</div>
-        <div class="module p1">圆桌共识 (CVP)</div>
-        <div class="module p1">判官校准 (WMV)</div>
-        <div class="module p2">信息素路由</div>
+        <div class="module done">Z3 硬锚定 <code>argus/z3_anchor.py</code></div>
+        <div class="module done">τ 噪声注入 <code>z3_anchor.py</code></div>
+        <div class="module done">圆桌共识 <code>argus/roundtable.py</code></div>
+        <div class="module done">经验蒸馏 <code>argus/distill.py</code></div>
+        <div class="module plan">测试用例生成器</div>
+        <div class="module plan">判官校准 (WMV)</div>
+        <div class="module plan">信息素路由</div>
       </div>
     </div>
 
     <div class="layer L2">
-      <div class="layer-label">L2 执行层<br><small>Agent Runtime</small></div>
+      <div class="layer-label">L2 执行层<small>Agent Runtime</small></div>
       <div class="layer-modules">
-        <div class="module p0">任务 Agent 集群</div>
-        <div class="module p0">教师/学生/验证者</div>
-        <div class="module p1">免疫修复</div>
-        <div class="module p2">凋亡/自噬</div>
-        <div class="module p2">工具合成器</div>
+        <div class="module done">教师 Agent（JSON 骨架） <code>argus/agents.py</code></div>
+        <div class="module done">学生 Agent <code>argus/agents.py</code></div>
+        <div class="module done">单轮编排 <code>argus/runner.py</code></div>
+        <div class="module done">凋亡检测 <code>argus/apoptosis.py</code></div>
+        <div class="module plan">工具合成器</div>
       </div>
     </div>
 
     <div class="layer L1">
-      <div class="layer-label">L1 记忆层<br><small>Epigenetic Memory</small></div>
+      <div class="layer-label">L1 记忆层<small>Epigenetic Memory</small></div>
       <div class="layer-modules">
-        <div class="module p0">经验记忆 (JSON)</div>
-        <div class="module p0">规则仓库 (正/负)</div>
-        <div class="module p1">抗体库</div>
-        <div class="module p2">甲基化标记</div>
-        <div class="module p2">资产记忆</div>
+        <div class="module done">经验记忆 (SQLite) <code>argus/experience_store.py</code></div>
+        <div class="module done">抗体库 (FTS5) <code>argus/antibody.py</code></div>
+        <div class="module done">甲基化标记 <code>argus/methylation.py</code></div>
+        <div class="module done">经验检索 <code>argus/retrieve.py</code></div>
+        <div class="module plan">资产记忆</div>
       </div>
     </div>
 
     <div class="layer L0">
-      <div class="layer-label">L0 基座层<br><small>Foundation</small></div>
+      <div class="layer-label">L0 基座层<small>Foundation</small></div>
       <div class="layer-modules">
+        <div class="module done">LLM 客户端 <code>argus/llm_client.py</code></div>
+        <div class="module done">Z3 沙箱 + 渲染器 <code>argus/z3_runner.py</code></div>
+        <div class="module done">配置 <code>argus/config.py</code></div>
         <div class="module">DeepSeek V4 Flash API</div>
-        <div class="module">Z3 Solver</div>
-        <div class="module">Python Sandbox</div>
+        <div class="module">Z3 4.13+</div>
         <div class="module">SQLite / 文件系统</div>
-        <div class="module">Git</div>
       </div>
     </div>
 
   </div>
 
-  <!-- ========== 2. 三环嵌套 ========== -->
-  <h2>二、三环嵌套递归进化循环</h2>
-  <div class="tri-loop">
-    <div class="loop-diagram">
-      <div class="ring outer-ring">外环 Outer Loop · 天级 · 停滞触发</div>
-      <div class="ring middle-ring">中环 Middle Loop · 小时级 · 任务批次触发</div>
-      <div class="ring inner-ring">内环 Inner Loop · 秒级 · 任务触发</div>
-      <div class="inner-content" style="top:250px;">
-        <strong>内环</strong>
-        执行 → 免疫修复<br>
-        工具调用 → 凋亡检测
+  <!-- ================= 二、约束生成框架（新增） ================= -->
+  <h2>二、四层约束生成框架（论文 Section 6）</h2>
+  <div class="card">
+    <p style="font-size:13.5px; color:#475569; margin-bottom:16px;">
+      基线的失败模式是「LLM 自由生成 Z3 代码」——括号不匹配、变量未声明、约束矛盾。
+      本节管线把生成过程限制在「语法合法 ∧ 逻辑可解」的空间内。
+    </p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text"><strong>JSON 骨架生成</strong>：教师 prompt 要求输出
+          <code>{variables, constraints, expected_sat}</code> 而非 Python 代码</div>
+        <div class="flow-file">agents.py · TEACHER_SYS_JSON</div>
       </div>
-      <div style="position:absolute; top:120px; left:50%; transform:translateX(-50%); text-align:center; font-size:12px; color:#c77b3a;">
-        <strong>中环</strong><br>种群博弈 → 自评测 → 蒸馏 → 记忆更新
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text"><strong>确定性渲染</strong>：模板拼接为 Z3 代码，括号与声明由构造保证；
+          schema 非法则抛 <code>TaskJSONInvalid</code>，不静默失败</div>
+        <div class="flow-file">z3_runner.py · render_z3_code</div>
       </div>
-      <div style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); text-align:center; font-size:12px; color:#e63946;">
-        <strong>外环</strong><br>元自修改 → 检查点 → 假设空间扩展 → 跨域迁移
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text"><strong>符号反馈</strong>：Z3 错误码 → 符号级 hint
+          （超时→「约束数减到 5 个以内」），注入下一轮 prompt</div>
+        <div class="flow-file">agents.py · _ERROR_CODE_TO_SYMBOLIC</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text"><strong>课程控制器</strong>：子档位变量数，5 连 ≥80% 升级 / 3 连 &lt;50% 降级，
+          状态持久化</div>
+        <div class="flow-file">scripts/difficulty_controller.py</div>
       </div>
     </div>
   </div>
 
-  <!-- ========== 3. 模块依赖 ========== -->
-  <h2>三、模块依赖关系图</h2>
-  <div class="dep-graph">
-    <div class="dep-row">
-      <div class="dep-node orchestrator">run_round.py (单轮编排)</div>
-    </div>
-    <div class="arrow">▲</div>
-    <div class="dep-row">
-      <div class="dep-node evolve">meta_mutate.py</div>
-      <div class="dep-node gov">constitution_check.py</div>
-      <div class="dep-node gov">checkpoint_create.py</div>
-    </div>
-    <div class="arrow">▲</div>
-    <div class="dep-row">
-      <div class="dep-node eval">roundtable.py</div>
-      <div class="dep-node eval">distill.py</div>
-      <div class="dep-node eval">retrieve.py</div>
-      <div class="dep-node core">cost_monitor.py</div>
-    </div>
-    <div class="arrow">▲</div>
-    <div class="dep-row">
-      <div class="dep-node core">generate.py (教师)</div>
-      <div class="dep-node core">solve.py (学生)</div>
-      <div class="dep-node core">verify.py (验证者)</div>
-    </div>
-    <div class="arrow">▲</div>
-    <div class="dep-row">
-      <div class="dep-node base">z3_runner.py</div>
-      <div class="dep-node base">llm_client.py</div>
-      <div class="dep-node base">log_write.py</div>
-      <div class="dep-node base">config.py</div>
+  <!-- ================= 三、单轮数据流 ================= -->
+  <h2>三、单轮数据流（<code>argus/runner.py :: run_round</code>）</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text">教师生成任务（条件 C/D 走种群博弈分支）</div>
+        <div class="flow-file">TeacherAgent.generate_task</div>
+      </div>
+      <div class="flow-step alt">
+        <div class="flow-num">✗</div>
+        <div class="flow-text">任务无效则<strong>提前返回</strong>：Δ_t = 1.0，写 <code>invalid_task</code> 事件</div>
+        <div class="flow-file">events: invalid_task</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text">按关键词检索经验，注入学生 prompt（条件 A/B 的学生上下文）</div>
+        <div class="flow-file">retrieve_experiences()</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text">学生生成求解代码，Z3 执行</div>
+        <div class="flow-file">StudentAgent.solve</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text">计算 Δ_t：形式锚定分支取 <code>0.0/1.0</code>；
+          自评分支取 <code>|score−100|/100</code></div>
+        <div class="flow-file">RoundResult.delta_t</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-text">圆桌共识（仅条件 D 且答错时触发）</div>
+        <div class="flow-file">run_roundtable()</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-text">经验蒸馏（仅条件 D）；每 20 轮建检查点；每 5 轮凋亡检查</div>
+        <div class="flow-file">distill / checkpoint / apoptosis</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-text">写事件流：<code>task_generated</code> / <code>solution_verified</code> /
+          <code>invalid_task</code> 等</div>
+        <div class="flow-file">logs/…/round_NNNN.jsonl</div>
+      </div>
     </div>
   </div>
 
-  <!-- ========== 4. 四条件实验矩阵 ========== -->
-  <h2>四、四条件对照实验设计矩阵</h2>
-  <div class="matrix">
+  <!-- ================= 四、四条件矩阵 ================= -->
+  <h2>四、四条件对照实验设计</h2>
+  <div class="card">
     <table>
       <thead>
         <tr>
-          <th>条件</th>
-          <th>形式锚定 (Z3)</th>
-          <th>种群博弈</th>
-          <th>经验蒸馏</th>
-          <th>圆桌共识</th>
-          <th>验证假设</th>
+          <th class="c">条件</th><th class="c">形式锚定</th><th class="c">种群博弈</th>
+          <th class="c">经验蒸馏</th><th class="c">圆桌共识</th><th>验证假设 / 实测结论</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="cond-name">A (基线)</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td>自确认循环偏差累积</td>
+          <td class="cond-name c">A</td>
+          <td class="c no">✗ LLM 自评</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td>
+          <td>自确认循环偏差累积 → Δ_t = 0.150（valid-only）</td>
         </tr>
         <tr>
-          <td class="cond-name">B (仅锚定)</td>
-          <td class="yes">✓ Z3</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td>形式锚定抑制 Δ_t</td>
+          <td class="cond-name c">B</td>
+          <td class="c yes">✓ Z3</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td>
+          <td>形式锚定抑制 Δ_t → Δ_t = 0.000（成立）</td>
         </tr>
         <tr>
-          <td class="cond-name">C (仅种群)</td>
-          <td class="no">✗ LLM自评</td>
-          <td class="yes">✓ 3 Agent</td>
-          <td class="no">✗ 无</td>
-          <td class="no">✗ 无</td>
-          <td>种群驱动难度自适应</td>
+          <td class="cond-name c">C</td>
+          <td class="c no">✗ LLM 自评</td><td class="c yes">✓</td><td class="c no">✗</td><td class="c no">✗</td>
+          <td>种群驱动难度自适应 → 有效任务率跌到 14.5%</td>
         </tr>
         <tr style="background:#e0f2fe;">
-          <td class="cond-name">D (完整ARGUS)</td>
-          <td class="yes">✓ Z3</td>
-          <td class="yes">✓ 3 Agent</td>
-          <td class="yes">✓ 有</td>
-          <td class="yes">✓ 有</td>
-          <td>协同效应 &gt; 独立之和</td>
+          <td class="cond-name c">D</td>
+          <td class="c yes">✓ Z3</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td>
+          <td>协同 &gt; 独立之和 → 有效任务率 9.5%（<strong>伪难度陷阱</strong>）</td>
         </tr>
       </tbody>
     </table>
-    <p style="margin-top:16px; font-size:13px; color:#64748b; text-align:center;">
-      实验规模：4条件 × 300轮 × 5次独立运行 = 6000轮 · 预算约 ¥300-500
+    <div class="metric-row" style="margin-top:18px;">
+      <div class="metric">
+        <div class="label">实验规模</div>
+        <div class="value">2,400 轮</div>
+        <div class="note">4 条件 × 200 轮 × 3 次</div>
+      </div>
+      <div class="metric">
+        <div class="label">τ 梯度实验</div>
+        <div class="value">800 轮</div>
+        <div class="note">8 τ × 2 条件 × 50 轮（真实 API）</div>
+      </div>
+      <div class="metric">
+        <div class="label">框架验证</div>
+        <div class="value">240 轮</div>
+        <div class="note">4 条件 × 3 难度 × 20 轮</div>
+      </div>
+      <div class="metric">
+        <div class="label">实测 API 成本</div>
+        <div class="value">≈ 5.2 元</div>
+        <div class="note">τ 扫描 2.82 + 框架验证 1.86</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 五、τ 噪声实验 ================= -->
+  <h2>五、裁判可靠度 τ 实验（论文 Section 5）</h2>
+  <div class="card">
+    <p style="font-size:13.5px; color:#475569;">
+      对每个 Z3 判决以概率 <code>p = (1−τ)/2</code> 翻转 SAT↔UNSAT（error / unknown 永不翻转）。
+      每轮有<strong>两次独立判决</strong>被注噪：教师任务验证 + 学生答案验证。
+    </p>
+    <div class="formula">
+      P(correct) = (1−p)² + p² = (1+τ²)/2
+      &nbsp;&nbsp;⟹&nbsp;&nbsp;
+      <span class="hl">Δ_t(τ) = (1 − τ²) / 2</span>
+      &nbsp;&nbsp;<span style="color:#94a3b8; font-size:12px;">（无自由参数）</span>
+    </div>
+    <div class="formula">
+      反推设计公式：&nbsp;<span class="hl">τ_c = √(1 − 2·Δ_t_max)</span>
+    </div>
+    <table style="margin-top:14px;">
+      <thead><tr><th>验证项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>解析拟合 MAE（条件 B / D）</td><td class="mono">0.0258 / 0.0520</td></tr>
+        <tr><td>判别性检验：实测 correct_rate vs 本模型</td><td class="mono">MAE 0.039</td></tr>
+        <tr><td>判别性检验：vs「裁判判断 + 系统接受」模型（P=τ²）</td><td class="mono">MAE 0.229（被排除）</td></tr>
+        <tr><td>双重瓶颈合成律 <code>1−Δ_global=(1−Δ_gen)(1−Δ_judge)</code></td>
+            <td class="mono">最大误差 1.11e-16</td></tr>
+        <tr><td>τ_c 实测（L1 隔离）</td><td class="mono">B = D = 0.55（网格下界，非拐点）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= 六、核心结果 ================= -->
+  <h2>六、核心结果</h2>
+  <div class="card">
+    <h3>6.1 双重瓶颈</h3>
+    <p style="font-size:13.5px; color:#475569;">
+      一轮「成功」需要 (i) 教师产出有效任务 <strong>且</strong> (ii) 学生判对。
+      按概率链式法则，两个瓶颈<strong>共享同一个 Δ_t 预算</strong>。
+      2400 轮四条件验证，误差在机器精度量级。
+    </p>
+    <h3>6.2 约束框架效果（真实 API）</h3>
+    <div class="metric-row">
+      <div class="metric"><div class="label">L1 有效任务率</div><div class="value">98.8%</div><div class="note">79/80</div></div>
+      <div class="metric"><div class="label">L2 有效任务率</div><div class="value">71.2%</div><div class="note">57/80（验收线 30%）</div></div>
+      <div class="metric"><div class="label">L3 有效任务率</div><div class="value">58.8%</div><div class="note">47/80（验收线 15%）</div></div>
+    </div>
+    <p style="font-size:13px; color:#64748b; margin-top:12px;">
+      基线在 2400 轮内只产出 11 个有效 L2 与 114 个有效 L3 任务 —— 它从未真正跑通 L2/L3。
     </p>
   </div>
 
-  <!-- ========== 5. 单轮数据流 ========== -->
-  <h2>五、单轮数据流（run_round.py 执行流程）</h2>
-  <div class="flow">
-    <div class="flow-step">
-      <div class="flow-num">1</div>
-      <div class="flow-text">教师 Agent 生成 Z3 约束集任务</div>
-      <div class="flow-file">→ tasks/task_N.json</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">2</div>
-      <div class="flow-text">Z3 验证任务有效性（非矛盾、可判定）</div>
-      <div class="flow-file">→ eval/anchors/hard/task_N_valid.json</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">3</div>
-      <div class="flow-text">检索相关经验并注入 Prompt</div>
-      <div class="flow-file">← memory/experiences/*.json</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">4</div>
-      <div class="flow-text">学生 Agent 生成 Z3 求解代码</div>
-      <div class="flow-file">→ solutions/task_N_sol.py</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">5</div>
-      <div class="flow-text">Z3 执行求解代码，返回 SAT/UNSAT</div>
-      <div class="flow-file">→ eval/anchors/hard/task_N_result.json</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">6</div>
-      <div class="flow-text">对比期望结果，计算 Δ_t（自评-真实差距）</div>
-      <div class="flow-file">→ logs/{cond}/round_NNN.jsonl</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">7</div>
-      <div class="flow-text">经验蒸馏：成功→正规则，失败→负规则</div>
-      <div class="flow-file">→ memory/experiences/exp_N.json</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">8</div>
-      <div class="flow-text">难度自适应：成功率 &gt;80% 升级，&lt;30% 降级</div>
-      <div class="flow-file">→ state/current_level.txt</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">9</div>
-      <div class="flow-text">每20轮：创建检查点 + 停滞检测</div>
-      <div class="flow-file">→ checkpoints/round_NNN/</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">10</div>
-      <div class="flow-text">成本监控：累计 token 消耗，超预算告警</div>
-      <div class="flow-file">→ state/cost.json</div>
-    </div>
-  </div>
-
-  <!-- ========== 6. 工作区目录结构 ========== -->
-  <h2>六、工作区目录结构（dsh 视角）</h2>
+  <!-- ================= 七、实际目录结构 ================= -->
+  <h2>七、仓库实际目录结构</h2>
   <div class="dir-tree">
-<span class="folder">argus-workspace/</span>
-├── <span class="file">README.md</span>                 <span class="comment"># 项目说明与运行指南</span>
-├── <span class="file">requirements.txt</span>          <span class="comment"># Python 依赖</span>
-├── <span class="file">run_experiment.sh</span>         <span class="comment"># 一键运行四条件实验</span>
-├── <span class="file">config.yaml</span>               <span class="comment"># 全局配置（API密钥/预算/轮次）</span>
+<span class="folder">self-evolving-agent-reliability/</span>
+├── <span class="folder">argus/</span>                      <span class="comment"># 核心代码（20 模块，~2700 行）</span>
+│   ├── <span class="highlight">llm_client.py</span>           <span class="comment"># Mock + Real 双模式 · 缓存/熔断/退避 · 成本单一函数</span>
+│   ├── <span class="highlight">z3_runner.py</span>            <span class="comment"># Z3 持久 worker 沙箱 + JSON→Z3 确定性渲染器</span>
+│   ├── <span class="highlight">z3_anchor.py</span>            <span class="comment"># 形式锚定 + τ 噪声注入 verify_with_noise</span>
+│   ├── <span class="highlight">agents.py</span>               <span class="comment"># Teacher(JSON骨架) / Student + 符号反馈映射</span>
+│   ├── <span class="highlight">runner.py</span>               <span class="comment"># 单轮编排 run_round（第三节的流程）</span>
+│   ├── <span class="highlight">population.py</span>           <span class="comment"># 种群博弈 + 能力边界检测</span>
+│   ├── experience_store.py       <span class="comment"># 经验记忆（SQLite + Jaccard 去重）</span>
+│   ├── antibody.py               <span class="comment"># 抗体库（FTS5）</span>
+│   ├── methylation.py            <span class="comment"># 甲基化标记（半衰期衰减）</span>
+│   ├── roundtable.py             <span class="comment"># 圆桌共识（4 角色盲评）</span>
+│   ├── distill.py / retrieve.py  <span class="comment"># 经验蒸馏 / 检索</span>
+│   ├── constitution.py           <span class="comment"># 分层宪法（12 核心规则）</span>
+│   ├── checkpoint.py             <span class="comment"># 检查点快照 + 回滚</span>
+│   ├── cost_monitor.py           <span class="comment"># 成本硬上限</span>
+│   ├── meta_mutate.py            <span class="comment"># 元自修改（宪法检查 + 停滞触发）</span>
+│   ├── apoptosis.py              <span class="comment"># 凋亡检测（熵崩溃 + 性能下降）</span>
+│   ├── log_write.py / config.py  <span class="comment"># 日志落盘 / 配置管理</span>
+│   └── __init__.py
 │
-├── <span class="folder">constitution/</span>
-│   ├── <span class="file">core.json</span>             <span class="comment"># 12条不可修改规则</span>
-│   └── <span class="file">adaptive.json</span>         <span class="comment"># 可修订的适应性规则</span>
+├── <span class="folder">scripts/</span>                    <span class="comment"># 实验与复现脚本（20 个）</span>
+│   ├── <span class="data">run_tau_sweep_real.py</span>    <span class="comment"># 800 轮 τ 扫描（真实 API）</span>
+│   ├── <span class="data">run_improved_smoke_real.py</span> <span class="comment"># 240 轮框架验证（真实 API）</span>
+│   ├── run_full_experiment.py    <span class="comment"># 2400 轮编排（断点续跑 + 成本监控）</span>
+│   ├── detect_tau_c.py           <span class="comment"># τ_c 检测（双口径 + 显著性护栏）</span>
+│   ├── analytical_fit_tau.py     <span class="comment"># Δ_t(τ) 解析拟合</span>
+│   ├── dual_bottleneck_law.py    <span class="comment"># 双重瓶颈合成律验证</span>
+│   ├── unify_paper_outputs.py    <span class="comment"># 论文数据包汇总 + 一致性交叉验证</span>
+│   ├── difficulty_controller.py  <span class="comment"># 课程控制器（子档位升降级）</span>
+│   ├── reanalyze_delta_t.py      <span class="comment"># Δ_t 双口径重分析</span>
+│   └── …（分析 / 绘图 / 报告脚本）
 │
-├── <span class="folder">agents/</span>
-│   ├── <span class="folder">agent_001/</span>
-│   │   ├── <span class="file">status.json</span>       <span class="comment"># 活跃/凋亡/休眠</span>
-│   │   ├── <span class="file">harness.json</span>      <span class="comment"># 当前提示词和技能库</span>
-│   │   └── <span class="file">seed.json</span>         <span class="comment"># 凋亡时提取的种子</span>
-│   └── <span class="folder">seeds/</span>                <span class="comment"># 待发芽的种子</span>
+├── <span class="folder">tests/</span>                     <span class="comment"># 170 个单元/集成测试</span>
 │
-├── <span class="folder">memory/</span>
-│   ├── <span class="folder">experiences/</span>          <span class="comment"># 经验原则（JSON文件）</span>
-│   ├── <span class="folder">methylation/</span>          <span class="comment"># 甲基化标记</span>
-│   ├── <span class="folder">antibodies/</span>           <span class="comment"># 抗体库</span>
-│   └── <span class="folder">vector_index/</span>         <span class="comment"># FAISS索引（可选）</span>
+├── <span class="folder">argus-workspace/</span>           <span class="comment"># 【实验数据 · 随仓库发布】</span>
+│   ├── <span class="folder">full/logs/</span>             <span class="data">#   Section 4：2400 轮基线</span>
+│   ├── <span class="folder">full/state/</span>            <span class="data">#   每 run 的最终难度</span>
+│   ├── <span class="folder">improved_real/logs/</span>    <span class="data">#   Section 6：240 轮框架验证</span>
+│   ├── <span class="folder">improved_real_run1_hexbug/logs/</span> <span class="data"># 缺陷复现证据（49 轮）</span>
+│   └── <span class="folder">smoke_real/logs/</span>       <span class="data">#   早期冒烟（80 轮）</span>
 │
-├── <span class="folder">population/</span>
-│   ├── <span class="folder">teacher/</span>
-│   │   ├── <span class="file">prompt.txt</span>
-│   │   └── <span class="file">generate.py</span>       <span class="comment"># 任务生成脚本</span>
-│   ├── <span class="folder">student/</span>
-│   │   ├── <span class="file">prompt.txt</span>
-│   │   └── <span class="file">solve.py</span>          <span class="comment"># 解题脚本</span>
-│   └── <span class="folder">verifier/</span>
-│       ├── <span class="file">prompt.txt</span>
-│       └── <span class="file">verify.py</span>         <span class="comment"># 验证脚本</span>
+├── <span class="folder">logs/</span>
+│   └── <span class="folder">tau_sweep_real/</span>         <span class="data">#   Section 5：800 轮 τ 扫描</span>
 │
-├── <span class="folder">eval/</span>
-│   ├── <span class="folder">roundtable/</span>
-│   │   ├── <span class="file">run.py</span>            <span class="comment"># 圆桌共识执行</span>
-│   │   └── <span class="folder">personas/</span>         <span class="comment"># 4角色 prompt</span>
-│   └── <span class="folder">anchors/</span>
-│       ├── <span class="folder">hard/</span>             <span class="comment"># Z3 验证结果</span>
-│       ├── <span class="folder">soft/</span>             <span class="comment"># 领域验证器结果</span>
-│       └── <span class="folder">consensus/</span>        <span class="comment"># 圆桌共识结果</span>
+├── <span class="folder">reports/</span>                   <span class="comment"># 论文图表与数据表</span>
+│   ├── <span class="folder">paper_data_final/</span>      <span class="comment">#   发布包：11 图 + 9 表 + tables/</span>
+│   ├── paper_ready_final.md      <span class="comment">#   论文 Section 4/5/6 初稿</span>
+│   ├── data_consistency_report.md <span class="comment">#  4 项数据一致性交叉验证</span>
+│   ├── verification_v2.md        <span class="comment">#   验证报告（含缺陷复盘）</span>
+│   └── fig*.png / table*.md / *.json
 │
-├── <span class="folder">scripts/</span>
-│   ├── <span class="file">z3_runner.py</span>          <span class="comment"># Z3 执行器</span>
-│   ├── <span class="file">llm_client.py</span>         <span class="comment"># LLM 调用封装</span>
-│   ├── <span class="file">config.py</span>             <span class="comment"># 配置管理</span>
-│   ├── <span class="file">log_write.py</span>          <span class="comment"># 日志写入</span>
-│   ├── <span class="file">distill.py</span>            <span class="comment"># 经验蒸馏</span>
-│   ├── <span class="file">retrieve.py</span>           <span class="comment"># 经验检索</span>
-│   ├── <span class="file">constitution_check.py</span> <span class="comment"># 宪法检查</span>
-│   ├── <span class="file">checkpoint_create.py</span>  <span class="comment"># 检查点创建</span>
-│   ├── <span class="file">meta_mutate.py</span>        <span class="comment"># 元自修改</span>
-│   ├── <span class="file">cost_monitor.py</span>       <span class="comment"># 成本监控</span>
-│   └── <span class="file">run_round.py</span>          <span class="comment"># 单轮编排</span>
+├── <span class="folder">文档/</span>                      <span class="comment"># 设计文档</span>
+│   ├── ARGUS自进化智能体架构.html  <span class="comment">#   ← 本文件</span>
+│   ├── 1.项目需求设计文档.md
+│   ├── 2.模块级实现规格文档.md
+│   ├── 3.全架构最小验证方案.md
+│   └── …
 │
-├── <span class="folder">tasks/</span>                    <span class="comment"># 生成的任务</span>
-├── <span class="folder">solutions/</span>                <span class="comment"># 学生解答</span>
-├── <span class="folder">checkpoints/</span>              <span class="comment"># 检查点快照</span>
-├── <span class="folder">logs/</span>                     <span class="comment"># 每轮日志（JSONL）</span>
-└── <span class="folder">tests/</span>                    <span class="comment"># 单元测试与集成测试</span>
+├── <span class="folder">需求文档/</span>                  <span class="comment"># 各阶段任务规格（9 个）</span>
+├── <span class="folder">constitution/</span>              <span class="comment"># core.json + adaptive.json</span>
+├── <span class="folder">checkpoints/</span> <span class="folder">memory/</span>       <span class="comment"># 运行时占位（.gitkeep）</span>
+│
+├── <span class="file">config.yaml</span> / <span class="file">config.yaml.example</span>
+├── <span class="file">requirements.txt</span>
+├── <span class="file">README.md</span> / <span class="file">LICENSE</span> / <span class="file">DEPRECATED.md</span>
+└── <span class="file">run_experiment.sh</span>
   </div>
 
-  <!-- ========== 7. 三条进化路径 ========== -->
-  <h2>七、ARGUS 的三条突破路径</h2>
-  <div class="dep-graph" style="flex-direction:row; justify-content:space-around; flex-wrap:wrap;">
-    <div style="flex:1; min-width:280px; padding:20px; background:#f0f9ff; border-radius:10px; border-left:4px solid #457b9d;">
-      <h3 style="color:#457b9d; margin-bottom:12px; font-size:16px;">路径一：假设空间递归扩展</h3>
-      <p style="font-size:13px; color:#475569;">Agent 不仅生成假设，还生成"生成假设的方法"，并递归改进这些方法。核心指标：假设空间扩展率。</p>
-      <div style="margin-top:10px; font-size:12px; color:#64748b;">代表方案：HyperAgents · Potentiality Dictionary</div>
-    </div>
-    <div style="flex:1; min-width:280px; padding:20px; background:#f0fdf4; border-radius:10px; border-left:4px solid #2a9d8f;">
-      <h3 style="color:#2a9d8f; margin-bottom:12px; font-size:16px;">路径二：跨域结构迁移</h3>
-      <p style="font-size:13px; color:#475569;">识别不同知识领域间的共享数学结构，将一个领域的方法迁移到另一个领域。核心指标：跨域迁移率。</p>
-      <div style="margin-top:10px; font-size:12px; color:#64748b;">代表方案：BootLoops · GRAFT-ATHENA</div>
-    </div>
-    <div style="flex:1; min-width:280px; padding:20px; background:#fef3f2; border-radius:10px; border-left:4px solid #f4a261;">
-      <h3 style="color:#c77b3a; margin-bottom:12px; font-size:16px;">路径三：元层面进化</h3>
-      <p style="font-size:13px; color:#475569;">不仅改进任务解决能力，还改进"改进任务解决能力的方法"。核心指标：元进化速度（性能提升的加速度）。</p>
-      <div style="margin-top:10px; font-size:12px; color:#64748b;">代表方案：DGM · HyperAgents · Nezha</div>
-    </div>
-  </div>
-
-  <!-- ========== 8. 技术栈与成本 ========== -->
-  <h2>八、技术栈与成本估算</h2>
-  <div class="matrix">
+  <!-- ================= 八、蓝图 vs 实现 ================= -->
+  <h2>八、设计蓝图（v1.0）vs 实际实现对照</h2>
+  <div class="card">
     <table>
       <thead>
-        <tr>
-          <th>类别</th>
-          <th>技术选型</th>
-          <th>规格 / 成本</th>
-          <th>用途</th>
-        </tr>
+        <tr><th style="width:22%">项目</th><th style="width:26%">v1.0 蓝图</th><th style="width:26%">实际实现</th><th>说明</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>基座 LLM</td>
-          <td style="font-family:monospace;">DeepSeek V4 Flash</td>
-          <td>284B MoE / 1M上下文 / ¥1.34输出</td>
-          <td>所有 Agent 调用</td>
+          <td>核心代码位置</td>
+          <td class="mono">scripts/*.py</td>
+          <td class="mono">argus/*.py</td>
+          <td>蓝图把基座模块放进 scripts/；实际独立为包，scripts/ 只放实验脚本</td>
         </tr>
         <tr>
-          <td>形式验证器</td>
-          <td style="font-family:monospace;">Z3 4.13+</td>
-          <td>中位延迟 5-8ms</td>
-          <td>硬锚定验证</td>
+          <td>教师/学生/验证者</td>
+          <td class="mono">population/{teacher,student,verifier}/</td>
+          <td class="mono">argus/agents.py + population.py</td>
+          <td>合并为类；verifier 并入 Z3Anchor</td>
         </tr>
         <tr>
-          <td>本地环境</td>
-          <td>Windows + Python 3.11 + uv</td>
-          <td>RTX 4060 8GB / 32GB RAM</td>
-          <td>开发与 Z3 调度</td>
+          <td>评测目录</td>
+          <td class="mono">eval/anchors/{hard,soft,consensus}/</td>
+          <td class="mono">argus/z3_anchor.py</td>
+          <td>不落盘中间结果，只写 jsonl 事件流</td>
         </tr>
         <tr>
-          <td>云端 GPU</td>
-          <td>AutoDL RTX 4090</td>
-          <td>约 ¥2.68/小时，约 67 小时</td>
-          <td>全量实验调度</td>
+          <td>记忆存储</td>
+          <td class="mono">memory/experiences/*.json + FAISS</td>
+          <td class="mono">SQLite（experience_store / antibody / methylation）</td>
+          <td>FAISS 未采用；改用 SQLite + Jaccard 去重</td>
         </tr>
         <tr>
-          <td>存储</td>
-          <td>SQLite + JSON 文件系统</td>
-          <td>50GB 数据盘（免费）</td>
-          <td>经验库、日志、检查点</td>
+          <td>Agent 状态</td>
+          <td class="mono">agents/agent_001/{status,harness,seed}.json</td>
+          <td>—</td>
+          <td>未实现；harness 变更仅存在于元变异器内存中</td>
         </tr>
-        <tr style="background:#e0f2fe; font-weight:700;">
-          <td>总计</td>
-          <td colspan="2">API ~¥300 + GPU ~¥180 + 缓冲</td>
-          <td>≈ ¥500（预算 ¥10,000）</td>
+        <tr>
+          <td>任务/解答落盘</td>
+          <td class="mono">tasks/*.json · solutions/*.py</td>
+          <td>—</td>
+          <td>未落盘；任务与解答内联在 round jsonl 事件中</td>
         </tr>
+        <tr>
+          <td>单轮编排</td>
+          <td class="mono">scripts/run_round.py</td>
+          <td class="mono">argus/runner.py :: run_round()</td>
+          <td>函数而非脚本</td>
+        </tr>
+        <tr>
+          <td>三环嵌套</td>
+          <td>内环秒级 / 中环小时级 / 外环天级</td>
+          <td>单轮循环 + 每 20 轮检查点</td>
+          <td><strong>未实现</strong>；时间尺度分层是设计意图，代码中无对应机制</td>
+        </tr>
+        <tr>
+          <td>实验规模</td>
+          <td>4 条件 × 300 轮 × 5 次 = <strong>6,000 轮</strong></td>
+          <td>4 × 200 × 3 = <strong>2,400 轮</strong></td>
+          <td>另加 τ 扫描 800 轮 + 框架验证 240 轮</td>
+        </tr>
+        <tr>
+          <td>成本模型</td>
+          <td>API ¥300 + 云端 GPU ¥180 ≈ ¥500</td>
+          <td><strong>≈ ¥5.2</strong>（纯 API）</td>
+          <td>未使用云端 GPU —— Z3 是 CPU 求解器；缓存复用使成本极低</td>
+        </tr>
+        <tr>
+          <td>τ 噪声注入</td>
+          <td>—</td>
+          <td class="mono">z3_anchor.verify_with_noise</td>
+          <td><strong>新增</strong>：为测量裁判可靠度阈值而加入</td>
+        </tr>
+        <tr>
+          <td>约束生成管线</td>
+          <td>—</td>
+          <td class="mono">agents.py + z3_runner.render_z3_code</td>
+          <td><strong>新增</strong>：修复 L2/L3 高无效率的核心改动</td>
+        </tr>
+        <tr>
+          <td>课程控制器</td>
+          <td>—</td>
+          <td class="mono">scripts/difficulty_controller.py</td>
+          <td><strong>新增</strong>：子档位升降级，抑制难度震荡</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px; color:#64748b; margin-top:14px;">
+      第八节的差异不是「实现偏离设计」的缺陷，而是研究推进的自然结果：
+      蓝图画的是通用自进化 Agent，最终仓库交付的是<strong>回答一个具体研究问题所需的最小系统</strong>。
+      未实现的规划项（三环嵌套、Agent 状态机、FAISS、云端 GPU 调度）在第九节列出。
+    </p>
+  </div>
+
+  <!-- ================= 九、未实现的规划项 ================= -->
+  <h2>九、设计蓝图中未实现的规划项</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>层</th><th>规划项</th><th>为何未做</th></tr></thead>
+      <tbody>
+        <tr><td>L5</td><td>风险信号网、人类闸门</td><td>离线实验中无人在环需求；成本硬上限已覆盖治理目标</td></tr>
+        <tr><td>L4</td><td>变异算子池、跨域迁移器、假设空间扩展器</td><td>超出「测量裁判可靠度阈值」这一研究问题</td></tr>
+        <tr><td>L3</td><td>测试用例生成器、判官校准(WMV)、信息素路由</td><td>Z3 锚定已是硬真值，无需软校准</td></tr>
+        <tr><td>L2</td><td>工具合成器</td><td>任务域固定为 Z3 约束求解</td></tr>
+        <tr><td>L1</td><td>资产记忆、FAISS 向量索引</td><td>SQLite + Jaccard 去重已满足检索需求（规模 &lt;10³ 条）</td></tr>
+        <tr><td>跨层</td><td>三环嵌套递归进化</td><td>需要长周期运行（小时/天级），与单次离线实验的时间预算不符</td></tr>
+        <tr><td>基建</td><td>云端 GPU 调度（AutoDL RTX 4090）</td><td>Z3 是 CPU 求解器，无需 GPU</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p style="text-align:center; margin-top:40px; color:#94a3b8; font-size:13px;">
-    ARGUS Architecture v1.0 · 生成于 2026-10-12 · 目标：顶会级自进化Agent论文
-  </p>
+  <footer>
+    ARGUS Architecture v2.0 · 与实际实现对齐 · 对应仓库 commit 5e73b26 之后的状态
+  </footer>
 
 </div>
 </body>
 </html>
-```
