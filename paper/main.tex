@@ -444,7 +444,7 @@ The analytical fit is overlaid in Appendix~A, Figure~\ref{fig:analytical_fit_app
 \label{sec:theorem1}
 
 Under the assumptions stated in Section~5.3, we state the threshold as a theorem.
-Figure~\ref{fig:theory_and_improvement} illustrates the threshold.
+Figure~\ref{fig:theorem1} illustrates the threshold.
 
 \textbf{Theorem 1.} \textit{The expected evaluation bias of the system is}
 
@@ -511,23 +511,16 @@ predicts 0.049: requiring two independent verdicts to agree costs a factor of tw
 at that reliability. Ratchet's bound is the special case of a system that acts on one judgment; the
 formula here generalises it to systems that act on agreement between two.
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
-  \begin{minipage}{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/fig5c_theorem1.png}
-  \end{minipage}\hfill
-  \begin{minipage}{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{figures/fig6_improvement_comparison_real.png}
-  \end{minipage}
-  \caption{Left: the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the real-API sweep for
+  \includegraphics[width=\textwidth]{figures/fig5c_theorem1.png}
+  \caption{Panel (a): the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the real-API sweep for
   conditions B and D, with the measured $\tau_c = 0.55$ and the corresponding
-  $\Delta_t^{\max} = 0.349$ marked; the rejected acceptance model ($\Delta_t = 1-\tau^2$) and
-  Ratchet's single-judgment bound ($(1-\tau)/2$) are shown for comparison. Right: before/after the
-  four-layer constraint framework over 240 rounds on the real API.}
-  \label{fig:theory_and_improvement}
-\end{figure}
+  $\Delta_t^{\max} = 0.349$ marked. Panel (b): the same closed form against the rejected acceptance
+  model ($\Delta_t = 1-\tau^2$) and Ratchet's single-judgment bound ($(1-\tau)/2$); the acceptance
+  model runs exactly twice as high and is rejected by the discriminating test of Section~5.3.}
+  \label{fig:theorem1}
+\end{figure*}
 
 % ===========================================================================
 % 6. EXTENDING GENERATOR CAPABILITY
@@ -559,7 +552,7 @@ therefore replace it with a four-layer pipeline:
 
 We validate the constraint framework on 240 rounds (4 conditions $\times$ 3 levels $\times$ 20
 rounds) using real DeepSeek V4 Flash API. Improvement across conditions is shown in
-Figure~\ref{fig:theory_and_improvement}.
+Figure~\ref{fig:improvement_comparison}.
 
 With the framework in place, valid rates under the real API are L1 = 98.8\% (79/80), L2 = 71.2\%
 (57/80), L3 = 58.8\% (47/80).
@@ -572,6 +565,17 @@ After the fix, the remaining invalid rounds are all
 parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the
 honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a
 well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig6_improvement_comparison_real.png}
+  \caption{Before/after the four-layer constraint generation framework, 240 rounds on the real API
+  (4 conditions $\times$ 3 levels $\times$ 20 rounds). Valid-task rate with the framework is L1 =
+  98.8\% (79/80), L2 = 71.2\% (57/80), L3 = 58.8\% (47/80); the legacy teacher produced only 11
+  valid L2 and 114 valid L3 tasks across 2,400 rounds. Because the two runs differ in budget and
+  denominator, this compares capability, not rates.}
+  \label{fig:improvement_comparison}
+\end{figure*}
 
 \subsection{Statistical Validation}
 \label{sec:stat}
