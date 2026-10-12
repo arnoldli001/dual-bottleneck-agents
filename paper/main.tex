@@ -1,0 +1,556 @@
+% ---------------------------------------------------------------------------
+% Dual-Bottleneck Agents
+%
+% Batch 2: real figures and tables wired in.
+%   - \includegraphics for all 12 published figures (figures/ is self-contained
+%     so the paper/ directory can be uploaded to Overleaf as-is)
+%   - booktabs tables built from reports/paper_data_final/tables/*.md
+%   - figure captions below, table captions above (NeurIPS convention)
+%   - \label on every float; cite them with \ref, never with a hard-coded number
+%
+% Abstract / Introduction / Section 3 are verbatim author text.
+% Sections 4-8 carry no body prose yet: the prose was not supplied.
+%
+% Compile target: pdfLaTeX (works unchanged on Overleaf).
+% ---------------------------------------------------------------------------
+
+\documentclass[11pt]{article}
+
+% --- encoding and fonts -----------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- math -------------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- figures and tables -----------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+
+% --- layout and links -------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+% --- bibliography -----------------------------------------------------------
+% natbib is required by the plainnat style used at the end of the document.
+\usepackage[numbers,sort&compress]{natbib}
+
+% ---------------------------------------------------------------------------
+\title{The Dual Bottleneck: A Composition Law for Judge Reliability and
+Generator Capability in Self-Evolving Agents}
+\author{[Author Name]\\[2pt]\small [Affiliation]}
+\date{\today}
+% ---------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+% ===========================================================================
+% ABSTRACT
+% ===========================================================================
+\begin{abstract}
+Self-evolving agents---systems that iteratively generate tasks, solve them, and distill
+experience---have shown promise in code generation and mathematical reasoning. Existing work
+predominantly focuses on the judge (the evaluator providing feedback), assuming that reliable
+judges suffice. Through 2,400 controlled experiments on Z3 constraint-solving tasks, we uncover a
+second, equally critical bottleneck: the generator (the LLM authoring new tasks). We formalize the
+Dual Bottleneck as a composition law on error budgets:
+$1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{valid}})$, verified
+to machine precision (1.11e-16) on 2,400 real-API rounds. The law implies that the generator and
+judge bottlenecks share one budget: a condition with large $\Delta_t^{\text{gen}}$ needs a more
+reliable judge for the same overall tolerance, and if $\Delta_t^{\text{gen}}$ alone exceeds the
+budget, no judge reliability can compensate. We empirically measure $\tau_c \approx 0.55$ on Level 1
+tasks using real DeepSeek V4 Flash API, and derive the parameter-free formula
+$\tau_c = \sqrt{1-2\Delta_t^{\max}}$. We identify a pseudo-difficulty trap: when the difficulty
+controller upgrades to Level 2/3, the LLM's task-generation validity collapses from $\sim$89\% to
+$<$10\%, causing the system to spin without progress. We propose a four-layer constraint generation
+framework that restores validity to 98.8\% at L1, 71.2\% at L2, and 58.8\% at L3 on real API.
+\end{abstract}
+
+% ===========================================================================
+% 1. INTRODUCTION
+% ===========================================================================
+\section{Introduction}
+
+Self-evolving agents---systems that iteratively generate tasks, solve them, and distill
+experience---have emerged as a promising paradigm for continuous improvement. The dominant
+narrative focuses on the \textit{judge}: how to provide reliable feedback preventing the agent from
+drifting into self-confirming loops.
+
+This concern is well-founded. The \textbf{self-verification cliff}~\cite{self_verification_cliff}
+shows that stronger generators have larger self-selection gaps: GPT-5.4-mini solves 54.7\% of AIME
+problems but self-selects correctly on only 41.9\%, recovering just 36\% of its sampling headroom.
+\textbf{Ratchet}~\cite{ratchet} derives an exact bound: a judge scoring failures as passes at rate
+$(1-\tau)/2$ or above retires nothing, at any sample size. \textbf{AgentJudgeBench}~\cite{agentjudgebench}
+reveals that LLM judges converge to a 77--82\% accuracy ceiling on hard queries regardless of model
+scale.
+
+We began with the same premise. We built a self-evolving agent with formal anchoring (Z3),
+population-based difficulty adaptation, and experience distillation. We ran 2,400 rounds of
+controlled experiments (4 conditions $\times$ 200 rounds $\times$ 3 runs).
+
+\textbf{We expected to confirm that formal anchoring suppresses self-score drift.} Condition A (LLM
+self-score) would show $\Delta_t$ growing; Condition B (Z3 anchor) would show $\Delta_t$ stable near
+zero. \textbf{This is exactly what we found}: A's $\Delta_t = 0.15$ across 200 rounds, B's
+$\Delta_t = 0.00$.
+
+\textbf{But we also found something unexpected.} Conditions C (population only) and D (full system)
+had invalid task rates of 85.5\% and 90.5\%, respectively. The difficulty controller, seeing high
+success on Level 1, upgraded to Level 2/3---but the LLM could not generate valid Z3 code at those
+levels. The system spun without progress, burning API budget on tasks that never reached
+verification.
+
+\textbf{This is the pseudo-difficulty trap.} It is not a judge failure---Z3 was perfectly reliable.
+It is a \textit{generator} failure. And it reveals that self-evolving systems face \textbf{two
+independent bottlenecks}, not one:
+
+\begin{enumerate}
+  \item \textbf{Judge-side bottleneck}: when judge reliability $\tau$ falls below a critical
+        threshold $\tau_c$, accumulated experience contains corrupted signals.
+  \item \textbf{Generator-side bottleneck}: when generator validity $V$ falls below $V_c$, any
+        difficulty upgrade pushes the system into empty spinning.
+\end{enumerate}
+
+Neither bottleneck alone explains the failure. A perfect judge cannot rescue a system whose
+generator cannot produce valid tasks. A perfect generator cannot rescue a system whose judge
+provides noisy signals. \textbf{The two bottlenecks compose.}
+
+To quantify this, we systematically varied judge reliability by injecting symmetric noise into the
+Z3 verdict and measured the resulting evaluation bias $\Delta_t$. Fitting the noise sweep reveals a
+parameter-free relationship:
+
+\[
+  \Delta_t(\tau) = \frac{1-\tau^2}{2}
+\]
+
+which inverts to $\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$. Measured MAE is 0.026 (Condition B) and
+0.052 (Condition D). On Level 1 tasks, $\tau_c(B) = \tau_c(D) = 0.55$.
+
+\textbf{This formula has three implications.} First, it establishes the critical judge reliability
+as a \textit{function of system tolerance}, not a fixed constant---a system that can tolerate more
+evaluation bias requires a less reliable judge. Second, it explains the ``judge scarcity'' problem
+quantitatively: even a 55\%-reliable judge suffices if the system's tolerance is 0.35. Third, it
+identifies a structural distinction from prior work: Ratchet's $(1-\tau)/2$ governs \textit{single}
+judgment (skill elimination), while our $(1-\tau^2)/2$ governs \textit{double} judgment (task
+validation + answer verification), which is the setting of most self-evolving loops.
+
+To address the generator-side bottleneck, we propose a four-layer constraint generation framework:
+JSON skeleton generation, deterministic rendering, symbolic feedback from Z3 error codes, and
+curriculum control with sub-level difficulty. On real DeepSeek V4 Flash API, this framework lifts L1
+validity above 80\% and L2 validity above 30\%---compared to $<$10\% without it.
+
+\textbf{Contributions.} (1) We formalize the Dual Bottleneck Framework and show that positive
+evolution requires $\tau \ge \tau_c \land V \ge V_c$ (Section 4). (2) We identify the
+pseudo-difficulty trap as a novel failure mode in self-evolving agents (Section 4). (3) We derive
+and empirically validate the analytical relationship $\Delta_t(\tau) = (1-\tau^2)/2$, yielding a
+parameter-free formula for $\tau_c$ (Section 5). (4) We propose a four-layer constraint generation
+framework and validate it with real API experiments (Section 6).
+
+\textbf{Roadmap.} Section 2 reviews related work. Section 3 formalizes the problem. Section 4
+presents the Dual Bottleneck Framework and experimental evidence. Section 5 derives the judge
+reliability threshold. Section 6 presents the constraint generation framework. Section 7 discusses
+implications and limitations.
+
+% ===========================================================================
+% 2. RELATED WORK -- title only
+% ===========================================================================
+\section{Related Work}
+
+% ===========================================================================
+% 3. PROBLEM SETUP
+% ===========================================================================
+\section{Problem Setup}
+
+Let $\tau \in [0,1]$ denote judge reliability: the probability that the judge's binary verdict
+matches ground truth. Let $V \in [0,1]$ denote generator validity: the fraction of generated tasks
+that pass the formal verifier. Let $\Delta_t$ denote the gap between the system's self-assessed
+correctness and ground truth at round $t$.
+
+\textbf{Definition 1 (Safe Zone).} A self-evolving system is in the safe zone if
+$\tau \ge \tau_c$ and $V \ge V_c$.
+
+\textbf{Proposition 1 (Necessity of both conditions).} If $\tau < \tau_c$, the system accumulates
+corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the system generates mostly
+invalid tasks and the effective evolution rate approaches zero.
+
+% ===========================================================================
+% 4. THE DUAL BOTTLENECK FRAMEWORK
+% ===========================================================================
+\section{The Dual Bottleneck Framework}
+
+\begin{table}[t]
+  \centering
+  \caption{Experiment setup.}
+  \label{tab:table1}
+  \small
+  \begin{tabularx}{\linewidth}{@{}lX@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Conditions & 4 (A / B / C / D) \\
+    Rounds per condition & 200 \\
+    Independent runs & 3 \\
+    Total rounds & 2400 \\
+    Difficulty levels & L1 (LIA, Int) / L2 (BV, BitVec) / L3 (LIA+BV+Array) \\
+    Model & DeepSeek V4 Flash (\texttt{deepseek-flash}) \\
+    Judge for A/C & LLM self-score (no formal anchor) \\
+    Judge for B/D & Z3 formal anchor \\
+    Primary metric & $\Delta_t$ (gap between system evaluation and ground truth) \\
+    Secondary metric & Valid task rate (valid / total) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Composition Law}
+
+% TODO(prose): Section 4.1 body text was not supplied. When it arrives it must
+% cite \ref{tab:table4c} at least once; \ref{fig:fig1} is placed here because it
+% illustrates the safe-region intersection that the law describes.
+
+\begin{table}[t]
+  \centering
+  \caption{The composition law holds to machine precision on all four conditions
+  (2{,}400 real-API rounds). Maximum absolute error $1.11\times10^{-16}$.}
+  \label{tab:table4c}
+  \small
+  \begin{tabularx}{\linewidth}{@{}l*{6}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $n$ & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\text{valid}}$ &
+    predicted $\Delta_t^{\text{global}}$ & observed & abs.\ error \\
+    \midrule
+    A & 600 & 0.1100 & 0.1500 & 0.2435 & 0.2435 & $5.55\times10^{-17}$ \\
+    B & 600 & 0.2450 & 0.0000 & 0.2450 & 0.2450 & $0$ \\
+    C & 600 & 0.8550 & 0.1879 & 0.8822 & 0.8823 & $1.11\times10^{-16}$ \\
+    D & 600 & 0.9050 & 0.0000 & 0.9050 & 0.9050 & $0$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\columnwidth]{figures/fig1_dual_bottleneck.png}
+  \caption{The safe region is the intersection of two conditions: judge reliability $\tau \ge
+  \tau_c$ on the $x$ axis, and generator invalid rate $\le 0.5$ on the $y$ axis. Outside that
+  intersection the loop still emits logs and still reports success on the rounds it completes ---
+  which is precisely why the failure is easy to miss.}
+  \label{fig:fig1}
+\end{figure}
+
+\subsection{Judge-Side Bottleneck}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2b_delta_t_per_round.png}
+  \caption{Each panel shows one condition; invalid rounds are marked with gray crosses. C/D show the
+  pseudo-difficulty trap after L2 transition. Vertical lines mark the first round at which the
+  difficulty controller raises the task level.}
+  \label{fig:fig2b}
+  \label{fig:delta_t_per_round}
+\end{figure*}
+
+\begin{table}[t]
+  \centering
+  \caption{Average $\Delta_t$ (valid-only caliber).}
+  \label{tab:table2b}
+  \small
+  \begin{tabularx}{\linewidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $n$ (valid) & Avg $\Delta_t$ (valid only) & Std dev & Min & Max \\
+    \midrule
+    A & 534 & 0.1500 & 0.0000 & 0.1500 & 0.1500 \\
+    B & 453 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    C & 87  & 0.1879 & 0.1394 & 0.1500 & 0.7000 \\
+    D & 57  & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Generator-Side Bottleneck}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig3_validity_rate.png}
+  \caption{Overall valid-task rate per condition, collapsing from 89.0\% (A) and 75.5\% (B) to
+  14.5\% (C) and 9.5\% (D). B is lower than A not because the anchor performs worse, but because Z3
+  anchoring \textit{actively exposes} invalid tasks that A's permissive self-scoring hides.}
+  \label{fig:fig3}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \caption{Valid task rate by condition.}
+  \label{tab:table3}
+  \small
+  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & Valid & Invalid & Valid rate & Correct rate (valid subset) \\
+    \midrule
+    A & 534 & 66  & 0.8900 & 1.0000 \\
+    B & 453 & 147 & 0.7550 & 1.0000 \\
+    C & 87  & 513 & 0.1450 & 1.0000 \\
+    D & 57  & 543 & 0.0950 & 1.0000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Budget Decomposition}
+
+% TODO(prose): Section 4.4 body text was not supplied. It must cite
+% \ref{tab:table4c} (the published table's budget-decomposition part) and quote
+% the required-tau_c formula: tau_c = \sqrt{1 - 2(1 - (1-Dt_max)/(1-Dt_gen))}.
+
+\begin{table}[t]
+  \centering
+  \caption{Budget decomposition: the judge budget left over once the generator
+  bottleneck is accounted for, and the judge reliability it requires.}
+  \label{tab:table4cbudget}
+  \small
+  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\max}$ & judge budget
+    & required $\tau_c$ \\
+    \midrule
+    A & 0.1100 & 0.60 & $0.5506$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.60 & $0.4702$ & 0.244 \\
+    C & 0.8550 & 0.60 & $-1.7586$ & unreachable \\
+    D & 0.9050 & 0.60 & $-3.2105$ & unreachable \\
+    \midrule
+    A & 0.1100 & 0.70 & $0.6629$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.70 & $0.6026$ & $\ge 0$ (random suffices) \\
+    C & 0.8550 & 0.70 & $-1.0690$ & unreachable \\
+    D & 0.9050 & 0.70 & $-2.1579$ & unreachable \\
+    \midrule
+    A & 0.1100 & 0.80 & $0.7753$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.80 & $0.7351$ & $\ge 0$ (random suffices) \\
+    C & 0.8550 & 0.80 & $-0.3793$ & unreachable \\
+    D & 0.9050 & 0.80 & $-1.1053$ & unreachable \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ===========================================================================
+% 5. JUDGE RELIABILITY THRESHOLD
+% ===========================================================================
+\section{Judge Reliability Threshold}
+
+\subsection{Noise Injection Protocol}
+
+\subsection{Empirical $\tau_c$}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig5_tau_c_curve_real.png}
+  \caption{The $\tau$-gradient sweep on the real API: 8 $\tau$ values $\times$ 2 conditions (B/D)
+  $\times$ 50 rounds = 800 rounds. Under the within-$\tau$ degeneration criterion no $\tau$ value
+  degenerates, so the reported $\tau_c = 0.55$ is the lower edge of the swept grid and should be
+  read as an upper bound, not as the system's tolerance. Panel (c) is empty because no $\tau$ value
+  degenerates under the within-$\tau$ criterion; the two vertical lines mark
+  $\tau_c(B) = \tau_c(D) = 0.55$.}
+  \label{fig:fig5}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \caption{Judge reliability threshold $\tau_c$ (real API).}
+  \label{tab:table4}
+  \small
+  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $\tau_c$ (combined) & $\tau_c$ ($\Delta_t$ caliber) & $\tau_c$ (correct-rate caliber) & Degenerate $\tau$ values \\
+    \midrule
+    Condition B & 0.55 & 0.55 & 0.55 & (none) \\
+    Condition D & 0.55 & 0.55 & 0.55 & (none) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Analytical Formula}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig5b_tau_c_analytical.png}
+  \caption{The closed form $\Delta_t(\tau) = (1 - \tau^2)/2$ against the observed scatter. The
+  formula has no free parameters; measured MAE over 50 rounds per $\tau$ cell is 0.0258 (B) and
+  0.0520 (D). The curve is anchored at 0.5 rather than 1.0 when $\tau = 0$, which is the binary
+  symmetry of two independent verdicts.}
+  \label{fig:fig5b}
+\end{figure}
+
+\subsection{Theorem 1: Judge Reliability Threshold}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig5c_theorem1.png}
+  \caption{Panel (a): the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the real-API sweep for
+  conditions B and D, with the measured $\tau_c = 0.55$ and the corresponding
+  $\Delta_t^{\max} = 0.349$ marked. Panel (b): the same closed form against the rejected acceptance
+  model ($\Delta_t = 1-\tau^2$) and Ratchet's single-judgment bound ($(1-\tau)/2$); the acceptance
+  model runs exactly twice as high and is rejected by the discriminating test of Section~5.}
+  \label{fig:fig5c}
+\end{figure*}
+
+% ===========================================================================
+% 6. EXTENDING GENERATOR CAPABILITY
+% ===========================================================================
+\section{Extending Generator Capability}
+
+\subsection{Four-Layer Constraint Framework}
+
+\subsection{Real API Validation}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig6_improvement_comparison_real.png}
+  \caption{Before/after the four-layer constraint generation framework, 240 rounds on the real API
+  (4 conditions $\times$ 3 levels $\times$ 20 rounds). Valid-task rate with the framework is L1 =
+  98.8\% (79/80), L2 = 71.2\% (57/80), L3 = 58.8\% (47/80); the legacy teacher produced only 11
+  valid L2 and 114 valid L3 tasks across 2,400 rounds. Because the two runs differ in budget and
+  denominator, this compares capability, not rates.}
+  \label{fig:fig6}
+\end{figure*}
+
+\begin{table}[t]
+  \centering
+  \caption{Constraint framework improvement (real API).}
+  \label{tab:table5}
+  \small
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    Level & Valid & Total & Valid rate \\
+    \midrule
+    L1 & 79 & 80 & 98.8\% \\
+    L2 & 57 & 80 & 71.2\% \\
+    L3 & 47 & 80 & 58.8\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% NOTE: fig3b is generated from the legacy 2400-round logs
+% (argus-workspace/full/logs/), so its caption documents the failure that
+% motivated the framework rather than the post-framework result. Table 5 carries
+% the post-framework numbers.
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig3b_validity_by_level.png}
+  \caption{Valid-task rate split by difficulty level. The invalid rate at L2/L3 exceeds 80\% in all
+  four conditions, showing that the LLM is unreliable at Z3 constraint generation from L2 upward
+  regardless of which mechanisms are enabled.}
+  \label{fig:fig3b}
+\end{figure*}
+
+% TODO(prose): Section 6.1 and 6.2 body text was not supplied. Per the brief it
+% should give 1-2 sentences of implementation detail per layer of the four-layer
+% framework, cite \ref{tab:table5} for the L1/L2/L3 rates, contrast against the
+% legacy baseline, and describe both panels of \ref{fig:fig6}.
+
+\subsection{Statistical Validation}
+
+% ===========================================================================
+% 7-8 -- titles only
+% ===========================================================================
+\section{Discussion}
+
+The formula implies that ``reliable enough'' is not an absolute property. A 55\%-reliable judge
+suffices for a system with $\Delta_t^{\max} = 0.35$. This reframes judge scarcity: the practical
+question is not ``can we find a perfect judge?'' but ``what tolerance $\Delta_t^{\max}$ can the
+system afford given its generator's $\Delta_t^{\text{gen}}$?''
+
+\section{Conclusion}
+
+% ===========================================================================
+% REFERENCES
+% ===========================================================================
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+% ===========================================================================
+% APPENDICES
+% ===========================================================================
+\appendix
+
+\section{Complete Figure Gallery}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig2_delta_t_AB.png}
+  \caption{Global-caliber $\Delta_t$ (invalid rounds encoded as $\Delta_t=1.0$).
+  Condition A averages 0.2435 and Condition B averages 0.2450---they appear
+  similar because B's larger invalid rate offsets its zero valid-round bias.
+  The valid-only caliber (Figure~\ref{fig:delta_t_per_round}) isolates judge
+  behavior and is the correct view for comparing judge reliability.}
+  \label{fig:fig2}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig2c_delta_t_L1_only.png}
+  \caption{Restricted to the rounds before C/D are promoted to L2. C/D's $\Delta_t$ in the L1 phase
+  is \textit{not} worse than A/B, so the population game itself does not hurt performance --- C/D's
+  later degradation comes from difficulty escalation, not from a defect in the mechanism. Note:
+  C/D's L1-phase sample sizes ($n = 13$, $n = 6$) are small because the difficulty controller
+  escalates quickly. The claim ``populations do not hurt at L1'' is directional; a larger-sample
+  confirmation is left to future work.}
+  \label{fig:fig2c}
+\end{figure}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig4_difficulty_trajectory.png}
+  \caption{Difficulty trajectories for conditions C and D. Failures are \textit{not} distributed
+  evenly across difficulty --- they cluster at the moment of escalation. Once the level is raised
+  the teacher keeps failing while the controller holds the level high, so the system believes it is
+  solving harder problems while actually spending its budget on unusable task proposals.}
+  \label{fig:fig4}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig7_tau_c_gap.png}
+  \caption{Early mock data reported $\tau_c(B) = 0.55$ versus $\tau_c(D) = 0.90$; the real API does
+  not reproduce that gap (both are 0.55). The left panel compares the difficulty distributions of B
+  and D, the right panel places the mock and real $\tau_c$ side by side. The original hypothesis
+  $\tau_c(D) > \tau_c(B)$ is \textit{not supported}.}
+  \label{fig:fig7}
+\end{figure*}
+
+\section{Theorem 1 Proof Sketch}
+
+\subsection*{Algebraic derivation of the composition law}
+
+% NOTE: the brief asks for this derivation under "Appendix B". Appendix B is
+% titled "Theorem 1 Proof Sketch" in the agreed structure, so the derivation is
+% carried here as a subsection. Rename the appendix if it should stand alone.
+
+Let $S = 1$ if the round succeeds (valid task + correct judgment), $0$ otherwise. Let $G = 1$ if the
+generator produces a valid task, $0$ otherwise. Let $V = 1$ if the judge correctly evaluates the
+round, $0$ otherwise. Then $S = G \cdot V$. By independence:
+\[
+  \mathbb{E}[S] = \mathbb{E}[G] \cdot \mathbb{E}[V]
+\]
+\[
+  1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{valid}})
+\]
+
+\section{Rejected Alternative Model}
+\section{Data Consistency Check}
+
+% ---------------------------------------------------------------------------
+% UNPLACED FLOATS
+%
+% The published data package holds 9 tables. Eight now have a home; these three
+% still need one. Move each into the section that should cite it and give it a
+% \caption and a \label.
+%
+%   table2a_delta_t_global        global caliber (discussed in 4.2)
+%   table2c_delta_t_semantics     caliber definitions (discussed in 4.2)
+%   table4b_analytical_fit        per-tau residuals (discussed in 5.3)
+%
+% NOTE: table4c is now placed in Section 4.1 as \ref{tab:table4c}, with its
+% budget-decomposition part as \ref{tab:table4cbudget} in Section 4.4.
+% ---------------------------------------------------------------------------
+
+\end{document}

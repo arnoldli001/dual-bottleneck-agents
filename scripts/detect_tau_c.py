@@ -494,10 +494,18 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
         print("matplotlib not available, skip figure")
         return
 
-    fig, axes = plt.subplots(1, 3, figsize=(18, 4.8))
+    # 2+1 布局：上排 (a)(b) 并排，下排 (c) 横跨两列。
+    # hspace=0.4 是为了让上排的 x 轴标签与下排标题不重叠。
+    # height_ratios=[1, 0.4]：within-τ 判据下没有任何 τ 退化，(c) 的柱高全为 0，
+    # 只用来展示 τ_c 竖线，因此压到上排的 40% 高度以免浪费半张图。
+    fig = plt.figure(figsize=(12, 7))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 0.4], hspace=0.4)
+    ax_a = fig.add_subplot(gs[0, 0])
+    ax_b = fig.add_subplot(gs[0, 1])
+    ax_c = fig.add_subplot(gs[1, :])
 
     # 子图 1：τ vs early/late Δ_t（条件 B 和 D）
-    ax = axes[0]
+    ax = ax_a
     for res, marker, label_prefix in [(results_b, "o", "B"), (results_d, "s", "D")]:
         taus = [r["tau"] for r in res["table"]]
         early = [r["early_delta_t"] for r in res["table"]]
@@ -513,7 +521,7 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
     ax.grid(True, alpha=0.3)
 
     # 子图 2：τ vs early/late 正确率
-    ax = axes[1]
+    ax = ax_b
     for res, marker, label_prefix in [(results_b, "o", "B"), (results_d, "s", "D")]:
         taus = [r["tau"] for r in res["table"]]
         early = [r["early_correct_rate"] for r in res["table"]]
@@ -528,8 +536,8 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
     ax.legend(fontsize=8, loc="lower right")
     ax.grid(True, alpha=0.3)
 
-    # 子图 3：退化标记 + τ_c
-    ax = axes[2]
+    # 子图 3：退化标记 + τ_c（横跨下排）
+    ax = ax_c
     taus = [r["tau"] for r in results_b["table"]]
     b_deg = [1 if r["degenerate"] else 0 for r in results_b["table"]]
     d_deg = [1 if r["degenerate"] else 0 for r in results_d["table"]]
@@ -553,7 +561,9 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
 
     fig.suptitle("τ_c detection (within-τ degeneration: late-half vs early-half)",
                  fontsize=13)
-    fig.tight_layout()
+    # gridspec 已控制子图间距。tight_layout 与 gridspec + suptitle 不兼容，
+    # 会抛 UserWarning 并可能覆盖 hspace，因此改为显式边距。
+    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.07, right=0.98)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")
     plt.close(fig)

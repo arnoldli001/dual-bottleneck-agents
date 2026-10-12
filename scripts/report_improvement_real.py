@@ -1,4 +1,4 @@
-"""P0-3 报告生成器：改进框架真实 API 验证
+﻿"""P0-3 报告生成器：改进框架真实 API 验证
 
 输入：
 - reports/improvement_real.json          （run_improved_smoke_real.py 产出）
@@ -360,7 +360,7 @@ def render_fig6(improved_lvl: dict, legacy_lvl: dict, out_png: Path,
         print("matplotlib not available")
         return
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.5, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 7))
     levels = [1, 2, 3]
     x = list(range(len(levels)))
     width = 0.5
