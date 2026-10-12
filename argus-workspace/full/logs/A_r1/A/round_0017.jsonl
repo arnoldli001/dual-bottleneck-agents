@@ -1,0 +1,6 @@
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T13:46:56.069139", "event_type": "task_generated", "task_id": "r0017_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T13:46:56.069550", "event_type": "solution_verified", "task_id": "r0017_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T14:07:00.485749", "event_type": "task_generated", "task_id": "r0017_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T14:07:00.486080", "event_type": "solution_verified", "task_id": "r0017_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T14:09:13.075557", "event_type": "task_generated", "task_id": "r0017_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 17, "condition": "A", "timestamp": "2026-10-12T14:09:13.075899", "event_type": "solution_verified", "task_id": "r0017_l1_a0", "correct": true, "delta_t": 0.15}

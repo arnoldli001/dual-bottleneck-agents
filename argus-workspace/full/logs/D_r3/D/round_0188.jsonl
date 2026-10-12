@@ -1,0 +1,4 @@
+{"round": 188, "condition": "D", "timestamp": "2026-10-12T15:15:34.625499", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 188, "condition": "D", "timestamp": "2026-10-12T15:23:59.021194", "event_type": "task_generated", "task_id": "r0188_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 188, "condition": "D", "timestamp": "2026-10-12T15:23:59.021499", "event_type": "solution_verified", "task_id": "r0188_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 188, "condition": "D", "timestamp": "2026-10-12T15:23:59.021721", "event_type": "experience_distilled", "principle": "难度3任务中，按预期结果逐步执行即可满足约束，保持流程稳定。"}

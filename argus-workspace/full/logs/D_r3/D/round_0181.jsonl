@@ -1,0 +1,4 @@
+{"round": 181, "condition": "D", "timestamp": "2026-10-12T15:13:05.752838", "event_type": "task_generated", "task_id": "r0181_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Int", "BitVec"]}
+{"round": 181, "condition": "D", "timestamp": "2026-10-12T15:13:05.753512", "event_type": "solution_verified", "task_id": "r0181_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 181, "condition": "D", "timestamp": "2026-10-12T15:13:05.754930", "event_type": "experience_distilled", "principle": "中等难度任务中，严格按预期目标执行并核对结果，可稳定达成预期。"}
+{"round": 181, "condition": "D", "timestamp": "2026-10-12T15:23:58.967064", "event_type": "invalid_task", "reason": "population produced invalid task"}

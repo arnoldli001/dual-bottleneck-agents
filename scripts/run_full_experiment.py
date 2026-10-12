@@ -143,8 +143,9 @@ def main() -> None:
                     help="断点续跑：跳过已完成的轮")
     ap.add_argument("--max_cost", type=float, default=50.0,
                     help="单 run 的成本硬告警阈值（元）")
-    ap.add_argument("--out_dir", type=str, default="argus-workspace/full",
-                    help="输出 workspace 根")
+    ap.add_argument("--out_dir", type=str, default="argus-workspace/_runtime/full",
+                    help="输出 workspace 根（默认写到 _runtime/，"
+                         "避免覆盖已发布的 argus-workspace/full/ 论文数据）")
     ap.add_argument("--progress", type=str, default="reports/full_progress_v2.txt")
     args = ap.parse_args()
 

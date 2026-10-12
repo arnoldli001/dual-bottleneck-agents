@@ -1,0 +1,6 @@
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:11:58.322285", "event_type": "task_generated", "task_id": "r0178_l3_a0", "level": 3, "valid": true, "expected": "unsat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:11:58.322809", "event_type": "solution_verified", "task_id": "r0178_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:11:58.323515", "event_type": "experience_distilled", "principle": "对不可满足任务，严格验证约束后判定 unsat，可确保结果正确。"}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:58.928638", "event_type": "task_generated", "task_id": "r0178_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "Array", "Int"]}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:58.929315", "event_type": "solution_verified", "task_id": "r0178_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:58.929858", "event_type": "experience_distilled", "principle": "按预期求解并复核结果，可确保任务正确完成。"}

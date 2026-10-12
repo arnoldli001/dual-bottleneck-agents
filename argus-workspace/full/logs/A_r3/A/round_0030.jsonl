@@ -1,0 +1,2 @@
+{"round": 30, "condition": "A", "timestamp": "2026-10-12T14:09:13.520231", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}
+{"round": 30, "condition": "A", "timestamp": "2026-10-12T14:23:52.781795", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}

@@ -1,0 +1,5 @@
+{"round": 151, "condition": "D", "timestamp": "2026-10-12T15:02:18.271942", "event_type": "task_generated", "task_id": "r0151_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 151, "condition": "D", "timestamp": "2026-10-12T15:02:18.272312", "event_type": "solution_verified", "task_id": "r0151_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 151, "condition": "D", "timestamp": "2026-10-12T15:02:18.272521", "event_type": "experience_distilled", "principle": "先明确期望，再按约束求解，实际输出与预期一致即成功。"}
+{"round": 151, "condition": "D", "timestamp": "2026-10-12T15:23:58.662226", "event_type": "task_generated", "task_id": "r0151_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 151, "condition": "D", "timestamp": "2026-10-12T15:23:58.662530", "event_type": "solution_verified", "task_id": "r0151_l3_a0", "correct": true, "delta_t": 0.0}

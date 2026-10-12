@@ -1,0 +1,6 @@
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T14:09:22.118120", "event_type": "task_generated", "task_id": "r0001_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T14:09:22.118512", "event_type": "solution_verified", "task_id": "r0001_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T14:09:22.118718", "event_type": "experience_distilled", "principle": "低难度任务按预期完成，保持当前策略即可"}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T15:23:57.180197", "event_type": "task_generated", "task_id": "r0001_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T15:23:57.180593", "event_type": "solution_verified", "task_id": "r0001_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T15:23:57.180815", "event_type": "experience_distilled", "principle": "准确输出期望结果sat并保持无错误，即可判定任务成功"}

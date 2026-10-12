@@ -1,0 +1,8 @@
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T14:15:13.897237", "event_type": "apoptosis_triggered", "agent_id": "D", "principles_count": 3}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T14:15:13.897636", "event_type": "task_generated", "task_id": "r0020_l2_a0", "level": 2, "valid": true, "expected": "sat", "keywords": ["BV", "BitVec"]}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T14:15:13.897934", "event_type": "solution_verified", "task_id": "r0020_l2_a0", "correct": true, "delta_t": 0.0}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T14:15:13.898136", "event_type": "experience_distilled", "principle": "按预期目标严格执行任务，确保最终结果与验收标准一致，即可通过验证。"}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T15:23:54.117826", "event_type": "apoptosis_triggered", "agent_id": "D", "principles_count": 3}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T15:23:54.118152", "event_type": "task_generated", "task_id": "r0020_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T15:23:54.118363", "event_type": "solution_verified", "task_id": "r0020_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 20, "condition": "D", "timestamp": "2026-10-12T15:23:54.118671", "event_type": "experience_distilled", "principle": "结果与预期一致且判定正确，说明当前执行策略有效。"}

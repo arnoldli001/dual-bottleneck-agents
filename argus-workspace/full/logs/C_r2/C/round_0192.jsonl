@@ -1,0 +1,2 @@
+{"round": 192, "condition": "C", "timestamp": "2026-10-12T15:15:12.236447", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 192, "condition": "C", "timestamp": "2026-10-12T15:17:58.629651", "event_type": "invalid_task", "reason": "population produced invalid task"}

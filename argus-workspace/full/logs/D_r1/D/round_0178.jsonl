@@ -1,0 +1,4 @@
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:11:54.764568", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:52.140288", "event_type": "task_generated", "task_id": "r0178_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "Array", "Int"]}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:52.140595", "event_type": "solution_verified", "task_id": "r0178_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 178, "condition": "D", "timestamp": "2026-10-12T15:23:52.140808", "event_type": "experience_distilled", "principle": "按预期求解并复核结果，可确保任务正确完成。"}

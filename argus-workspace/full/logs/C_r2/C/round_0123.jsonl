@@ -1,0 +1,4 @@
+{"round": 123, "condition": "C", "timestamp": "2026-10-12T14:51:10.961582", "event_type": "task_generated", "task_id": "r0123_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 123, "condition": "C", "timestamp": "2026-10-12T14:51:10.962177", "event_type": "solution_verified", "task_id": "r0123_l3_a0", "correct": true, "delta_t": 0.15}
+{"round": 123, "condition": "C", "timestamp": "2026-10-12T15:17:57.782228", "event_type": "task_generated", "task_id": "r0123_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 123, "condition": "C", "timestamp": "2026-10-12T15:17:57.787918", "event_type": "solution_verified", "task_id": "r0123_l3_a0", "correct": true, "delta_t": 0.15}

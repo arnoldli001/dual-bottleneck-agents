@@ -1,0 +1,4 @@
+{"round": 194, "condition": "D", "timestamp": "2026-10-12T15:17:19.835013", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 194, "condition": "D", "timestamp": "2026-10-12T15:23:55.834239", "event_type": "task_generated", "task_id": "r0194_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 194, "condition": "D", "timestamp": "2026-10-12T15:23:55.834878", "event_type": "solution_verified", "task_id": "r0194_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 194, "condition": "D", "timestamp": "2026-10-12T15:23:55.835143", "event_type": "experience_distilled", "principle": "满足约束条件的任务应直接按预期执行，确保结果与预期一致。"}

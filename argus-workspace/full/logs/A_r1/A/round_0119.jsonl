@@ -1,0 +1,3 @@
+{"round": 119, "condition": "A", "timestamp": "2026-10-12T14:09:17.800142", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}
+{"round": 119, "condition": "A", "timestamp": "2026-10-12T14:09:21.722245", "event_type": "task_generated", "task_id": "r0119_l1_a0", "level": 1, "valid": true, "expected": "unsat", "keywords": ["LIA", "Int"]}
+{"round": 119, "condition": "A", "timestamp": "2026-10-12T14:09:21.722573", "event_type": "solution_verified", "task_id": "r0119_l1_a0", "correct": true, "delta_t": 0.15}

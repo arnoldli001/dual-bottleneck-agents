@@ -1,0 +1,3 @@
+{"round": 20, "condition": "C", "timestamp": "2026-10-12T12:05:20.242825", "event_type": "apoptosis_triggered", "agent_id": "C", "principles_count": 3}
+{"round": 20, "condition": "C", "timestamp": "2026-10-12T12:05:20.243242", "event_type": "task_generated", "task_id": "r0020_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 20, "condition": "C", "timestamp": "2026-10-12T12:05:20.243462", "event_type": "solution_verified", "task_id": "r0020_l3_a0", "correct": true, "delta_t": 0.15}

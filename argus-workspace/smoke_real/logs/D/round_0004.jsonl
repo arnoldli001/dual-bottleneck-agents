@@ -1,0 +1,3 @@
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T12:05:57.700268", "event_type": "task_generated", "task_id": "r0004_l1_a0", "level": 1, "valid": true, "expected": "unsat", "keywords": ["LIA", "Int"]}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T12:05:57.700641", "event_type": "solution_verified", "task_id": "r0004_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T12:05:57.700839", "event_type": "experience_distilled", "principle": "低难度任务按标准流程直接求解即可得出正确结论，无需引入额外复杂策略。"}

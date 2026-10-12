@@ -1,0 +1,5 @@
+{"round": 90, "condition": "D", "timestamp": "2026-10-12T14:40:21.002222", "event_type": "apoptosis_triggered", "agent_id": "D", "principles_count": 3}
+{"round": 90, "condition": "D", "timestamp": "2026-10-12T14:40:21.002641", "event_type": "task_generated", "task_id": "r0090_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 90, "condition": "D", "timestamp": "2026-10-12T14:40:21.002871", "event_type": "solution_verified", "task_id": "r0090_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 90, "condition": "D", "timestamp": "2026-10-12T14:40:21.003057", "event_type": "experience_distilled", "principle": "中等难度任务按预期达成约束，保持稳定执行即可，无需额外干预。"}
+{"round": 90, "condition": "D", "timestamp": "2026-10-12T15:23:58.083600", "event_type": "invalid_task", "reason": "population produced invalid task"}

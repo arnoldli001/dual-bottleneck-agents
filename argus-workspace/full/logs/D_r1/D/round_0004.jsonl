@@ -1,0 +1,6 @@
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T14:10:02.971734", "event_type": "task_generated", "task_id": "r0004_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T14:10:02.972109", "event_type": "solution_verified", "task_id": "r0004_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T14:10:02.972325", "event_type": "experience_distilled", "principle": "简单任务直接按要求执行即可，无需过度推理，稳定完成即达标。"}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T15:19:33.705343", "event_type": "task_generated", "task_id": "r0004_l3_a0", "level": 3, "valid": true, "expected": "unsat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T15:19:33.710956", "event_type": "solution_verified", "task_id": "r0004_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 4, "condition": "D", "timestamp": "2026-10-12T15:19:33.711205", "event_type": "experience_distilled", "principle": "准确判定约束不可满足，直接返回unsat即可通过验证。"}

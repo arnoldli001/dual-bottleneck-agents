@@ -1,0 +1,4 @@
+{"round": 116, "condition": "A", "timestamp": "2026-10-12T14:08:35.823271", "event_type": "task_generated", "task_id": "r0116_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 116, "condition": "A", "timestamp": "2026-10-12T14:08:35.824743", "event_type": "solution_verified", "task_id": "r0116_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 116, "condition": "A", "timestamp": "2026-10-12T14:08:48.617445", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}
+{"round": 116, "condition": "A", "timestamp": "2026-10-12T14:09:15.653760", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}

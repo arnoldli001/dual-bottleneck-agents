@@ -1,0 +1,3 @@
+{"round": 36, "condition": "C", "timestamp": "2026-10-12T14:20:29.312798", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 36, "condition": "C", "timestamp": "2026-10-12T14:59:44.814429", "event_type": "task_generated", "task_id": "r0036_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 36, "condition": "C", "timestamp": "2026-10-12T14:59:44.814746", "event_type": "solution_verified", "task_id": "r0036_l3_a0", "correct": true, "delta_t": 0.15}

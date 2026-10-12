@@ -1,0 +1,4 @@
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T14:09:39.797652", "event_type": "task_generated", "task_id": "r0003_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T14:09:39.803355", "event_type": "solution_verified", "task_id": "r0003_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T14:09:39.803583", "event_type": "experience_distilled", "principle": "简单任务按预期直接完成即可，无需额外复杂处理"}
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T15:23:53.833157", "event_type": "invalid_task", "reason": "population produced invalid task"}

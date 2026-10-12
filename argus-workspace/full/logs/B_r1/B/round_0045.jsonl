@@ -1,0 +1,4 @@
+{"round": 45, "condition": "B", "timestamp": "2026-10-12T14:18:01.251491", "event_type": "apoptosis_triggered", "agent_id": "B", "principles_count": 0}
+{"round": 45, "condition": "B", "timestamp": "2026-10-12T14:18:01.251922", "event_type": "task_generated", "task_id": "r0045_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 45, "condition": "B", "timestamp": "2026-10-12T14:18:01.252125", "event_type": "solution_verified", "task_id": "r0045_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 45, "condition": "B", "timestamp": "2026-10-12T14:23:59.011937", "event_type": "invalid_task", "reason": "teacher failed after max_retries", "level": 1}

@@ -1,0 +1,4 @@
+{"round": 150, "condition": "C", "timestamp": "2026-10-12T15:00:23.383122", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 150, "condition": "C", "timestamp": "2026-10-12T15:00:30.428415", "event_type": "apoptosis_triggered", "agent_id": "C", "principles_count": 3}
+{"round": 150, "condition": "C", "timestamp": "2026-10-12T15:00:30.428742", "event_type": "task_generated", "task_id": "r0150_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 150, "condition": "C", "timestamp": "2026-10-12T15:00:30.428958", "event_type": "solution_verified", "task_id": "r0150_l3_a0", "correct": true, "delta_t": 0.15}

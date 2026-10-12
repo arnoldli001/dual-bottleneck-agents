@@ -1,0 +1,2 @@
+{"round": 14, "condition": "A", "timestamp": "2026-10-12T11:55:26.448360", "event_type": "task_generated", "task_id": "r0014_l1_a0", "level": 1, "valid": true, "expected": "unsat", "keywords": ["LIA", "Int"]}
+{"round": 14, "condition": "A", "timestamp": "2026-10-12T11:55:26.448787", "event_type": "solution_verified", "task_id": "r0014_l1_a0", "correct": true, "delta_t": 0.15}

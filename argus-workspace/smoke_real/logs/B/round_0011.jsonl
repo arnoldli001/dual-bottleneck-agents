@@ -1,0 +1,2 @@
+{"round": 11, "condition": "B", "timestamp": "2026-10-12T11:57:58.105786", "event_type": "task_generated", "task_id": "r0011_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 11, "condition": "B", "timestamp": "2026-10-12T11:57:58.106182", "event_type": "solution_verified", "task_id": "r0011_l1_a0", "correct": true, "delta_t": 0.0}

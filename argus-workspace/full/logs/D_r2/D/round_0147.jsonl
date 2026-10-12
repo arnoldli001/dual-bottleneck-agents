@@ -1,0 +1,4 @@
+{"round": 147, "condition": "D", "timestamp": "2026-10-12T15:00:35.579197", "event_type": "task_generated", "task_id": "r0147_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 147, "condition": "D", "timestamp": "2026-10-12T15:00:35.579615", "event_type": "solution_verified", "task_id": "r0147_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 147, "condition": "D", "timestamp": "2026-10-12T15:00:35.579826", "event_type": "experience_distilled", "principle": "预期为sat且实际为sat时，说明当前求解策略有效，可复用。"}
+{"round": 147, "condition": "D", "timestamp": "2026-10-12T15:23:55.262550", "event_type": "invalid_task", "reason": "population produced invalid task"}

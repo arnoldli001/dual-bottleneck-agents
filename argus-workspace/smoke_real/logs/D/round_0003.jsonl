@@ -1,0 +1,3 @@
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T12:05:49.186450", "event_type": "task_generated", "task_id": "r0003_l1_a0", "level": 1, "valid": true, "expected": "unsat", "keywords": ["LIA", "Int"]}
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T12:05:49.187253", "event_type": "solution_verified", "task_id": "r0003_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 3, "condition": "D", "timestamp": "2026-10-12T12:05:49.187503", "event_type": "experience_distilled", "principle": "对不可满足问题应直接判定为unsat，避免误判为有解。"}

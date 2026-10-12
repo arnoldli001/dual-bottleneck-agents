@@ -194,7 +194,10 @@ def main() -> None:
     ap.add_argument("--use-real-api", action="store_true",
                     help="必填，强制真实 API")
     ap.add_argument("--cost-limit", type=float, default=10.0)
-    ap.add_argument("--out_dir", type=str, default="argus-workspace/improved_real")
+    ap.add_argument("--out_dir", type=str,
+                    default="argus-workspace/_runtime/improved_real",
+                    help="输出目录（默认写到 _runtime/，避免覆盖已发布的 "
+                         "argus-workspace/improved_real/ 论文数据）")
     ap.add_argument("--probe", action="store_true",
                     help="探针模式：每 cell 2 轮")
     args = ap.parse_args()

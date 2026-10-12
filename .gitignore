@@ -11,9 +11,28 @@ __pycache__/
 *.db
 llm_cache.db
 
-# 运行时工作区（重跑实验时生成，不入库）
-argus-workspace/
-state/
+# 运行时工作区
+#
+# `argus-workspace/` 同时承担两个角色：
+#   1. 重跑实验时的输出目录（运行时产物，不应入库）
+#   2. 论文所用实验数据的存放位置（需要随仓库发布，保证可复现）
+#
+# 因此这里排除的是「目录内容」而不是「目录本身」——
+# `argus-workspace/` 结尾不加 `/`，才能用 `!` 逐个放行下面的数据子目录。
+# （Git 规则：父目录被整体排除后，其内部文件无法再被重新包含。）
+argus-workspace/*
+argus-workspace/_runtime/
+
+# 例外：论文数据（随仓库发布，见 README「数据说明」）
+!argus-workspace/full/
+!argus-workspace/improved_real/
+!argus-workspace/improved_real_run1_hexbug/
+!argus-workspace/smoke_real/
+
+# 课程控制器状态文件（运行时生成）
+# 用 `/state/` 而非 `state/`：后者会匹配任意深度的 state/ 目录，
+# 误伤 argus-workspace/full/state/（该目录是实验状态记录，需要发布）。
+/state/
 
 # 旧 git 历史备份（CLEAN-1 时保留，不入库）
 .git.backup/

@@ -1,0 +1,3 @@
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T12:05:29.821096", "event_type": "task_generated", "task_id": "r0001_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T12:05:29.821488", "event_type": "solution_verified", "task_id": "r0001_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 1, "condition": "D", "timestamp": "2026-10-12T12:05:29.821716", "event_type": "experience_distilled", "principle": "低难度任务按预期完成，说明当前方法有效。"}

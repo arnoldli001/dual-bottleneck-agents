@@ -1,0 +1,5 @@
+{"round": 121, "condition": "D", "timestamp": "2026-10-12T14:51:33.889029", "event_type": "task_generated", "task_id": "r0121_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 121, "condition": "D", "timestamp": "2026-10-12T14:51:33.889423", "event_type": "solution_verified", "task_id": "r0121_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 121, "condition": "D", "timestamp": "2026-10-12T15:23:55.045872", "event_type": "task_generated", "task_id": "r0121_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 121, "condition": "D", "timestamp": "2026-10-12T15:23:55.051744", "event_type": "solution_verified", "task_id": "r0121_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 121, "condition": "D", "timestamp": "2026-10-12T15:23:55.052116", "event_type": "experience_distilled", "principle": "难度3任务中，严格遵循预期目标执行，实际结果与预期一致即成功。"}

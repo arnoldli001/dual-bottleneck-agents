@@ -1,0 +1,3 @@
+{"round": 5, "condition": "A", "timestamp": "2026-10-12T11:53:23.707916", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 5, "condition": "A", "timestamp": "2026-10-12T11:53:23.708325", "event_type": "task_generated", "task_id": "r0005_l1_a0", "level": 1, "valid": true, "expected": "unsat", "keywords": ["LIA", "Int"]}
+{"round": 5, "condition": "A", "timestamp": "2026-10-12T11:53:23.708536", "event_type": "solution_verified", "task_id": "r0005_l1_a0", "correct": true, "delta_t": 0.15}

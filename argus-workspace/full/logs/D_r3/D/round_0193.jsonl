@@ -1,0 +1,5 @@
+{"round": 193, "condition": "D", "timestamp": "2026-10-12T15:17:19.108831", "event_type": "task_generated", "task_id": "r0193_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 193, "condition": "D", "timestamp": "2026-10-12T15:17:19.109315", "event_type": "solution_verified", "task_id": "r0193_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 193, "condition": "D", "timestamp": "2026-10-12T15:17:19.109566", "event_type": "experience_distilled", "principle": "按预期目标执行，任务成功达成 satisfiable 结果，保持流程稳定即可复现。"}
+{"round": 193, "condition": "D", "timestamp": "2026-10-12T15:23:59.126948", "event_type": "task_generated", "task_id": "r0193_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 193, "condition": "D", "timestamp": "2026-10-12T15:23:59.127255", "event_type": "solution_verified", "task_id": "r0193_l3_a0", "correct": true, "delta_t": 0.0}

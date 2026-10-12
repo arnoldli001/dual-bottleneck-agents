@@ -1,0 +1,4 @@
+{"round": 153, "condition": "D", "timestamp": "2026-10-12T15:02:49.768870", "event_type": "task_generated", "task_id": "r0153_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 153, "condition": "D", "timestamp": "2026-10-12T15:02:49.769309", "event_type": "solution_verified", "task_id": "r0153_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 153, "condition": "D", "timestamp": "2026-10-12T15:02:49.769565", "event_type": "experience_distilled", "principle": "面对SAT任务，准确判定可满足并确保输出与预期一致即可成功。"}
+{"round": 153, "condition": "D", "timestamp": "2026-10-12T15:23:51.870623", "event_type": "invalid_task", "reason": "population produced invalid task"}

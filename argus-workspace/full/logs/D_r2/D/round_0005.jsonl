@@ -1,0 +1,5 @@
+{"round": 5, "condition": "D", "timestamp": "2026-10-12T14:10:03.175796", "event_type": "apoptosis_triggered", "agent_id": "D", "principles_count": 3}
+{"round": 5, "condition": "D", "timestamp": "2026-10-12T14:10:03.176630", "event_type": "task_generated", "task_id": "r0005_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 5, "condition": "D", "timestamp": "2026-10-12T14:10:03.176880", "event_type": "solution_verified", "task_id": "r0005_l1_a0", "correct": true, "delta_t": 0.0}
+{"round": 5, "condition": "D", "timestamp": "2026-10-12T14:10:03.177081", "event_type": "experience_distilled", "principle": "低难度任务中，按标准流程执行即可稳定达成预期结果。"}
+{"round": 5, "condition": "D", "timestamp": "2026-10-12T15:23:53.879040", "event_type": "invalid_task", "reason": "population produced invalid task"}

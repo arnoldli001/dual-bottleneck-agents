@@ -1,0 +1,4 @@
+{"round": 128, "condition": "D", "timestamp": "2026-10-12T14:54:09.417141", "event_type": "task_generated", "task_id": "r0128_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "BitVec"]}
+{"round": 128, "condition": "D", "timestamp": "2026-10-12T14:54:09.417522", "event_type": "solution_verified", "task_id": "r0128_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 128, "condition": "D", "timestamp": "2026-10-12T14:54:09.417717", "event_type": "experience_distilled", "principle": "中等难度任务按预期正确完成并通过验证，应保持当前执行方式。"}
+{"round": 128, "condition": "D", "timestamp": "2026-10-12T15:23:55.155664", "event_type": "invalid_task", "reason": "population produced invalid task"}

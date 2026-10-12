@@ -1,0 +1,5 @@
+{"round": 125, "condition": "D", "timestamp": "2026-10-12T14:52:58.881418", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 125, "condition": "D", "timestamp": "2026-10-12T15:23:55.152380", "event_type": "apoptosis_triggered", "agent_id": "D", "principles_count": 3}
+{"round": 125, "condition": "D", "timestamp": "2026-10-12T15:23:55.152713", "event_type": "task_generated", "task_id": "r0125_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 125, "condition": "D", "timestamp": "2026-10-12T15:23:55.153042", "event_type": "solution_verified", "task_id": "r0125_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 125, "condition": "D", "timestamp": "2026-10-12T15:23:55.153382", "event_type": "experience_distilled", "principle": "准确理解任务要求并严格按要求执行，可确保结果符合预期。"}

@@ -1,0 +1,6 @@
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:12:20.339882", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:12:20.340374", "event_type": "task_generated", "task_id": "r0135_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:12:20.340747", "event_type": "solution_verified", "task_id": "r0135_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:23:55.331696", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:23:55.332233", "event_type": "task_generated", "task_id": "r0135_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 135, "condition": "A", "timestamp": "2026-10-12T14:23:55.332575", "event_type": "solution_verified", "task_id": "r0135_l1_a0", "correct": true, "delta_t": 0.15}

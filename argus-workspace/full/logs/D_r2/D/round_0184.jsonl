@@ -1,0 +1,4 @@
+{"round": 184, "condition": "D", "timestamp": "2026-10-12T15:14:11.306406", "event_type": "task_generated", "task_id": "r0184_l3_a0", "level": 3, "valid": true, "expected": "sat", "keywords": ["LIA", "BV", "Array", "Int", "BitVec"]}
+{"round": 184, "condition": "D", "timestamp": "2026-10-12T15:14:11.306779", "event_type": "solution_verified", "task_id": "r0184_l3_a0", "correct": true, "delta_t": 0.0}
+{"round": 184, "condition": "D", "timestamp": "2026-10-12T15:14:11.306969", "event_type": "experience_distilled", "principle": "面对中等难度任务时，按标准流程逐步推进即可稳定达成目标。"}
+{"round": 184, "condition": "D", "timestamp": "2026-10-12T15:23:55.633274", "event_type": "invalid_task", "reason": "population produced invalid task"}

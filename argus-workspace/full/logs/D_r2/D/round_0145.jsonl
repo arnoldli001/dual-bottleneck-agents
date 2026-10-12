@@ -1,0 +1,2 @@
+{"round": 145, "condition": "D", "timestamp": "2026-10-12T15:00:01.739916", "event_type": "invalid_task", "reason": "population produced invalid task"}
+{"round": 145, "condition": "D", "timestamp": "2026-10-12T15:23:55.221224", "event_type": "invalid_task", "reason": "population produced invalid task"}

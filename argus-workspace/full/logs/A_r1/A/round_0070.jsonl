@@ -1,0 +1,9 @@
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T13:58:27.074931", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T13:58:27.075344", "event_type": "task_generated", "task_id": "r0070_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T13:58:27.075563", "event_type": "solution_verified", "task_id": "r0070_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:07:01.781989", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:07:01.782456", "event_type": "task_generated", "task_id": "r0070_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:07:01.782699", "event_type": "solution_verified", "task_id": "r0070_l1_a0", "correct": true, "delta_t": 0.15}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:09:14.445770", "event_type": "apoptosis_triggered", "agent_id": "A", "principles_count": 0}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:09:14.446115", "event_type": "task_generated", "task_id": "r0070_l1_a0", "level": 1, "valid": true, "expected": "sat", "keywords": ["LIA", "Int"]}
+{"round": 70, "condition": "A", "timestamp": "2026-10-12T14:09:14.446455", "event_type": "solution_verified", "task_id": "r0070_l1_a0", "correct": true, "delta_t": 0.15}
