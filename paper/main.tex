@@ -44,9 +44,10 @@
 \usepackage{array}
 
 % --- bibliography -----------------------------------------------------------
-% natbib 由 neurips_2026.sty 内部加载，此处不再重复。
+% natbib 由 neurips_2026.sty 内部加载，此处不再重复；数字模式用
+% \PassOptionsToPackage{numbers,compress}{natbib} 传入（见文件开头）。
 % neurips_2026.sty 本身不设 \bibliographystyle，必须由正文提供；
-% plainnat 是 natbib 的标准搭配，故文末保留 \bibliographystyle{plainnat}。
+% 文末用 unsrtnat 让文献编号按首次引用顺序排列（plainnat 按作者字母序）。
 
 % ---------------------------------------------------------------------------
 \title{The Dual Bottleneck: A Composition Law for Judge Reliability and
@@ -876,7 +877,10 @@ first.''
 % ===========================================================================
 % REFERENCES
 % ===========================================================================
-\bibliographystyle{plainnat}
+% unsrtnat (not plainnat) so that reference numbers follow order of first
+% citation: the first \cite in the text becomes [1]. plainnat numbers
+% alphabetically by author, which makes the Introduction open on [3].
+\bibliographystyle{unsrtnat}
 \bibliography{refs}
 
 % ===========================================================================
