@@ -250,7 +250,7 @@ def render(obs: dict, metrics: dict, tau_c: float, out_png: Path) -> None:
     ax1.set_ylim(0.0, 0.45)
     ax1.set_xlabel(r"Judge reliability $\tau$")
     ax1.set_ylabel(r"Evaluation bias $\Delta_t$")
-    ax1.set_title(r"(a) Theorem 1 vs real-API sweep")
+    ax1.set_title(r"(a)")
     ax1.grid(alpha=0.3)
     ax1.legend(loc="upper right", framealpha=0.95)
 
@@ -284,12 +284,11 @@ def render(obs: dict, metrics: dict, tau_c: float, out_png: Path) -> None:
     ax2.set_ylim(0.0, 0.80)
     ax2.set_xlabel(r"Judge reliability $\tau$")
     ax2.set_ylabel(r"Evaluation bias $\Delta_t$")
-    ax2.set_title(r"(b) Why the acceptance model is rejected")
+    ax2.set_title(r"(b)")
     ax2.grid(alpha=0.3)
     ax2.legend(loc="upper right", framealpha=0.95)
 
-    fig.suptitle("fig5c — Theorem 1: Judge Reliability Threshold", fontsize=14)
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.tight_layout(rect=(0, 0, 1, 1))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight",
                 facecolor="white", edgecolor="white")

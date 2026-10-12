@@ -382,8 +382,7 @@ def render_fig6(improved_lvl: dict, legacy_lvl: dict, out_png: Path,
     ax.set_xticklabels([f"L{lv}" for lv in levels])
     ax.set_xlabel("Difficulty Level")
     ax.set_ylabel(f"Valid tasks produced (of {legacy_total} rounds)")
-    ax.set_title("(a) Legacy teacher, 2400-round budget:\n"
-                 "it never got past L1")
+    ax.set_title("(a)")
     ax.set_ylim(0, max(lg_valid) * 1.25)
     ax.grid(True, alpha=0.3, axis="y")
     ax.annotate(
@@ -413,14 +412,10 @@ def render_fig6(improved_lvl: dict, legacy_lvl: dict, out_png: Path,
     ax.set_xticklabels([f"L{lv}" for lv in levels])
     ax.set_xlabel("Difficulty Level (explicitly requested)")
     ax.set_ylabel("Success rate when requested (%)")
-    ax.set_title("(b) Constraint framework, 20 rounds requested per cell:\n"
-                 "all levels reachable")
+    ax.set_title("(b)")
     ax.set_ylim(0, 118)
     ax.grid(True, alpha=0.3, axis="y")
 
-    fig.suptitle(
-        "fig6 (real API) — capability, not rate: the two panels have "
-        "different denominators by necessity", fontsize=12)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")

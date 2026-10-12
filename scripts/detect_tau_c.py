@@ -518,7 +518,7 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
                 label=f"{label_prefix} late Δ_t")
     ax.set_xlabel("Judge reliability τ", fontsize=11)
     ax.set_ylabel("Δ_t", fontsize=11)
-    ax.set_title("(a) early vs late Δ_t per τ", fontsize=12)
+    ax.set_title("(a)", fontsize=12)
     ax.tick_params(labelsize=11)
     ax.legend(fontsize=11, loc="upper right")
     ax.grid(True, alpha=0.3)
@@ -535,7 +535,7 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
                 label=f"{label_prefix} late correct")
     ax.set_xlabel("Judge reliability τ", fontsize=11)
     ax.set_ylabel("Correct rate", fontsize=11)
-    ax.set_title("(b) early vs late correct rate per τ", fontsize=12)
+    ax.set_title("(b)", fontsize=12)
     ax.tick_params(labelsize=11)
     ax.legend(fontsize=11, loc="lower right")
     ax.grid(True, alpha=0.3)
@@ -558,17 +558,15 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
                    label=f"τ_c(D)={results_d['tau_c']}")
     ax.set_xlabel("Judge reliability τ", fontsize=11)
     ax.set_ylabel("Degenerate (1=yes, 0=no)", fontsize=11)
-    ax.set_title("(c) degeneration flags and τ_c", fontsize=12)
+    ax.set_title("(c)", fontsize=12)
     ax.set_yticks([0, 1])
     ax.tick_params(labelsize=11)
     ax.legend(fontsize=11, loc="upper left")
     ax.grid(True, alpha=0.3)
 
-    fig.suptitle("τ_c detection (within-τ degeneration: late-half vs early-half)",
-                 fontsize=13)
     # gridspec 已控制子图间距。tight_layout 与 gridspec + suptitle 不兼容，
     # 会抛 UserWarning 并可能覆盖 hspace，因此改为显式边距。
-    fig.subplots_adjust(top=0.93, bottom=0.06, left=0.11, right=0.98)
+    fig.subplots_adjust(top=0.98, bottom=0.06, left=0.11, right=0.98)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")
     plt.close(fig)

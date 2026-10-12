@@ -305,8 +305,7 @@ def render_fig7(tau_c_results: dict | None,
     ax.set_xticks(x)
     ax.set_xticklabels(lab)
     ax.set_ylabel("τ_c (judge reliability threshold)")
-    ax.set_title("(a) τ_c: the mock gap does NOT reproduce under real API\n"
-                 "(pinning difficulty to L1 disables D's upgrade mechanism)")
+    ax.set_title("(a)")
     ax.legend(loc="upper left", fontsize=9)
     ax.set_ylim(0, 1.15)
     ax.grid(True, alpha=0.3, axis="y")
@@ -346,8 +345,7 @@ def render_fig7(tau_c_results: dict | None,
     ax.set_xticklabels(["invalid", "L1", "L2", "L3"])
     ax.set_xlabel("Difficulty level (or 'invalid' = teacher failed)")
     ax.set_ylabel("Rounds at this level (% of total)")
-    ax.set_title("(b) D reaches L2/L3 via population game; B stays at L1\n"
-                 "(this part of the hypothesis IS supported)")
+    ax.set_title("(b)")
     ax.legend(loc="upper right", fontsize=9)
     ax.set_ylim(0, max(max(b_vals), max(d_vals)) * 1.2 + 5)
     ax.grid(True, alpha=0.3, axis="y")
@@ -360,11 +358,6 @@ def render_fig7(tau_c_results: dict | None,
         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
     )
 
-    fig.suptitle(
-        "fig7 — difficulty distribution differs, but the τ_c gap does not "
-        "reproduce under real API",
-        fontsize=12,
-    )
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")

@@ -89,9 +89,6 @@ def render_fig3b(records: list[dict], out_png: Path) -> None:
     ax.set_xticklabels(["L1", "L2", "L3"])
     ax.set_xlabel("Difficulty Level", fontsize=14.4)
     ax.set_ylabel("Valid Task Rate (%)", fontsize=14.4)
-    ax.set_title("Validity Rate by Difficulty Level\n"
-                 "pseudo-difficulty trap\n"
-                 "visible in L2/L3", fontsize=16.8)
     ax.tick_params(labelsize=14.4)
     ax.set_ylim(0, 150)
     ax.set_xlim(-0.55, 2.55)
@@ -173,7 +170,6 @@ def render_fig2c(records: list[dict], out_png: Path) -> None:
         patch.set_alpha(0.6)
     ax.set_ylabel("Δ_t (L1 phase only, valid rounds)")
     ax.set_xlabel("Condition")
-    ax.set_title("C/D's Δ_t in L1 phase is comparable to A/B\n(population game does NOT hurt L1 Δ_t)")
     ax.set_ylim(-0.05, 0.6)
     ax.grid(True, alpha=0.3, axis="y")
     # 注释关键点
@@ -195,15 +191,11 @@ def render_fig2c(records: list[dict], out_png: Path) -> None:
                  color=colors[cond], linewidth=1.5)
     ax.set_xlabel("Δ_t")
     ax.set_ylabel("CDF (cumulative fraction of rounds)")
-    ax.set_title("CDF of Δ_t in L1 phase — populations adds noise but not bias")
     ax.legend(loc="lower right", fontsize=9)
     ax.set_xlim(0, 0.5)
     ax.set_ylim(0, 1.05)
     ax.grid(True, alpha=0.3)
 
-    fig.suptitle("fig2c — C/D's L1-phase Δ_t is NOT worse than A/B (proves population "
-                 "doesn't hurt at L1)",
-                 fontsize=12)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")

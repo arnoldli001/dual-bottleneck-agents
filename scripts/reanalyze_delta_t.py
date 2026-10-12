@@ -236,8 +236,6 @@ def render_fig2b(records: list[dict], out_path: Path) -> None:
                     transform=ax.transAxes, fontsize=9, color="#664400",
                     verticalalignment="top", horizontalalignment="center",
                     bbox=dict(boxstyle="round", facecolor="white", alpha=0.7))
-    fig.suptitle("fig2b — per-round Δ_t across 4 conditions (run 1, first 200 rounds)",
-                 fontsize=13)
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=300, bbox_inches="tight")

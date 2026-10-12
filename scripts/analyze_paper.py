@@ -370,7 +370,6 @@ def fig1_dual_bottleneck(out_png: Path,
     ax.set_ylim(0.0, 1.0)
     ax.set_xlabel("Judge Reliability τ", fontsize=14.4)
     ax.set_ylabel("Invalid Rate", fontsize=14.4)
-    ax.set_title("ARGUS Dual-Bottleneck Diagram", fontsize=16.8)
     ax.tick_params(labelsize=14.4)
     ax.grid(True, alpha=0.2)
     fig.tight_layout()
@@ -405,8 +404,6 @@ def fig2_delta_t_AB(records: list[dict], out_png: Path) -> bool:
         ax.plot(x_centers, ys, marker="o", linewidth=2, color=color, label=label)
     ax.set_xlabel("Round index")
     ax.set_ylabel("Avg Δ_t (per 20-round bucket)")
-    ax.set_title("Global-caliber Δ_t: invalid rounds encoded as 1.0",
-                 fontsize=12)
     ax.legend(loc="upper right")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
@@ -447,9 +444,6 @@ def fig3_validity_rate(records: list[dict], out_png: Path) -> bool:
     ax.set_xticklabels(conds)
     ax.set_xlabel("Condition", fontsize=14.4)
     ax.set_ylabel("Ratio", fontsize=14.4)
-    ax.set_title("Valid Task Rate by Condition\n"
-                 "generation-side bottleneck\n"
-                 "emerges in C/D", fontsize=16.8)
     ax.tick_params(labelsize=14.4)
     ax.legend(loc="upper center", ncol=2, fontsize=14.4, framealpha=0.95)
     ax.set_ylim(0, 2.00)
@@ -491,7 +485,6 @@ def fig4_difficulty_trajectory(records: list[dict], out_png: Path) -> bool:
                        alpha=0.6, label=f"{cond} (invalid)")
     ax.set_xlabel("Round index (20-round buckets)")
     ax.set_ylabel("Difficulty level (avg)")
-    ax.set_title("C/D Difficulty Trajectories — pseudo-difficulty trap visible after L1→L2 transition")
     ax.set_yticks([0, 1, 2, 3])
     ax.legend(loc="upper left")
     ax.grid(True, alpha=0.3)

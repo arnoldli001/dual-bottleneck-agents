@@ -214,10 +214,6 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
 
     ax.set_xlabel(r"Judge reliability $\tau$")
     ax.set_ylabel(r"$\Delta_t$")
-    ax.set_title("Analytical fit of the\n"
-                 "noise-induced error floor\n"
-                 r"($\Delta_t(\tau)=(1-\tau^2)/2$," "\n"
-                 "no fitted parameters)", fontsize=16.8)
     ax.legend(loc="upper right", fontsize=14.4)
     ax.grid(True, alpha=0.3)
     ax.set_xlim(0.52, 1.02)
