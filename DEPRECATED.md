@@ -87,3 +87,39 @@ v1 按"当前是否被引用"判断废弃，v2 改为"论文未完成前一律�
 - `logs/*.log`（19 个）、`logs/full_A_r1.log.err`
 - `scripts/*.log`（12 个）
 - 14 个废弃脚本（见上表）
+
+---
+
+## 开发期测试残留（已删除）
+
+### `logs/D/round_0999.jsonl`（139 B）
+
+**结论：非实验数据，不属于任何实验。**
+
+内容：
+
+```json
+{"round": 999, "condition": "D", "timestamp": "2026-10-12T10:29:25.979084",
+ "event_type": "smoke", "msg": "中文测试 123", "level": 1}
+```
+
+判定依据：
+
+| 字段 | 值 | 说明 |
+|------|-----|------|
+| `event_type` | `smoke` | 不在实验事件类型中（实验用 `task_generated` / `solution_verified` / `invalid_task`） |
+| `msg` | `中文测试 123` | UTF-8 编码验证串 |
+| `round` | `999` | 哨兵值；三个实验的轮次上限分别是 200 / 20 / 50 |
+| `timestamp` | `10:29:25` | 与所属 commit 相差 6 秒 |
+
+来源：commit `8a8c85c`（"P0: 5 核心模块 + 52 单测全绿"，2026-10-12 10:29:31）。
+当时的 `.gitignore` 有 `*.log` 但没有 `logs/`，因此用 `logs/D/` 当草稿目录写出的
+这个编码测试文件被一并提交。
+
+冗余性：`tests/test_log_write.py::test_utf8_chinese` 已完整覆盖同一验证目的，
+且全仓**零引用**（无脚本/测试/模块读取该路径）。
+
+处理：删除该文件，并移除随之变空的 `logs/D/` 目录。
+删除前留档：`sha256 = CAC41E797BBE5AAFDC0B63E61630E9C615EEE398D8E5A9149DEBD1BACA7A4CE8`
+
+删除后 `logs/` 仅剩 `tau_sweep_real/`（论文 Section 5 数据），目录语义清晰。
