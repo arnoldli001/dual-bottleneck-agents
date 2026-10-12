@@ -203,8 +203,12 @@ $\tau \ge \tau_c$ and $V \ge V_c$.
 
 \textbf{Proposition 1 (Necessity of both conditions).} If $\tau < \tau_c$, the system accumulates
 corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the system generates mostly
-invalid tasks and the effective evolution rate approaches zero. The experimental setup is summarized
-in Table~\ref{tab:table1}.
+invalid tasks and the effective evolution rate approaches zero.
+
+We ran 4 conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 runs = 2400 rounds on DeepSeek V4
+Flash. Difficulty spans L1 (linear integer arithmetic, $\le$10 Int vars), L2 (bit-vectors, $\le$20
+vars), and L3 (mixed LIA+BV+Array, $\le$30 vars). Primary metric is $\Delta_t$; secondary metric is
+valid task rate.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
@@ -221,29 +225,6 @@ The primary metric is $\Delta_t$, the gap between the system's own evaluation an
 Invalid rounds --- where the teacher fails to produce a solvable constraint set --- are encoded as
 $\Delta_t = 1.0$ under the \textit{global} caliber and excluded under the \textit{valid-only} caliber.
 Figure~\ref{fig:dual_bottleneck} shows the two bottlenecks side by side.
-
-\begin{table}[t]
-  \centering
-  \caption{Experiment setup.}
-  \label{tab:table1}
-  \small
-  \begin{tabularx}{\linewidth}{@{}lX@{}}
-    \toprule
-    Parameter & Value \\
-    \midrule
-    Conditions & 4 (A / B / C / D) \\
-    Rounds per condition & 200 \\
-    Independent runs & 3 \\
-    Total rounds & 2400 \\
-    Difficulty levels & L1 (LIA, Int) / L2 (BV, BitVec) / L3 (LIA+BV+Array) \\
-    Model & DeepSeek V4 Flash (\texttt{deepseek-flash}) \\
-    Judge for A/C & LLM self-score (no formal anchor) \\
-    Judge for B/D & Z3 formal anchor \\
-    Primary metric & $\Delta_t$ (gap between system evaluation and ground truth) \\
-    Secondary metric & Valid task rate (valid / total) \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 \subsection{Composition Law}
 
@@ -263,36 +244,17 @@ chain rule
   1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{judge}})
 \]
 
-This holds to machine precision on the 2400-round data (Table~\ref{tab:table4c}).
+This holds to machine precision on the 2400-round data (Appendix~D, Table~\ref{tab:table4c_appendix}).
 
-\begin{table}[t]
+\begin{figure}[t]
   \centering
-  \caption{The composition law holds to machine precision on all four conditions
-  (2{,}400 real-API rounds). Maximum absolute error $1.11\times10^{-16}$.}
-  \label{tab:table4c}
-  \small
-  \begin{tabularx}{\linewidth}{@{}l*{6}{>{\centering\arraybackslash}X}@{}}
-    \toprule
-    Condition & $n$ & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\text{valid}}$ &
-    predicted $\Delta_t^{\text{global}}$ & observed & abs.\ error \\
-    \midrule
-    A & 600 & 0.1100 & 0.1500 & 0.2435 & 0.2435 & $5.55\times10^{-17}$ \\
-    B & 600 & 0.2450 & 0.0000 & 0.2450 & 0.2450 & $0$ \\
-    C & 600 & 0.8550 & 0.1879 & 0.8822 & 0.8823 & $1.11\times10^{-16}$ \\
-    D & 600 & 0.9050 & 0.0000 & 0.9050 & 0.9050 & $0$ \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig1_dual_bottleneck.png}
+  \includegraphics[width=0.6\textwidth]{figures/fig1_dual_bottleneck.png}
   \caption{The safe region is the intersection of two conditions: judge reliability $\tau \ge
   \tau_c$ on the $x$ axis, and generator invalid rate $\le 0.5$ on the $y$ axis. Outside that
   intersection the loop still emits logs and still reports success on the rounds it completes ---
   which is precisely why the failure is easy to miss.}
   \label{fig:dual_bottleneck}
-\end{figure*}
+\end{figure}
 
 \subsection{Two Bottlenecks}
 
@@ -301,7 +263,7 @@ Under the valid-only caliber, condition A (LLM self-score) gives $\Delta_t = 0.1
 truth, so self-score drift vanishes by construction. Under the global caliber the same conditions read
 A = 0.243 and B = 0.245, because B's 147 invalid rounds are charged $\Delta_t = 1.0$. That is a
 caliber difference, not a data inconsistency; see Appendix~\ref{app:data_consistency} and
-Table~\ref{tab:table3}.
+Figure~\ref{fig:validity_by_condition}.
 
 \begin{figure*}[t]
   \centering
@@ -312,23 +274,6 @@ Table~\ref{tab:table3}.
   \label{fig:delta_t_per_round}
 \end{figure*}
 
-\begin{table}[t]
-  \centering
-  \caption{Average $\Delta_t$ (valid-only caliber).}
-  \label{tab:table2b}
-  \small
-  \begin{tabularx}{\linewidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
-    \toprule
-    Condition & $n$ (valid) & Avg $\Delta_t$ (valid only) & Std dev & Min & Max \\
-    \midrule
-    A & 534 & 0.1500 & 0.0000 & 0.1500 & 0.1500 \\
-    B & 453 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
-    C & 87  & 0.1879 & 0.1394 & 0.1500 & 0.7000 \\
-    D & 57  & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
 The judge is not the only bottleneck. Once the population game is enabled (C and D), the controller
 pushes tasks toward L2/L3 and the teacher cannot reliably author bit-vector and array constraints:
 valid rates collapse from 89.0\% (A) and 75.5\% (B) to 14.5\% (C) and 9.5\% (D). The failures are
@@ -338,31 +283,14 @@ system believes it is solving harder problems while it spends its budget on task
 verification. The student is not at fault; every round with a valid task was solved correctly
 (Figure~\ref{fig:validity_by_condition}).
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3_validity_rate.png}
+  \includegraphics[width=0.6\textwidth]{figures/fig3_validity_rate.png}
   \caption{Overall valid-task rate per condition, collapsing from 89.0\% (A) and 75.5\% (B) to
   14.5\% (C) and 9.5\% (D). B is lower than A not because the anchor performs worse, but because Z3
   anchoring \textit{actively exposes} invalid tasks that A's permissive self-scoring hides.}
   \label{fig:validity_by_condition}
-\end{figure*}
-
-\begin{table}[t]
-  \centering
-  \caption{Valid task rate by condition.}
-  \label{tab:table3}
-  \small
-  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
-    \toprule
-    Condition & Valid & Invalid & Valid rate & Correct rate (valid subset) \\
-    \midrule
-    A & 534 & 66  & 0.8900 & 1.0000 \\
-    B & 453 & 147 & 0.7550 & 1.0000 \\
-    C & 87  & 513 & 0.1450 & 1.0000 \\
-    D & 57  & 543 & 0.0950 & 1.0000 \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
+\end{figure}
 
 \subsection{Budget Decomposition}
 
@@ -390,7 +318,9 @@ diagnosis into an accounting rule.
 \begin{table}[t]
   \centering
   \caption{Budget decomposition: the judge budget left over once the generator
-  bottleneck is accounted for, and the judge reliability it requires.}
+  bottleneck is accounted for, and the judge reliability it requires.
+  Full sweep over $\Delta_t^{\max} \in \{0.60, 0.70, 0.80\}$ in
+  Appendix~D, Table~\ref{tab:table4cbudget_full}.}
   \label{tab:table4cbudget}
   \small
   \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
@@ -402,16 +332,6 @@ diagnosis into an accounting rule.
     B & 0.2450 & 0.60 & $0.4702$ & 0.244 \\
     C & 0.8550 & 0.60 & $-1.7586$ & unreachable \\
     D & 0.9050 & 0.60 & $-3.2105$ & unreachable \\
-    \midrule
-    A & 0.1100 & 0.70 & $0.6629$ & $\ge 0$ (random suffices) \\
-    B & 0.2450 & 0.70 & $0.6026$ & $\ge 0$ (random suffices) \\
-    C & 0.8550 & 0.70 & $-1.0690$ & unreachable \\
-    D & 0.9050 & 0.70 & $-2.1579$ & unreachable \\
-    \midrule
-    A & 0.1100 & 0.80 & $0.7753$ & $\ge 0$ (random suffices) \\
-    B & 0.2450 & 0.80 & $0.7351$ & $\ge 0$ (random suffices) \\
-    C & 0.8550 & 0.80 & $-0.3793$ & unreachable \\
-    D & 0.9050 & 0.80 & $-1.1053$ & unreachable \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -427,16 +347,10 @@ This section asks a single question: given a generator that can produce candidat
 \subsection{Noise Injection Protocol}
 \label{sec:noise}
 
-We model an unreliable judge by flipping its verdict with probability $(1 - \tau)/2$, where
-$\tau \in [0, 1]$ is the judge reliability. The flip is applied symmetrically (SAT $\to$ UNSAT and
-UNSAT $\to$ SAT); error and unknown verdicts are never flipped, since they carry no truth value to
-invert. Each $(\tau, \text{condition})$ cell uses a fixed noise seed so the experiment is
-bit-for-bit reproducible. The protocol is implemented in
-\texttt{argus/z3\_anchor.py::verify\_with\_noise}.
-
-A detail that matters for Section~5.3: in this configuration \textbf{two independent judgments} are
-noised per round --- the teacher's verdict on the generated task, and the student's verdict on its
-own encoding. They are produced by separate Z3 calls and therefore flip independently.
+We model an unreliable judge by flipping each verdict with probability $p = (1-\tau)/2$,
+symmetrically for SAT and UNSAT. Two independent Z3 calls are noised per round --- the teacher's
+verdict on the generated task and the student's verdict on its encoding --- so they flip
+independently.
 
 \subsection{Empirical $\tau_c$}
 \label{sec:empirical_tau}
@@ -458,7 +372,7 @@ Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ falls
 0.30 at $\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
 downward, not a straight line, and it passes through 0.5 at $\tau = 0$ rather than through 1.0. Both
 features turn out to be diagnostic of the mechanism, as Section~5.3 shows. The detected thresholds are
-collected in Table~\ref{tab:table4}.
+$\tau_c(B) = \tau_c(D) = 0.55$ across all three calibers (combined, $\Delta_t$, correct-rate).
 
 \begin{figure}[t]
   \centering
@@ -471,21 +385,6 @@ collected in Table~\ref{tab:table4}.
   $\tau_c(B) = \tau_c(D) = 0.55$.}
   \label{fig:tau_c_curve}
 \end{figure}
-
-\begin{table}[t]
-  \centering
-  \caption{Judge reliability threshold $\tau_c$ (real API).}
-  \label{tab:table4}
-  \small
-  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
-    \toprule
-    Condition & $\tau_c$ (combined) & $\tau_c$ ($\Delta_t$ caliber) & $\tau_c$ (correct-rate caliber) & Degenerate $\tau$ values \\
-    \midrule
-    Condition B & 0.55 & 0.55 & 0.55 & (none) \\
-    Condition D & 0.55 & 0.55 & 0.55 & (none) \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 \subsection{Analytical Formula}
 \label{sec:analytical}
@@ -583,17 +482,7 @@ reliability:
 This is the practically useful form of the result: it converts a tolerance on evaluation error into
 a minimum reliability requirement for the judge, without needing to re-run the sweep. Note the
 reachability bound --- no judge reliability can hold $\Delta_t$ below 0.5, since $\Delta_t(0) = 1/2$.
-The analytical fit is overlaid in Figure~\ref{fig:analytical_fit}.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig5b_tau_c_analytical.png}
-  \caption{The closed form $\Delta_t(\tau) = (1 - \tau^2)/2$ against the observed scatter. The
-  formula has no free parameters; measured MAE over 50 rounds per $\tau$ cell is 0.0258 (B) and
-  0.0520 (D). The curve is anchored at 0.5 rather than 1.0 when $\tau = 0$, which is the binary
-  symmetry of two independent verdicts.}
-  \label{fig:analytical_fit}
-\end{figure}
+The analytical fit is overlaid in Appendix~A, Figure~\ref{fig:analytical_fit_appendix}.
 
 \subsection{Theorem 1: Judge Reliability Threshold}
 \label{sec:theorem1}
@@ -717,42 +606,22 @@ therefore replace it with a four-layer pipeline:
 \label{sec:api}
 
 We validate the constraint framework on 240 rounds (4 conditions $\times$ 3 levels $\times$ 20
-rounds) using real DeepSeek V4 Flash API. This is a capability probe rather than a full replication
-of the 2400-round baseline: the legacy comparison uses the existing 2400-round logs, while the
-framework is measured on a deliberately smaller budget because each level is requested explicitly
-rather than left to the difficulty controller. Improvement across conditions is shown in
+rounds) using real DeepSeek V4 Flash API. Improvement across conditions is shown in
 Figure~\ref{fig:improvement_comparison}.
 
 With the framework in place, valid rates under the real API are L1 = 98.8\% (79/80), L2 = 71.2\%
 (57/80), L3 = 58.8\% (47/80). The legacy teacher, by contrast, produced only a handful of L2/L3 valid
 tasks across 2400 rounds (11 and 114 respectively), because most attempts failed before a task could
-be verified at all. Because the two runs use different round budgets and different denominators, this
-compares \textbf{capability}, not rates.
+be verified at all.
 
-The first real-API run of the framework scored 100\% on L1 but only 10\% on L2. Every failure carried
-the same diagnostic: the validator tokenised constraints with a bare identifier regex, which splits
-the hexadecimal literal \texttt{0x0F} into \texttt{0} and \texttt{x0F}; the fragment was then
-rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex masks, so it was
-unaffected; L2 is bit-vector theory, where \texttt{0xFF}-style masks are the standard idiom, so the
-validator rejected essentially every well-formed task. The failure was in our own guardrail, not in
-the model.
-
-The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific)
-with placeholders before scanning, and extends the Z3 builtin whitelist (\texttt{BitVecVal},
-\texttt{BV2Int}, \texttt{LShR}, \ldots). L2 rose from 10\% to 71.2\% and L3 reached 58.8\%. Seven
-regression tests pin the behaviour.
-
-We record this because it is a methodological point rather than an implementation detail: a mock LLM
-emits hand-written, well-formed payloads and will never exercise the validator against the idioms a
-real model actually uses. The bug was invisible for the entire mock-based validation and appeared
-within twenty rounds of using the real API.
+The framework's first real-API run scored only 10\% on L2 due to a validator bug on hexadecimal
+literals; after the fix, L2 rose to 71.2\% (Appendix~\ref{app:l2_debug}).
 
 After the fix, the remaining invalid rounds are all
 \texttt{error\_code=1: LLM did not return valid JSON} --- the model produced output that could not be
 parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the
 honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a
 well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
-Validity by difficulty level is in Figure~\ref{fig:validity_by_level}.
 
 \begin{figure*}[t]
   \centering
@@ -780,19 +649,6 @@ Validity by difficulty level is in Figure~\ref{fig:validity_by_level}.
     \bottomrule
   \end{tabular}
 \end{table}
-
-% NOTE: fig3b is generated from the legacy 2400-round logs
-% (argus-workspace/full/logs/), so its caption documents the failure that
-% motivated the framework rather than the post-framework result. Table 5 carries
-% the post-framework numbers.
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig3b_validity_by_level.png}
-  \caption{Valid-task rate split by difficulty level. The invalid rate at L2/L3 exceeds 80\% in all
-  four conditions, showing that the LLM is unreliable at Z3 constraint generation from L2 upward
-  regardless of which mechanisms are enabled.}
-  \label{fig:validity_by_level}
-\end{figure*}
 
 \subsection{Statistical Validation}
 \label{sec:stat}
@@ -919,6 +775,25 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
   \label{fig:tau_c_gap}
 \end{figure*}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig5b_tau_c_analytical.png}
+  \caption{The closed form $\Delta_t(\tau) = (1 - \tau^2)/2$ against the observed scatter. The
+  formula has no free parameters; measured MAE over 50 rounds per $\tau$ cell is 0.0258 (B) and
+  0.0520 (D). The curve is anchored at 0.5 rather than 1.0 when $\tau = 0$, which is the binary
+  symmetry of two independent verdicts.}
+  \label{fig:analytical_fit_appendix}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig3b_validity_by_level.png}
+  \caption{Valid-task rate split by difficulty level. The invalid rate at L2/L3 exceeds 80\% in all
+  four conditions, showing that the LLM is unreliable at Z3 constraint generation from L2 upward
+  regardless of which mechanisms are enabled.}
+  \label{fig:validity_by_level_appendix}
+\end{figure*}
+
 \section{Theorem 1 Proof Sketch}
 
 \subsection*{Algebraic derivation of the composition law}
@@ -1043,7 +918,7 @@ system's evaluation and which plays the role of ground truth.
 \subsection{Two statistical calibers}
 \label{sec:calibers}
 
-\textbf{Caliber 1: valid-only $\Delta_t$ (Table~\ref{tab:table2b}).} The denominator is
+\textbf{Caliber 1: valid-only $\Delta_t$ (Table~\ref{tab:table2b_appendix}).} The denominator is
 \texttt{len(records[r.valid])}. Invalid rounds --- those in which teacher generation failed and no
 ground-truth label exists --- are excluded. Under this caliber A gives $\Delta_t \approx 0.15$, since
 the LLM self-score deviates from the Z3 truth on a small number of rounds, while B and D give
@@ -1063,7 +938,7 @@ the two calibers above, and Table~\ref{tab:table2c_calibers} verifies both simul
 \begin{table*}[t]
   \centering
   \caption{The same rounds under both calibers. The valid-only rows are the entries of
-  Table~\ref{tab:table2b}; the global rows additionally charge every invalid round $\Delta_t = 1.0$.}
+  Table~\ref{tab:table2b_appendix}; the global rows additionally charge every invalid round $\Delta_t = 1.0$.}
   \label{tab:table2c_calibers}
   \small
   \begin{tabular}{@{}llrr@{}}
@@ -1086,6 +961,98 @@ The paper uses \textbf{caliber 1 (valid-only)} for its main tables, and \textbf{
 when describing the pseudo-difficulty trap, where the quantity of interest is precisely how many
 rounds C and D invalidate.
 
+\subsection*{Tables moved from the main text}
+
+Three tables that previously sat in the main text are collected here, so that the body keeps only
+the two tables it reasons about directly.
+
+\begin{table*}[t]
+  \centering
+  \caption{The composition law holds to machine precision on all four conditions
+  (2{,}400 real-API rounds). Maximum absolute error $1.11\times10^{-16}$.}
+  \label{tab:table4c_appendix}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{6}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $n$ & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\text{valid}}$ &
+    predicted $\Delta_t^{\text{global}}$ & observed & abs.\ error \\
+    \midrule
+    A & 600 & 0.1100 & 0.1500 & 0.2435 & 0.2435 & $5.55\times10^{-17}$ \\
+    B & 600 & 0.2450 & 0.0000 & 0.2450 & 0.2450 & $0$ \\
+    C & 600 & 0.8550 & 0.1879 & 0.8822 & 0.8823 & $1.11\times10^{-16}$ \\
+    D & 600 & 0.9050 & 0.0000 & 0.9050 & 0.9050 & $0$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\begin{table*}[t]
+  \centering
+  \caption{Average $\Delta_t$ (valid-only caliber).}
+  \label{tab:table2b_appendix}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $n$ (valid) & Avg $\Delta_t$ (valid only) & Std dev & Min & Max \\
+    \midrule
+    A & 534 & 0.1500 & 0.0000 & 0.1500 & 0.1500 \\
+    B & 453 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    C & 87  & 0.1879 & 0.1394 & 0.1500 & 0.7000 \\
+    D & 57  & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\begin{table*}[t]
+  \centering
+  \caption{Budget decomposition over the full sweep of $\Delta_t^{\max}$: the judge budget left
+  over once the generator bottleneck is accounted for, and the judge reliability it requires. The
+  main text shows only the $\Delta_t^{\max} = 0.60$ block.}
+  \label{tab:table4cbudget_full}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    Condition & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\max}$ & judge budget
+    & required $\tau_c$ \\
+    \midrule
+    A & 0.1100 & 0.60 & $0.5506$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.60 & $0.4702$ & 0.244 \\
+    C & 0.8550 & 0.60 & $-1.7586$ & unreachable \\
+    D & 0.9050 & 0.60 & $-3.2105$ & unreachable \\
+    \midrule
+    A & 0.1100 & 0.70 & $0.6629$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.70 & $0.6026$ & $\ge 0$ (random suffices) \\
+    C & 0.8550 & 0.70 & $-1.0690$ & unreachable \\
+    D & 0.9050 & 0.70 & $-2.1579$ & unreachable \\
+    \midrule
+    A & 0.1100 & 0.80 & $0.7753$ & $\ge 0$ (random suffices) \\
+    B & 0.2450 & 0.80 & $0.7351$ & $\ge 0$ (random suffices) \\
+    C & 0.8550 & 0.80 & $-0.3793$ & unreachable \\
+    D & 0.9050 & 0.80 & $-1.1053$ & unreachable \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\section{Debugging the L2 Validator}
+\label{app:l2_debug}
+
+The framework's first real-API run scored 100\% on L1 but only 10\% on L2. Every failure carried
+the same diagnostic: the validator tokenised constraints with a bare identifier regex, which splits
+the hexadecimal literal \texttt{0x0F} into \texttt{0} and \texttt{x0F}; the fragment was then
+rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex masks, so it was
+unaffected; L2 is bit-vector theory, where \texttt{0xFF}-style masks are the standard idiom, so the
+validator rejected essentially every well-formed task. The failure was in our own guardrail, not in
+the model.
+
+The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific)
+with placeholders before scanning, and extends the Z3 builtin whitelist (\texttt{BitVecVal},
+\texttt{BV2Int}, \texttt{LShR}, \ldots). L2 rose from 10\% to 71.2\% and L3 reached 58.8\%. Seven
+regression tests pin the behaviour.
+
+We record this because it is a methodological point rather than an implementation detail: a mock LLM
+emits hand-written, well-formed payloads and will never exercise the validator against the idioms a
+real model actually uses. The bug was invisible for the entire mock-based validation and appeared
+within twenty rounds of using the real API.
+
 % ---------------------------------------------------------------------------
 % UNPLACED FLOATS
 %
@@ -1096,12 +1063,25 @@ rounds C and D invalidate.
 %   table2a_delta_t_global        global caliber (discussed in 4.2)
 %   table4b_analytical_fit        per-tau residuals (discussed in 5.3)
 %
-% NOTE: table2c_delta_t_semantics is now placed in Appendix D as
+% NOTE: table2c_delta_t_semantics is placed in Appendix D as
 % \ref{tab:table2c_sources} and \ref{tab:table2c_calibers}; that is what the
 % Section 4.2 pointer \ref{app:data_consistency} resolves to.
 %
-% NOTE: table4c is now placed in Section 4.1 as \ref{tab:table4c}, with its
-% budget-decomposition part as \ref{tab:table4cbudget} in Section 4.4.
+% Stage 3 moved four floats out of the body into the appendices, and deleted
+% two body floats:
+%   table1 (Experiment setup)   deleted; its content is now prose in Section 3
+%   table3 (valid rate)         deleted; it duplicated
+%                               \ref{fig:validity_by_condition}
+%   table4c (composition law)   -> Appendix D, \ref{tab:table4c_appendix}
+%   table2b (valid-only dt)     -> Appendix D, \ref{tab:table2b_appendix}
+%   table4cbudget               -> body keeps the 0.60 block only; the full
+%                                  sweep is Appendix D,
+%                                  \ref{tab:table4cbudget_full}
+%   table4 (tau_c)              deleted; now a sentence in Section 5.2
+%   fig5b  (analytical fit)     -> Appendix A,
+%                                  \ref{fig:analytical_fit_appendix}
+%   fig3b  (validity by level)  -> Appendix A,
+%                                  \ref{fig:validity_by_level_appendix}
 % ---------------------------------------------------------------------------
 
 \end{document}
