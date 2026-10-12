@@ -1,4 +1,6 @@
-# Dual-Bottleneck Agents
+# Dual-Bottleneck Agents（中文说明）
+
+英文主版请见 [README.md](README.md).
 
 ## 项目一句话描述
 

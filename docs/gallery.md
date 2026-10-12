@@ -1,126 +1,120 @@
-# Figure Gallery
+# Complete Figure Gallery
 
-This document presents all **11 figures** of the paper and links all **9 data tables**.
+This document shows all **11 figures** from the paper. Figure numbers below follow this gallery's
+numbering; the original filename is given in parentheses for cross-reference, together with the inline
+label used in `reports/paper_ready_final.md` where the two differ.
 
-Every image is copied from `reports/paper_data_final/` — the 300 DPI, English-labelled release versions.
-The generating code and the raw logs both ship with the repository, so every figure here can be
-regenerated offline with the commands in
-[Reproducing All Figures Offline](../README.md#reproducing-all-figures-offline-no-api-key-required).
-
-- **Core Figures** — main-text figures, 4
-- **Appendix Figures** — supporting figures, 7
-- **Data Tables** — 9
+- **Core Figures** — the four figures that carry the main argument
+- **Appendix Figures** — the seven supporting figures
+- **Data Tables** — the nine data tables
 
 ---
 
-## Core Figures
+## Core Figures (in paper main text)
 
-### fig1 — Dual-bottleneck concept (τ–C plane)
+### Figure 1 — Dual-bottleneck concept (fig1_dual_bottleneck.png · paper label: Figure 1)
 
-The system is safe only inside the **intersection** of two safe regions: judge reliability τ ≥ τ_c, and
-generator valid-task rate ≥ 0.5. Outside that intersection the loop still produces logs and still reports
-success on the rounds it can complete, which is precisely why the failure is easy to miss.
+The safe region is the intersection of two conditions: judge reliability τ ≥ τ_c, and generator
+valid-task rate ≥ 0.5. Outside that intersection the loop still emits logs and still reports success on
+the rounds it completes — which is precisely why the failure is easy to miss.
 
-![fig1 — Dual-bottleneck concept](images/fig1_dual_bottleneck.png)
+![Figure 1 — Dual-bottleneck concept](images/fig1_dual_bottleneck.png)
 
-### fig2b — Per-round Δ_t across 4 conditions
+### Figure 2 — Δ_t evolution, A vs B, per round (fig2b_delta_t_per_round.png · paper label: Figure 2b)
 
-Per-round Δ_t, one panel per condition; invalid rounds are marked with gray crosses. C/D show the
-pseudo-difficulty trap after the transition into L2, and the vertical lines mark the first round at which
-the difficulty controller raises the task level.
+Per-round Δ_t across all four conditions, one panel each; invalid rounds are marked with gray crosses,
+and vertical lines mark the first round at which the difficulty controller raises the task level.
+Conditions C and D show the pseudo-difficulty trap after the transition into L2.
 
-> Sub-view: [fig2](images/fig2_delta_t_AB.png) is the A/B subset of this figure;
-> [fig2c](images/fig2c_delta_t_L1_only.png) is the L1-phase slice.
+![Figure 2 — Per-round Δ_t](images/fig2b_delta_t_per_round.png)
 
-![fig2b — Per-round Δ_t](images/fig2b_delta_t_per_round.png)
+> Sub-views: [fig2](images/fig2_delta_t_AB.png) is the A/B subset; [fig2c](images/fig2c_delta_t_L1_only.png)
+> is the L1-phase slice.
 
-### fig3b — Valid task rate by difficulty level
+### Figure 3 — Validity by difficulty level (fig3b_validity_by_level.png · paper label: Figure 3b)
 
-Valid-task rate split by difficulty level: **the invalid rate at L2/L3 exceeds 80% in all four
+Valid-task rate split by difficulty level. The invalid rate at L2/L3 exceeds **80% in all four
 conditions**, showing that the LLM is unreliable at Z3 constraint generation from L2 upward regardless of
 which mechanisms are enabled.
 
-![fig3b — Valid task rate by difficulty level](images/fig3b_validity_by_level.png)
+![Figure 3 — Validity by difficulty level](images/fig3b_validity_by_level.png)
 
-### fig5b — Analytical fit Δ_t(τ) = (1 − τ²)/2
+> Sub-view: [fig3](images/fig3_validity_rate.png) shows the same quantity aggregated per condition
+> instead of per level.
 
-The closed form against the observed scatter. The formula has **no free parameters**; measured MAE over
-50 rounds per τ cell is **0.0258 (B) / 0.0520 (D)**. The curve is anchored at 0.5 rather than 1.0 when
-τ = 0, which is the binary symmetry of two independent verdicts.
+### Figure 4 — Analytical fit of Δ_t(τ) (fig5b_tau_c_analytical.png · paper label: Figure 5b)
 
-![fig5b — Analytical fit](images/fig5b_tau_c_analytical.png)
+The closed form Δ_t(τ) = (1 − τ²)/2 against the observed scatter. The formula has **no free parameters**;
+measured MAE over 50 rounds per τ cell is **0.0258 (B)** and **0.0520 (D)**. The curve is anchored at 0.5
+rather than 1.0 when τ = 0, which is the binary symmetry of two independent verdicts.
+
+![Figure 4 — Analytical fit](images/fig5b_tau_c_analytical.png)
+
+> Sub-view: [fig5](images/fig5_tau_c_curve_real.png) shows the measured sweep that this fit is drawn
+> against, without the closed form overlaid.
 
 ---
 
 ## Appendix Figures
 
-### fig2 — Δ_t of conditions A vs B
+### Figure A.1 — Δ_t overview, 20-round buckets (fig2_delta_t_AB.png · paper label: Figure 2)
 
-The judge-side bottleneck contrast. Under the valid-only caliber A (LLM self-score) = **0.150** and
-B (Z3 anchor) = **0.000**; under the global caliber A = **0.243** and B = **0.245**. The two pairs look
-contradictory but differ only by caliber — B's 147 of 600 invalid rounds are charged Δ_t = 1.0. See
-`reports/table2c_delta_t_semantics.md`.
+Δ_t evolution for conditions A and B, aggregated in 20-round buckets. A holds near **0.15** — a
+persistent gap between LLM self-scoring and Z3 ground truth — while B holds at **0.00**, because the
+anchor's verdict *is* the ground truth whenever a task is well-formed.
 
-> This figure is the A/B subset of [fig2b](images/fig2b_delta_t_per_round.png).
+![Figure A.1 — Δ_t A vs B](images/fig2_delta_t_AB.png)
 
-![fig2 — Δ_t A vs B](images/fig2_delta_t_AB.png)
+### Figure A.2 — C/D Δ_t in L1 phase only (fig2c_delta_t_L1_only.png · paper label: Figure 2c)
 
-### fig2c — L1-phase Δ_t (C/D vs A/B)
+Restricted to the rounds before C/D are promoted to L2. C/D's Δ_t in the L1 phase is **not** worse than
+A/B, so the population game itself does not hurt performance — C/D's later degradation comes from
+difficulty escalation, not from a defect in the mechanism.
 
-This panel uses **only the rounds before C/D are promoted to L2**. The result is that C/D's Δ_t in the L1
-phase is *not* worse than A/B — the population game itself does not hurt performance; C/D's later
-degradation comes from the difficulty escalation, not from a defect in the mechanism.
+![Figure A.2 — L1-phase Δ_t](images/fig2c_delta_t_L1_only.png)
 
-> This figure is the L1-phase slice of [fig2b](images/fig2b_delta_t_per_round.png).
+### Figure A.3 — Validity rate by condition (fig3_validity_rate.png · paper label: Figure 3)
 
-![fig2c — L1-phase Δ_t](images/fig2c_delta_t_L1_only.png)
+Overall valid-task rate per condition, collapsing from **89.0%** (A) and **75.5%** (B) to **14.5%** (C)
+and **9.5%** (D). B is lower than A not because the anchor performs worse, but because Z3 anchoring
+*actively exposes* invalid tasks that A's permissive self-scoring hides.
 
-### fig3 — Valid task rate by condition
+![Figure A.3 — Valid task rate by condition](images/fig3_validity_rate.png)
 
-Overall valid-task rate per condition: it collapses from **89.0%** (A) and **75.5%** (B) to **14.5%** (C)
-and **9.5%** (D). B being lower than A does not mean the anchor is worse — the Z3 anchor *actively
-exposes* invalid tasks, whereas A's permissive self-scoring hides them.
+### Figure A.4 — Difficulty trajectory (fig4_difficulty_trajectory.png · paper label: Figure 4)
 
-![fig3 — Valid task rate by condition](images/fig3_validity_rate.png)
+Difficulty trajectories for conditions C and D. Failures are **not** distributed evenly across difficulty
+— they cluster at the moment of escalation. Once the level is raised the teacher keeps failing while the
+controller holds the level high, so the system believes it is solving harder problems while actually
+spending its budget on unusable task proposals.
 
-### fig4 — C/D difficulty trajectories
+![Figure A.4 — C/D difficulty trajectories](images/fig4_difficulty_trajectory.png)
 
-Difficulty trajectories for conditions C and D. The key observation: failures are **not** distributed
-evenly across difficulty — they cluster at the moment of escalation. Once the level is raised the teacher
-keeps failing while the controller holds the level high, so the system believes it is solving harder
-problems while actually spending its budget on unparseable or unsatisfiable task proposals.
+### Figure A.5 — τ vs Δ_t, real API (fig5_tau_c_curve_real.png · paper label: Figure 5)
 
-![fig4 — C/D difficulty trajectories](images/fig4_difficulty_trajectory.png)
+The τ-gradient sweep on the real API: 8 τ values × 2 conditions (B/D) × 50 rounds = **800 rounds**. Under
+the within-τ degeneration criterion no τ value degenerates, so the reported τ_c = 0.55 is the **lower edge
+of the swept grid** and should be read as an upper bound, not as the system's tolerance.
 
-### fig5 — τ vs Δ_t curve with τ_c (real API)
+![Figure A.5 — τ vs Δ_t with τ_c](images/fig5_tau_c_curve_real.png)
 
-The τ-gradient sweep on the real API: 8 τ values × 2 conditions (B/D) × 50 rounds = **800 rounds**.
+### Figure A.6 — Improvement comparison (fig6_improvement_comparison_real.png · paper label: Figure 6)
 
-> **On the measured τ_c = 0.55.** Under the within-τ degeneration criterion no τ value degenerates, so
-> 0.55 is the **lower edge of the swept grid**, not a detected transition. Read it as an **upper bound**
-> on τ_c, not as the system's true tolerance.
+Before/after the four-layer constraint generation framework, 240 rounds on the real API (4 conditions ×
+3 levels × 20 rounds). Valid-task rate with the framework is **L1 = 98.8%** (79/80), **L2 = 71.2%**
+(57/80), **L3 = 58.8%** (47/80); the legacy teacher produced only 11 valid L2 and 114 valid L3 tasks
+across 2,400 rounds. Because the two runs differ in budget and denominator, this compares capability, not
+rates.
 
-![fig5 — τ vs Δ_t with τ_c](images/fig5_tau_c_curve_real.png)
+![Figure A.6 — Improvement comparison](images/fig6_improvement_comparison_real.png)
 
-### fig6 — Improvement comparison (real API)
+### Figure A.7 — τ_c gap analysis (fig7_tau_c_gap.png · paper label: Figure 7)
 
-Before/after the four-layer constraint generation framework (240 rounds on the real API: 4 conditions ×
-3 levels × 20 rounds). With the framework in place the valid-task rate is **L1 = 98.8% (79/80),
-L2 = 71.2% (57/80), L3 = 58.8% (47/80)**. The legacy teacher produced only 11 valid L2 and 114 valid L3
-tasks across 2,400 rounds. Because the two runs use different round budgets and different denominators,
-this figure compares **capability**, not rates.
-
-![fig6 — Improvement comparison](images/fig6_improvement_comparison_real.png)
-
-### fig7 — τ_c gap: hypothesis audit
-
-Early mock data reported a gap of τ_c(B) = 0.55 versus τ_c(D) = 0.90; the real API does not reproduce it
+Early mock data reported τ_c(B) = 0.55 versus τ_c(D) = 0.90; the real API does not reproduce that gap
 (both are **0.55**). The left panel compares the difficulty distributions of B and D, the right panel
-places the mock and real τ_c side by side. Conclusion: **the original hypothesis τ_c(D) > τ_c(B) is not
-supported** — the mock gap came from deterministic task content collapsing Δ_t into a {0, 1} sequence,
-not from a real mechanistic difference.
+places the mock and real τ_c side by side. The original hypothesis τ_c(D) > τ_c(B) is **not supported**.
 
-![fig7 — τ_c gap](images/fig7_tau_c_gap.png)
+![Figure A.7 — τ_c gap](images/fig7_tau_c_gap.png)
 
 ---
 
@@ -140,13 +134,10 @@ not from a real mechanistic difference.
 
 ---
 
-## A Note on Figure Naming
+## Regenerating These Figures
 
-A letter suffix marks a variant within the same family, not a revised edition:
+Every figure here is rebuilt from the raw logs already in the repository, with no API calls, by the
+commands in [Reproducing All Figures Offline](../README.md#reproducing-all-figures-offline-no-api-key-required).
 
-- `fig2` / `fig2b` / `fig2c` are three views of Δ_t (A-vs-B contrast / per-round across 4 conditions /
-  L1 phase only)
-- `fig3` / `fig3b` are two facets of valid-task rate (by condition / by difficulty level)
-- `fig5` / `fig5b` are the measured curve and the analytical fit respectively
-
-Some figures from earlier versions are deprecated; the mapping is in [`DEPRECATED.md`](../DEPRECATED.md).
+*Note: Figure numbers are synchronized with the submitted paper. If the paper is updated, this gallery
+will be updated accordingly.*
