@@ -210,6 +210,7 @@ dual-bottleneck-agents/
 ├── argus-workspace/          # 实验数据（论文用，随仓库发布）
 ├── logs/                     # 实验数据（Section 5）
 ├── reports/                  # 图表、数据表、报告
+├── docs/                     # 公开文档（图库 + 架构说明）
 ├── constitution/             # 12 核心规则 JSON
 ├── config.yaml.example       # 配置模板
 ├── requirements.txt
@@ -250,8 +251,8 @@ dual-bottleneck-agents/
 
 **四条件设计**：A = 无锚定无种群；B = 仅 Z3 锚定；C = 仅种群博弈；D = 全开。
 
-> 上表即完整的五层架构说明。开发期的架构图与设计文档（含「设计蓝图 vs 实际实现」对照表，
-> 以及初版设计里规划了但没有落地的功能清单）属于开发内部资料，**未随仓库发布**；需要时请向作者索取。
+> 完整架构说明见 [`docs/architecture.html`](docs/architecture.html)（浏览器直接打开），
+> 内含 **「设计蓝图 vs 实际实现」对照表**，以及初版设计里规划了但**没有落地**的功能清单。
 
 ---
 

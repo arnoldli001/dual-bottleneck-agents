@@ -118,7 +118,11 @@ Which log maps to which paper section:
       improved_real_run1_hexbug/  Hex-literal defect evidence (49 rounds)
       smoke_real/         Early smoke test (80 rounds)
     reports/            Paper figures, data tables, and analysis
-    docs/               README figures and the complete gallery
+    docs/               README figures, the full gallery, and the architecture note
+
+See [`docs/architecture.html`](docs/architecture.html) for a walkthrough of the five-layer architecture,
+including a design-blueprint-vs-actual-implementation comparison and a list of planned features that were
+never built. (That document is in Chinese.)
 
 ## Reproducibility
 
