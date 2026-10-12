@@ -2,6 +2,8 @@
 
 英文主版请见 [README.md](README.md).
 
+论文标题：**《双重瓶颈：自进化智能体中裁判可靠度与生成器能力的组合定律》**
+
 ## 项目一句话描述
 
 我做的方向是：当用来判断"这个任务有没有做对"的裁判本身不可靠时，一个自进化的智能体会在什么临界点上停止变好。我把它做成了一个能跑的实验，代码和数据都在这个仓库里。
@@ -53,6 +55,7 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 
 该式在 2400 轮四条件数据上成立到**机器精度（1.11e-16）**。
 两个瓶颈**共享同一个 Δ_t 预算** —— 这是双重瓶颈框架的定量形式。
+等价于乘形式：1 − Δ_t^global = (1 − Δ_t^gen)(1 − Δ_t^valid)。
 
 ### 1.2 裁判噪声的解析形式
 
@@ -102,7 +105,7 @@ pytest tests/ -q
 
 ### 2.3 完整图表与数据
 
-全部 11 张图 + 9 张数据表在 [docs/gallery.md](docs/gallery.md)。
+全部 12 张图 + 9 张数据表在 [docs/gallery.md](docs/gallery.md)。
 
 ### 2.4 离线复现全部图表（**不需要 API key**）
 
@@ -296,6 +299,20 @@ dual-bottleneck-agents/
    真实能力边界；框架能保证合法骨架被正确渲染，但无法保证模型产出合法骨架
 5. **Mock 与真实 API 行为差异大** —— mock 无法暴露框架缺陷
    （`0x0F` 字面量缺陷即为实例，见 `reports/verification_v2.md` §3.5）
+
+---
+
+## 引用
+
+如果这项工作对你有帮助，请引用：
+
+    @article{dual_bottleneck_2026,
+      title  = {The Dual Bottleneck: A Composition Law for Judge Reliability
+                and Generator Capability in Self-Evolving Agents},
+      author = {[Your Name]},
+      year   = {2026},
+      note   = {Code available at github.com/arnoldli001/dual-bottleneck-agents}
+    }
 
 ---
 

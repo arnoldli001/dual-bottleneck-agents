@@ -71,6 +71,10 @@ Thumbs.db
 # 从 文档/ 拆分而来：论文写作需要，但不作为开源内容发布。
 paper_notes/
 
+# LaTeX 论文源码（paper/main.tex、refs.bib、checklist.tex、figures/）
+# NeurIPS 双盲期间不入库：源码与仓库绑定会泄露作者身份。
+paper/
+
 # 归档脚本（目录尚不存在，预留规则）
 archive/deprecated_scripts/
 

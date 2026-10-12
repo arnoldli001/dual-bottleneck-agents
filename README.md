@@ -1,8 +1,8 @@
 # Dual-Bottleneck Agents
 
-Code and experimental data for the study *The Dual Bottleneck: Judge Reliability and Generator
-Capability in Self-Evolving Agents*. The internal project codename is **ARGUS**; the Python package
-under `argus/` retains this name.
+Code and experimental data for the study *The Dual Bottleneck: A Composition Law for Judge
+Reliability and Generator Capability in Self-Evolving Agents*. The internal project codename is
+**ARGUS**; the Python package under `argus/` retains this name.
 
 ![Dual Bottleneck Concept](docs/images/fig1_dual_bottleneck.png)
 
@@ -54,6 +54,10 @@ Empirically verified to 1.11e-16 precision (machine epsilon) on the combined exp
 This means the two bottlenecks do not merely co-exist — they compose multiplicatively in the "survival"
 of correct signals. A system must address both to reach Δ_t ≈ 0.
 
+This is equivalent to the multiplicative form:
+
+    1 − Δ_t^global = (1 − Δ_t^gen)(1 − Δ_t^valid).
+
 ## Reproducing All Figures Offline (no API key required)
 
 The repository contains the raw logs used in the paper. The following commands read them directly and
@@ -89,7 +93,7 @@ regenerate every figure and data table:
 
 ## Complete Figure Gallery
 
-All 11 figures (4 core + 7 appendix) are in [docs/gallery.md](docs/gallery.md).
+All 12 figures (8 main text + 4 appendix) are in [docs/gallery.md](docs/gallery.md).
 
 ## Data Layout
 
@@ -156,8 +160,8 @@ provide your own `DEEPSEEK_API_KEY` via an environment variable and run
 If you find this work useful, please cite:
 
     @article{dual_bottleneck_2026,
-      title  = {The Dual Bottleneck: Judge Reliability and Generator
-                Capability in Self-Evolving Agents},
+      title  = {The Dual Bottleneck: A Composition Law for Judge Reliability
+                and Generator Capability in Self-Evolving Agents},
       author = {[Your Name]},
       year   = {2026},
       note   = {Code available at github.com/arnoldli001/dual-bottleneck-agents}
