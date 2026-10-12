@@ -52,11 +52,14 @@ def render_fig3b(records: list[dict], out_png: Path) -> None:
     # 计算每个 (cond, level) 的 valid_rate（含非该 level 的 invalid 计入分母）
     # 这里 "含 invalid" = 全部 invalid 都在 L1 路径上（C/D 大部分 invalid 在 L1）
     # 论文需求："L1 valid 率 > 75%，L2/L3 < 15%" —— 用 level 所属记录数当分母
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(4.8, 4.00))
     width = 0.18
     x = list(range(len(levels)))
+    # One slot per condition. The original built this list but then indexed
+    # offsets[0] for every condition, so all four bars landed on the same x
+    # and the grouping was invisible.
+    offsets = [-1.5 * width + i * width for i in range(len(conds))]
     for i, cond in enumerate(conds):
-        offsets = [-1.5 * width + i * width for _ in x]
         vals = []
         for lv in levels:
             int_lv = int(lv)
@@ -68,31 +71,48 @@ def render_fig3b(records: list[dict], out_png: Path) -> None:
                 tot += table.get((cond, "invalid"), {}).get("invalid", 0)
             rate = v / tot * 100 if tot else 0.0
             vals.append(rate)
-        bars = ax.bar([xi + offsets[0] for xi in x], vals, width,
-                       color=colors[cond], label=f"Condition {cond}")
+        bars = ax.bar([xi + offsets[i] for xi in x], vals, width,
+                      color=colors[cond], label=f"Condition {cond}")
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2, h + 2,
-                    f"{h:.1f}%", ha="center", va="bottom",
-                    fontsize=8, color=colors[cond])
+            # Rotated 90 deg and placed inside the tall bars: twelve horizontal
+            # labels cannot fit side by side at 14.4pt once the figure is
+            # reduced to 60% width.
+            inside = h > 25
+            ax.text(bar.get_x() + bar.get_width() / 2,
+                    h / 2 if inside else h + 2,
+                    f"{h:.1f}%", ha="center",
+                    va="center" if inside else "bottom", rotation=90,
+                    fontsize=14.4, color="white" if inside else colors[cond])
 
     ax.set_xticks(x)
     ax.set_xticklabels(["L1", "L2", "L3"])
-    ax.set_xlabel("Difficulty Level")
-    ax.set_ylabel("Valid Task Rate (%)")
-    ax.set_title("Validity Rate by Difficulty Level — pseudo-difficulty trap visible in L2/L3")
-    ax.legend(loc="upper right", fontsize=10)
-    ax.set_ylim(0, 115)
+    ax.set_xlabel("Difficulty Level", fontsize=14.4)
+    ax.set_ylabel("Valid Task Rate (%)", fontsize=14.4)
+    ax.set_title("Validity Rate by Difficulty Level\n"
+                 "pseudo-difficulty trap\n"
+                 "visible in L2/L3", fontsize=16.8)
+    ax.tick_params(labelsize=14.4)
+    ax.set_ylim(0, 150)
+    ax.set_xlim(-0.55, 2.55)
     ax.grid(True, alpha=0.3, axis="y")
     # 关键注释
-    ax.axhline(75, color="#006600", linestyle=":", alpha=0.5,
-                label="L1 target ≥75%")
-    ax.axhline(15, color="#aa0000", linestyle=":", alpha=0.5,
-                label="L2/L3 target ≤15%")
-    ax.text(0.5, 90, "L1: high validity\n(simple LIA, LLM succeeds)",
-             ha="center", fontsize=10, color="#006600")
-    ax.text(1.5, 30, "L2/L3: very low validity\n(BV/Array fail ~85-100%)",
-             ha="center", fontsize=10, color="#aa0000")
+    ax.axhline(75, color="#006600", linestyle=":", alpha=0.6,
+               label="L1 ≥75%")
+    ax.axhline(15, color="#aa0000", linestyle=":", alpha=0.6,
+               label="L2/L3 ≤15%")
+    ax.text(0.10, 0.56, "L1: high validity\n(simple LIA, LLM succeeds)",
+            transform=ax.transAxes, ha="left", va="center",
+            fontsize=14.4, color="#006600",
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
+    ax.text(0.98, 0.20, "L2/L3: very low validity\n(BV/Array fail ~85-100%)",
+            transform=ax.transAxes, ha="right", va="center",
+            fontsize=14.4, color="#aa0000",
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
+    # Legend inside the axes so it costs neither width nor height.
+    ax.legend(loc="upper left", bbox_to_anchor=(0.0, 1.0), ncol=2,
+              fontsize=14.4, framealpha=0.95, borderaxespad=0.15,
+              columnspacing=1.0, handletextpad=0.5)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")

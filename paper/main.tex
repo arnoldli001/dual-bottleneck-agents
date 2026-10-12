@@ -52,7 +52,7 @@
 % ---------------------------------------------------------------------------
 \title{The Dual Bottleneck: A Composition Law for Judge Reliability and
 Generator Capability in Self-Evolving Agents}
-\author{[Author Name]\\[2pt]\small [Affiliation]}
+\author{Hao Li\\[2pt]\small Independent Researcher\\[2pt]\small \texttt{lihao9108@outlook.com}}
 \date{\today}
 % ---------------------------------------------------------------------------
 
@@ -63,10 +63,6 @@ Generator Capability in Self-Evolving Agents}
 \setlength{\belowdisplayshortskip}{3pt plus 1pt minus 1pt}
 
 \begin{document}
-
-% Diagnostic only -- prints the real column geometry to the compile log.
-% Remove once the values are recorded.
-\typeout{PROBE textwidth=\the\textwidth columnwidth=\the\columnwidth linewidth=\the\linewidth}
 
 \maketitle
 
@@ -80,10 +76,10 @@ predominantly focuses on the judge (the evaluator providing feedback), assuming 
 judges suffice. Through 2,400 controlled experiments on Z3 constraint-solving tasks, we uncover a
 second, equally critical bottleneck: the generator (the LLM authoring new tasks). We formalize the
 Dual Bottleneck as a composition law on error budgets:
-$1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{valid}})$, verified
+$1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})$, verified
 to machine precision (1.11e-16) on 2,400 real-API rounds. The law implies that the generator and
-judge bottlenecks share one budget: a condition with large $\Delta_t^{\text{gen}}$ needs a more
-reliable judge for the same overall tolerance, and if $\Delta_t^{\text{gen}}$ alone exceeds the
+judge bottlenecks share one budget: a condition with large $\Delta_t^{\mathrm{gen}}$ needs a more
+reliable judge for the same overall tolerance, and if $\Delta_t^{\mathrm{gen}}$ alone exceeds the
 budget, no judge reliability can compensate. We empirically measure $\tau_c \approx 0.55$ on Level 1
 tasks using real DeepSeek V4 Flash API, and derive the parameter-free formula
 $\tau_c = \sqrt{1-2\Delta_t^{\max}}$. We identify a pseudo-difficulty trap: when the difficulty
@@ -174,8 +170,9 @@ $\Delta_t^{\max}$, the required judge reliability is $\tau_c = \sqrt{1 - 2\Delta
 form with no free parameters. And because the two bottlenecks share one budget, the generator's error
 $\Delta_t^{\mathrm{gen}}$ is charged first: if $\Delta_t^{\mathrm{gen}} \ge \Delta_t^{\max}$, no judge
 reliability can rescue the loop. In our own system, the generator bottleneck consumed the entire
-budget at L2/L3 ($\Delta_t^{\mathrm{gen}} \approx 0.9$), which is why no judge reliability above 0.55
-could have helped before the four-layer constraint framework restored generator validity.
+budget ($\Delta_t^{\mathrm{gen}} = 0.855$ for C and $0.905$ for D, driven by failures at the
+L1$\to$L2 transition), which is why no judge reliability above 0.55 could have helped before the
+four-layer constraint framework restored generator validity.
 
 % ===========================================================================
 % 2. RELATED WORK -- title only
@@ -212,24 +209,20 @@ corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the syste
 invalid tasks and the effective evolution rate approaches zero.
 
 We ran 4 conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 runs = 2400 rounds on DeepSeek V4
-Flash. Difficulty spans L1 (linear integer arithmetic, $\le$10 Int vars), L2 (bit-vectors, $\le$20
-vars), and L3 (mixed LIA+BV+Array, $\le$30 vars). Primary metric is $\Delta_t$; secondary metric is
-valid task rate.
+Flash (\texttt{deepseek-flash}). Difficulty spans L1 (linear integer arithmetic, $\le$10 Int vars),
+L2 (bit-vectors, $\le$20 vars), and L3 (mixed LIA+BV+Array, $\le$30 vars). Primary metric is
+$\Delta_t$; secondary metric is valid task rate.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
 % ===========================================================================
 \section{The Dual Bottleneck Framework}
 
-We ran 4 system conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 independent runs = 2400 rounds
-using DeepSeek V4 Flash (\texttt{deepseek-flash}). Conditions differ in which architectural mechanisms
-are enabled: A has neither formal anchoring nor population game; B enables Z3 formal anchoring only;
-C enables the population game only; D enables all mechanisms (anchoring + population + distillation +
-round-table consensus). Difficulty spans three levels: L1 (linear integer arithmetic, $\le$10 Int
-variables), L2 (bit-vectors, $\le$20 variables), and L3 (mixed LIA + BV + Array, $\le$30 variables).
-The primary metric is $\Delta_t$, the gap between the system's own evaluation and the ground truth.
-Invalid rounds --- where the teacher fails to produce a solvable constraint set --- are encoded as
-$\Delta_t = 1.0$ under the \textit{global} caliber and excluded under the \textit{valid-only} caliber.
+Conditions differ in which architectural mechanisms are enabled: A has neither formal anchoring nor
+population game; B enables Z3 formal anchoring only; C enables the population game only; D enables all
+mechanisms (anchoring + population + distillation + round-table consensus). Invalid rounds --- where
+the teacher fails to produce a solvable constraint set --- are encoded as $\Delta_t = 1.0$ under the
+\textit{global} caliber and excluded under the \textit{valid-only} caliber.
 Figure~\ref{fig:bottleneck_and_validity} shows the two bottlenecks side by side.
 
 \subsection{Composition Law}
@@ -247,7 +240,7 @@ round succeeds only if a valid task exists \textit{and} the student judges it co
 chain rule
 
 \[
-  1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{judge}})
+  1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
 \]
 
 This holds to machine precision on the 2400-round data (Appendix~D, Table~\ref{tab:table4c_appendix}).
@@ -292,20 +285,20 @@ The two bottlenecks therefore \textbf{share one budget}. Given a tolerated globa
 $\Delta_t^{\max}$, the amount left for judge noise is
 
 \[
-  \Delta_{\text{judge}}^{\text{budget}} = 1 - \frac{1-\Delta_t^{\max}}{1-\Delta_t^{\text{gen}}}
+  \Delta_{\mathrm{judge}}^{\mathrm{budget}} = 1 - \frac{1-\Delta_t^{\max}}{1-\Delta_t^{\mathrm{gen}}}
   \qquad\Longrightarrow\qquad
-  \tau_c = \sqrt{1 - 2\,\Delta_{\text{judge}}^{\text{budget}}}
+  \tau_c = \sqrt{1 - 2\,\Delta_{\mathrm{judge}}^{\mathrm{budget}}}
 \]
 
 $\tau_c$ is thus not an intrinsic property of a condition's mechanisms --- it is \textbf{derived}
 from how much of the budget the generator bottleneck leaves over. A condition with a large
-$\Delta_t^{\text{gen}}$ needs a more reliable judge for the same overall tolerance, but the driver is
+$\Delta_t^{\mathrm{gen}}$ needs a more reliable judge for the same overall tolerance, but the driver is
 the budget split, not $\tau_c$ itself.
 
-Concretely, at $\Delta_t^{\max} = 0.60$: condition B ($\Delta_t^{\text{gen}} = 0.245$) requires
-$\tau_c \approx 0.24$, while C and D ($\Delta_t^{\text{gen}} = 0.855$ and $0.905$) cannot meet the
+Concretely, at $\Delta_t^{\max} = 0.60$: condition B ($\Delta_t^{\mathrm{gen}} = 0.245$) requires
+$\tau_c \approx 0.24$, while C and D ($\Delta_t^{\mathrm{gen}} = 0.855$ and $0.905$) cannot meet the
 budget at \textbf{any} judge reliability, because their generator bottleneck alone already exceeds
-it. That is the correct form of the Q4 intuition, and it turns the dual-bottleneck framework from a
+it. That is the correct form of the budget intuition, and it turns the dual-bottleneck framework from a
 diagnosis into an accounting rule.
 
 % ===========================================================================
@@ -336,8 +329,8 @@ Figure~\ref{fig:tau_c_curve_appendix}.
 An earlier mock-LLM gap of $\tau_c(D) = 0.90$ vs $\tau_c(B) = 0.55$ did not reproduce under L1
 isolation; pinning the difficulty removes exactly the mechanism the hypothesis invoked.
 
-Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ falls monotonically from
-0.30 at $\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
+Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ declines from 0.30 at
+$\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
 downward, not a straight line, and it passes through 0.5 at $\tau = 0$ rather than through 1.0. Both
 features turn out to be diagnostic of the mechanism, as Section~5.3 shows. The detected thresholds are
 $\tau_c(B) = \tau_c(D) = 0.55$ across all three calibers (combined, $\Delta_t$, correct-rate).
@@ -608,7 +601,7 @@ reducing invalid rounds is what the framework claims to do.
 The formula implies that ``reliable enough'' is not an absolute property. A 55\%-reliable judge
 suffices for a system with $\Delta_t^{\max} = 0.35$. This reframes judge scarcity: the practical
 question is not ``can we find a perfect judge?'' but ``what tolerance $\Delta_t^{\max}$ can the
-system afford given its generator's $\Delta_t^{\text{gen}}$?''
+system afford given its generator's $\Delta_t^{\mathrm{gen}}$?''
 
 We derive three concrete pre-deployment checks. (1) Measure the generator's error
 $\Delta_t^{\mathrm{gen}}$ at the highest difficulty the controller is allowed to request. If
@@ -616,9 +609,9 @@ $\Delta_t^{\mathrm{gen}} \ge \Delta_t^{\max}$, the generator is the bottleneck; 
 wasted effort. (2) Measure the judge's error on a held-out set of valid tasks; this gives $\tau$
 directly. (3) Plug both into $\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$ and compare with the measured
 $\tau$. If $\tau < \tau_c$, expect monotone drift; if $\tau \ge \tau_c$, expect stable or improving
-behavior. In our case, the L1 sweep returned $\tau = \tau_c = 0.55$, and the L2/L3 regime returned
-$\Delta_t^{\mathrm{gen}} \approx 0.9 > \Delta_t^{\max} = 0.6$, correctly predicting the
-pseudo-difficulty trap before it was observed in the full 2{,}400-round run.
+behavior. In our case, the L1 sweep returned $\tau = \tau_c = 0.55$, while the full 2,400-round run
+returned $\Delta_t^{\mathrm{gen}} = 0.855$ (C) and $0.905$ (D), both exceeding $\Delta_t^{\max} = 0.6$
+--- which is the pseudo-difficulty trap.
 
 The composition law also suggests an architectural direction: self-evolving systems should expose
 $\Delta_t^{\mathrm{gen}}$ and $\tau$ as first-class telemetry, gating difficulty escalation on
@@ -714,9 +707,10 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig3b_validity_by_level.png}
-  \caption{Valid-task rate split by difficulty level. The invalid rate at L2/L3 exceeds 80\% in all
-  four conditions, showing that the LLM is unreliable at Z3 constraint generation from L2 upward
-  regardless of which mechanisms are enabled.}
+  \caption{Valid-task rate by difficulty level. Every round that reached L2/L3 produced a valid
+  task: the 85.5\% and 90.5\% invalid rates of C and D occur \textit{before} level assignment,
+  because the teacher fails at the L1$\to$L2 transition while the controller holds the level high.
+  This is the pseudo-difficulty trap.}
   \label{fig:validity_by_level_appendix}
 \end{figure*}
 
@@ -756,7 +750,7 @@ round, $0$ otherwise. Then $S = G \cdot V$. By independence:
   \mathbb{E}[S] = \mathbb{E}[G] \cdot \mathbb{E}[V]
 \]
 \[
-  1 - \Delta_t^{\text{global}} = (1 - \Delta_t^{\text{gen}})(1 - \Delta_t^{\text{valid}})
+  1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
 \]
 
 \section{Rejected Alternative Model}
@@ -921,8 +915,8 @@ the two tables it reasons about directly.
   \small
   \begin{tabularx}{\textwidth}{@{}l*{6}{>{\centering\arraybackslash}X}@{}}
     \toprule
-    Condition & $n$ & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\text{valid}}$ &
-    predicted $\Delta_t^{\text{global}}$ & observed & abs.\ error \\
+    Condition & $n$ & $\Delta_t^{\mathrm{gen}}$ & $\Delta_t^{\mathrm{valid}}$ &
+    predicted $\Delta_t^{\mathrm{global}}$ & observed & abs.\ error \\
     \midrule
     A & 600 & 0.1100 & 0.1500 & 0.2435 & 0.2435 & $5.55\times10^{-17}$ \\
     B & 600 & 0.2450 & 0.0000 & 0.2450 & 0.2450 & $0$ \\
@@ -958,7 +952,7 @@ the two tables it reasons about directly.
   \small
   \begin{tabularx}{\textwidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
     \toprule
-    Condition & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\max}$ & judge budget
+    Condition & $\Delta_t^{\mathrm{gen}}$ & $\Delta_t^{\max}$ & judge budget
     & required $\tau_c$ \\
     \midrule
     A & 0.1100 & 0.60 & $0.5506$ & $\ge 0$ (random suffices) \\

@@ -78,10 +78,15 @@ paper_notes/
 # refs.bib 自 2026-10-13 起入库：已逐条核实 10 条文献全部为第三方工作、
 #   不含任何自引，双盲理由不成立；且 main.tex 里写着 \bibliography{refs}，
 #   只提交 main.tex 会让克隆者拿到一个无法编译的论文。
-# checklist.tex / figures/ 仍排除。
+# figures/ 自 2026-10-13 起入库：main.tex 引用 figures/*.png，但仓库里原本
+#   一张图都没有，克隆者无法编译。注意必须先放行目录本身，否则其中的文件
+#   无法再被 `!` 重新包含。
+# checklist.tex 仍排除。
 paper/*
 !paper/main.tex
 !paper/refs.bib
+!paper/figures/
+!paper/figures/*.png
 
 # 归档脚本（目录尚不存在，预留规则）
 archive/deprecated_scripts/

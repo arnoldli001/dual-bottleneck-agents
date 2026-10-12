@@ -176,17 +176,17 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
         import matplotlib.pyplot as plt
         plt.rcParams.update({
             "font.family": "DejaVu Sans",
-            "axes.titlesize": 14,
-            "axes.labelsize": 12,
-            "xtick.labelsize": 10,
-            "ytick.labelsize": 10,
-            "legend.fontsize": 10,
+            "axes.titlesize": 16.8,
+            "axes.labelsize": 14.4,
+            "xtick.labelsize": 14.4,
+            "ytick.labelsize": 14.4,
+            "legend.fontsize": 14.4,
         })
     except ImportError:
         print("matplotlib not available, skip fig5b")
         return
 
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(5, 4.28))
 
     # 理论曲线（细密采样）
     taus_fine = [0.50 + 0.0025 * i for i in range(201)]   # 0.50 .. 1.00
@@ -214,9 +214,11 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
 
     ax.set_xlabel(r"Judge reliability $\tau$")
     ax.set_ylabel(r"$\Delta_t$")
-    ax.set_title("Analytical fit of the noise-induced error floor\n"
-                 r"($\Delta_t(\tau)=(1-\tau^2)/2$, no fitted parameters)")
-    ax.legend(loc="upper right", fontsize=10)
+    ax.set_title("Analytical fit of the\n"
+                 "noise-induced error floor\n"
+                 r"($\Delta_t(\tau)=(1-\tau^2)/2$," "\n"
+                 "no fitted parameters)", fontsize=16.8)
+    ax.legend(loc="upper right", fontsize=14.4)
     ax.grid(True, alpha=0.3)
     ax.set_xlim(0.52, 1.02)
     ax.set_ylim(-0.02, 0.42)
@@ -229,7 +231,7 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
         f"RMSE(D) = {rmse['D']:.4f}\n"
         f"data: {mode}",
         xy=(0.035, 0.045), xycoords="axes fraction",
-        fontsize=10, color="#003366", ha="left", va="bottom",
+        fontsize=14.4, color="#003366", ha="left", va="bottom",
         bbox=dict(boxstyle="round", facecolor="#eef4fb", alpha=0.95),
     )
 

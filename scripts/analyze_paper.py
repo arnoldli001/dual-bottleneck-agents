@@ -1,4 +1,4 @@
-﻿"""ARGUS 论文级图表生成器：从已有 JSONL 日志提取数据，生成 6 张图 + 5 张表 + paper_ready.md。
+"""ARGUS 论文级图表生成器：从已有 JSONL 日志提取数据，生成 6 张图 + 5 张表 + paper_ready.md。
 
 输入数据：
 - ``argus-workspace/full/logs/{{condition}}_r{{run}}/{{condition}}/round_*.jsonl``
@@ -332,7 +332,7 @@ def fig1_dual_bottleneck(out_png: Path,
     plt = _setup_matplotlib()
     if plt is None:
         return False
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(4.5, 3.5))
     # 横轴: τ（裁判可靠度），纵轴: C（生成器能力指数；这里映射为"生成器 invalid 率"）
     tau = [0.5, 1.0]
     cap = [0.0, 1.0]
@@ -352,23 +352,26 @@ def fig1_dual_bottleneck(out_png: Path,
                                                 edgecolor="#cc9933")
     ax.add_patch(gen_low)
     ax.text(0.85, 0.15, "Safe Zone\n(formal anchor\nsustains evolution)",
-            ha="center", va="center", fontsize=11, color="#003366")
-    ax.text(0.35, 0.5, "Judge-Noise\nCollapse\n(τ ↓ → Δ_t ↑)",
-            ha="center", va="center", fontsize=11, color="#660000")
+            ha="center", va="center", fontsize=14.4, color="#003366")
+    # Kept inside xlim: at 0.35 this label sat outside the axes and collided
+    # with the y-axis label once the figure was reduced to 60% width.
+    ax.text(0.6, 0.55, "Judge-Noise\nCollapse\n(τ ↓ → Δ_t ↑)",
+            ha="center", va="center", fontsize=14.4, color="#660000")
     ax.text(0.85, 0.65, "Generation\nBottleneck\n(LLM can't author\nL2+ tasks)",
-            ha="center", va="center", fontsize=11, color="#664400")
+            ha="center", va="center", fontsize=14.4, color="#664400")
     # 箭头标签
-    ax.annotate("τ ↓", xy=(0.35, 0.95), fontsize=14, color="#cc3333", ha="center")
-    ax.annotate("τ ↑", xy=(0.85, 0.95), fontsize=14, color="#3366cc", ha="center")
+    ax.annotate("τ ↓", xy=(0.6, 0.95), fontsize=16.8, color="#cc3333", ha="center")
+    ax.annotate("τ ↑", xy=(0.85, 0.95), fontsize=16.8, color="#3366cc", ha="center")
     if tau_c_b is not None and tau_c_d is not None:
         ax.axvline(min(tau_c_b, tau_c_d), color="purple", linestyle="--", alpha=0.7,
                    label=f"τ_c ≈ {min(tau_c_b, tau_c_d):.2f}")
-        ax.legend(loc="upper right")
+        ax.legend(loc="upper right", fontsize=14.4)
     ax.set_xlim(0.5, 1.0)
     ax.set_ylim(0.0, 1.0)
-    ax.set_xlabel("Judge Reliability τ", fontsize=12)
-    ax.set_ylabel("Invalid Rate", fontsize=12)
-    ax.set_title("ARGUS Dual-Bottleneck Diagram", fontsize=14)
+    ax.set_xlabel("Judge Reliability τ", fontsize=14.4)
+    ax.set_ylabel("Invalid Rate", fontsize=14.4)
+    ax.set_title("ARGUS Dual-Bottleneck Diagram", fontsize=16.8)
+    ax.tick_params(labelsize=14.4)
     ax.grid(True, alpha=0.2)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -418,7 +421,7 @@ def fig3_validity_rate(records: list[dict], out_png: Path) -> bool:
     plt = _setup_matplotlib()
     if plt is None:
         return False
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(4.7, 2.66))
     conds = ["A", "B", "C", "D"]
     valid_rates = []
     invalid_rates = []
@@ -437,16 +440,19 @@ def fig3_validity_rate(records: list[dict], out_png: Path) -> bool:
     ax.bar(x, invalid_rates, bottom=valid_rates, label="Invalid", color="#c44033")
     for i, cond in enumerate(conds):
         ax.text(i, valid_rates[i] / 2, f"{valid_rates[i]*100:.1f}%",
-                ha="center", va="center", color="white", fontweight="bold")
+                ha="center", va="center", color="white", fontweight="bold", fontsize=14.4)
         ax.text(i, valid_rates[i] + invalid_rates[i] / 2, f"{invalid_rates[i]*100:.1f}%",
-                ha="center", va="center", color="white", fontweight="bold")
+                ha="center", va="center", color="white", fontweight="bold", fontsize=14.4)
     ax.set_xticks(x)
     ax.set_xticklabels(conds)
-    ax.set_xlabel("Condition")
-    ax.set_ylabel("Ratio")
-    ax.set_title("Valid Task Rate by Condition — generation-side bottleneck emerges in C/D")
-    ax.legend(loc="upper right")
-    ax.set_ylim(0, 1.05)
+    ax.set_xlabel("Condition", fontsize=14.4)
+    ax.set_ylabel("Ratio", fontsize=14.4)
+    ax.set_title("Valid Task Rate by Condition\n"
+                 "generation-side bottleneck\n"
+                 "emerges in C/D", fontsize=16.8)
+    ax.tick_params(labelsize=14.4)
+    ax.legend(loc="upper center", ncol=2, fontsize=14.4, framealpha=0.95)
+    ax.set_ylim(0, 2.00)
     ax.grid(True, alpha=0.3, axis="y")
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
