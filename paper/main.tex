@@ -56,6 +56,12 @@ Generator Capability in Self-Evolving Agents}
 \date{\today}
 % ---------------------------------------------------------------------------
 
+% Equation spacing (global preamble settings; no per-equation \vspace).
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{3pt plus 1pt minus 1pt}
+\setlength{\belowdisplayshortskip}{3pt plus 1pt minus 1pt}
+
 \begin{document}
 
 % Diagnostic only -- prints the real column geometry to the compile log.
@@ -224,7 +230,7 @@ variables), L2 (bit-vectors, $\le$20 variables), and L3 (mixed LIA + BV + Array,
 The primary metric is $\Delta_t$, the gap between the system's own evaluation and the ground truth.
 Invalid rounds --- where the teacher fails to produce a solvable constraint set --- are encoded as
 $\Delta_t = 1.0$ under the \textit{global} caliber and excluded under the \textit{valid-only} caliber.
-Figure~\ref{fig:dual_bottleneck} shows the two bottlenecks side by side.
+Figure~\ref{fig:bottleneck_and_validity} shows the two bottlenecks side by side.
 
 \subsection{Composition Law}
 
@@ -248,12 +254,18 @@ This holds to machine precision on the 2400-round data (Appendix~D, Table~\ref{t
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.6\textwidth]{figures/fig1_dual_bottleneck.png}
-  \caption{The safe region is the intersection of two conditions: judge reliability $\tau \ge
-  \tau_c$ on the $x$ axis, and generator invalid rate $\le 0.5$ on the $y$ axis. Outside that
-  intersection the loop still emits logs and still reports success on the rounds it completes ---
-  which is precisely why the failure is easy to miss.}
-  \label{fig:dual_bottleneck}
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig1_dual_bottleneck.png}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig3_validity_rate.png}
+  \end{minipage}
+  \caption{Left: the safe region as the intersection of judge reliability
+  $\tau \ge \tau_c$ and generator invalid rate $\le 0.5$. Right: valid-task
+  rate collapsing from 89.0\% (A) and 75.5\% (B) to 14.5\% (C) and 9.5\% (D).}
+  \label{fig:bottleneck_and_validity}
 \end{figure}
 
 \subsection{Two Bottlenecks}
@@ -263,16 +275,7 @@ Under the valid-only caliber, condition A (LLM self-score) gives $\Delta_t = 0.1
 truth, so self-score drift vanishes by construction. Under the global caliber the same conditions read
 A = 0.243 and B = 0.245, because B's 147 invalid rounds are charged $\Delta_t = 1.0$. That is a
 caliber difference, not a data inconsistency; see Appendix~\ref{app:data_consistency} and
-Figure~\ref{fig:validity_by_condition}.
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2b_delta_t_per_round.png}
-  \caption{Each panel shows one condition; invalid rounds are marked with gray crosses. C/D show the
-  pseudo-difficulty trap after L2 transition. Vertical lines mark the first round at which the
-  difficulty controller raises the task level.}
-  \label{fig:delta_t_per_round}
-\end{figure*}
+Figure~\ref{fig:bottleneck_and_validity}.
 
 The judge is not the only bottleneck. Once the population game is enabled (C and D), the controller
 pushes tasks toward L2/L3 and the teacher cannot reliably author bit-vector and array constraints:
@@ -281,16 +284,7 @@ valid rates collapse from 89.0\% (A) and 75.5\% (B) to 14.5\% (C) and 9.5\% (D).
 level high while the teacher keeps failing. We call this the \textbf{pseudo-difficulty trap}: the
 system believes it is solving harder problems while it spends its budget on tasks that never reach
 verification. The student is not at fault; every round with a valid task was solved correctly
-(Figure~\ref{fig:validity_by_condition}).
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.6\textwidth]{figures/fig3_validity_rate.png}
-  \caption{Overall valid-task rate per condition, collapsing from 89.0\% (A) and 75.5\% (B) to
-  14.5\% (C) and 9.5\% (D). B is lower than A not because the anchor performs worse, but because Z3
-  anchoring \textit{actively exposes} invalid tasks that A's permissive self-scoring hides.}
-  \label{fig:validity_by_condition}
-\end{figure}
+(Figure~\ref{fig:bottleneck_and_validity}).
 
 \subsection{Budget Decomposition}
 
@@ -306,35 +300,13 @@ $\Delta_t^{\max}$, the amount left for judge noise is
 $\tau_c$ is thus not an intrinsic property of a condition's mechanisms --- it is \textbf{derived}
 from how much of the budget the generator bottleneck leaves over. A condition with a large
 $\Delta_t^{\text{gen}}$ needs a more reliable judge for the same overall tolerance, but the driver is
-the budget split, not $\tau_c$ itself. The budget split is given in
-Table~\ref{tab:table4cbudget}.
+the budget split, not $\tau_c$ itself.
 
 Concretely, at $\Delta_t^{\max} = 0.60$: condition B ($\Delta_t^{\text{gen}} = 0.245$) requires
 $\tau_c \approx 0.24$, while C and D ($\Delta_t^{\text{gen}} = 0.855$ and $0.905$) cannot meet the
 budget at \textbf{any} judge reliability, because their generator bottleneck alone already exceeds
 it. That is the correct form of the Q4 intuition, and it turns the dual-bottleneck framework from a
 diagnosis into an accounting rule.
-
-\begin{table}[t]
-  \centering
-  \caption{Budget decomposition: the judge budget left over once the generator
-  bottleneck is accounted for, and the judge reliability it requires.
-  Full sweep over $\Delta_t^{\max} \in \{0.60, 0.70, 0.80\}$ in
-  Appendix~D, Table~\ref{tab:table4cbudget_full}.}
-  \label{tab:table4cbudget}
-  \small
-  \begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
-    \toprule
-    Condition & $\Delta_t^{\text{gen}}$ & $\Delta_t^{\max}$ & judge budget
-    & required $\tau_c$ \\
-    \midrule
-    A & 0.1100 & 0.60 & $0.5506$ & $\ge 0$ (random suffices) \\
-    B & 0.2450 & 0.60 & $0.4702$ & 0.244 \\
-    C & 0.8550 & 0.60 & $-1.7586$ & unreachable \\
-    D & 0.9050 & 0.60 & $-3.2105$ & unreachable \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
 
 % ===========================================================================
 % 5. JUDGE RELIABILITY THRESHOLD
@@ -358,33 +330,17 @@ independently.
 We sweep $\tau$ over eight values $\{0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.90, 1.00\}$ for
 conditions B and D, with 50 rounds per cell (800 rounds total) using the \textbf{real} DeepSeek V4
 Flash API. All rounds are pinned to difficulty L1 so that the generator-side bottleneck is held
-constant and only the judge's reliability varies. Figure~\ref{fig:tau_c_curve} shows the empirical
-curve.
+constant and only the judge's reliability varies. The empirical curve is in Appendix~A,
+Figure~\ref{fig:tau_c_curve_appendix}.
 
-The original hypothesis was that $\tau_c(D) > \tau_c(B)$ because D's population game advances the
-difficulty into L2/L3. Under L1 isolation the real-API sweep returns
-\textbf{$\tau_c(D) = \tau_c(B) = 0.55$}, and an earlier mock-LLM gap of 0.90 vs 0.55 does not
-reproduce. Pinning the difficulty removes exactly the mechanism the hypothesis invoked; the mock gap
-was an artefact of deterministic task content collapsing $\Delta_t$ to a $\{0, 1\}$ sequence. The
-hypothesis as stated is \textbf{not supported}.
+An earlier mock-LLM gap of $\tau_c(D) = 0.90$ vs $\tau_c(B) = 0.55$ did not reproduce under L1
+isolation; pinning the difficulty removes exactly the mechanism the hypothesis invoked.
 
 Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ falls monotonically from
 0.30 at $\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
 downward, not a straight line, and it passes through 0.5 at $\tau = 0$ rather than through 1.0. Both
 features turn out to be diagnostic of the mechanism, as Section~5.3 shows. The detected thresholds are
 $\tau_c(B) = \tau_c(D) = 0.55$ across all three calibers (combined, $\Delta_t$, correct-rate).
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig5_tau_c_curve_real.png}
-  \caption{The $\tau$-gradient sweep on the real API: 8 $\tau$ values $\times$ 2 conditions (B/D)
-  $\times$ 50 rounds = 800 rounds. Under the within-$\tau$ degeneration criterion no $\tau$ value
-  degenerates, so the reported $\tau_c = 0.55$ is the lower edge of the swept grid and should be
-  read as an upper bound, not as the system's tolerance. Panel (c) is empty because no $\tau$ value
-  degenerates under the within-$\tau$ criterion; the two vertical lines mark
-  $\tau_c(B) = \tau_c(D) = 0.55$.}
-  \label{fig:tau_c_curve}
-\end{figure}
 
 \subsection{Analytical Formula}
 \label{sec:analytical}
@@ -488,7 +444,7 @@ The analytical fit is overlaid in Appendix~A, Figure~\ref{fig:analytical_fit_app
 \label{sec:theorem1}
 
 Under the assumptions stated in Section~5.3, we state the threshold as a theorem.
-Figure~\ref{fig:theorem1} illustrates the threshold.
+Figure~\ref{fig:theory_and_improvement} illustrates the threshold.
 
 \textbf{Theorem 1.} \textit{The expected evaluation bias of the system is}
 
@@ -526,12 +482,6 @@ fitting} by the discriminating test: MAE 0.2291 against the observed \texttt{cor
 $\tau = 0.55$ it predicts 0.6975 against a measured 0.3000 (B) and 0.3200 (D). No result in this
 paper uses $\Delta_t = 1-\tau^{2}$.
 
-\textbf{Empirical $\tau_c$.} Under L1 isolation no $\tau$ triggers the within-$\tau$ degeneration
-criterion, so the detected value is $\tau_c(B) = \tau_c(D) =$ \textbf{0.55} --- the lower edge of the
-swept grid, to be read as an \textbf{upper bound} rather than the system's true tolerance. The closed
-form maps it to $\Delta_t^{\max} = (1-0.55^{2})/2 = 0.34875 \approx$ \textbf{0.349}, consistent with
-the measured per-cell bias at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
-
 \textbf{Relation to the Ratchet bound.} Ratchet's analysis gives $(1 - \tau)/2$ as the probability
 that a \textbf{single} judgment is flipped. Our quantity is the steady-state error of a
 \textbf{double}-judgment system. The two are related by the agreement probability, and the
@@ -561,16 +511,23 @@ predicts 0.049: requiring two independent verdicts to agree costs a factor of tw
 at that reliability. Ratchet's bound is the special case of a system that acts on one judgment; the
 formula here generalises it to systems that act on agreement between two.
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig5c_theorem1.png}
-  \caption{Panel (a): the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the real-API sweep for
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig5c_theorem1.png}
+  \end{minipage}\hfill
+  \begin{minipage}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig6_improvement_comparison_real.png}
+  \end{minipage}
+  \caption{Left: the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the real-API sweep for
   conditions B and D, with the measured $\tau_c = 0.55$ and the corresponding
-  $\Delta_t^{\max} = 0.349$ marked. Panel (b): the same closed form against the rejected acceptance
-  model ($\Delta_t = 1-\tau^2$) and Ratchet's single-judgment bound ($(1-\tau)/2$); the acceptance
-  model runs exactly twice as high and is rejected by the discriminating test of Section~5.3.}
-  \label{fig:theorem1}
-\end{figure*}
+  $\Delta_t^{\max} = 0.349$ marked; the rejected acceptance model ($\Delta_t = 1-\tau^2$) and
+  Ratchet's single-judgment bound ($(1-\tau)/2$) are shown for comparison. Right: before/after the
+  four-layer constraint framework over 240 rounds on the real API.}
+  \label{fig:theory_and_improvement}
+\end{figure}
 
 % ===========================================================================
 % 6. EXTENDING GENERATOR CAPABILITY
@@ -586,20 +543,15 @@ Section~4.3 showed that free-form code generation is the binding constraint on t
 therefore replace it with a four-layer pipeline:
 
 \begin{enumerate}
-  \item \textbf{JSON skeleton generation.} The teacher prompt asks for a JSON object
-        (\texttt{variables}, \texttt{constraints}, \texttt{expected\_sat}) instead of Python code,
-        removing the bracket-matching and variable-declaration failure classes outright.
-  \item \textbf{Deterministic rendering.} \texttt{render\_z3\_code} turns the skeleton into Z3 Python
-        code by template substitution. Because the renderer never guesses, the output is
-        syntactically valid by construction; malformed skeletons raise a typed
-        \texttt{TaskJSONInvalid} rather than failing silently.
-  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to symbolic constraints (for example, a
-        timeout appends ``reduce the constraint count to at most five'') which are injected into the
-        next attempt's prompt.
-  \item \textbf{Curriculum controller.} Sub-level variable counts within each difficulty level are
-        raised after five consecutive rounds with valid rate $> 0.80$ and lowered after three
-        consecutive rounds below $0.50$, damping the oscillation that produced the pseudo-difficulty
-        trap.
+  \item \textbf{JSON skeleton generation.} The teacher prompt asks for a JSON object instead of
+        Python code, removing the bracket-matching and variable-declaration failure classes.
+  \item \textbf{Deterministic rendering.} A templated renderer turns the skeleton into Z3 Python
+        code, so the output is syntactically valid by construction.
+  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to symbolic constraints and injected
+        into the next attempt's prompt.
+  \item \textbf{Curriculum controller.} Sub-level variable counts are raised after five consecutive
+        rounds with valid rate $> 0.80$ and lowered after three below $0.50$, damping the oscillation
+        that produced the pseudo-difficulty trap.
 \end{enumerate}
 
 \subsection{Real API Validation}
@@ -607,12 +559,10 @@ therefore replace it with a four-layer pipeline:
 
 We validate the constraint framework on 240 rounds (4 conditions $\times$ 3 levels $\times$ 20
 rounds) using real DeepSeek V4 Flash API. Improvement across conditions is shown in
-Figure~\ref{fig:improvement_comparison}.
+Figure~\ref{fig:theory_and_improvement}.
 
 With the framework in place, valid rates under the real API are L1 = 98.8\% (79/80), L2 = 71.2\%
-(57/80), L3 = 58.8\% (47/80). The legacy teacher, by contrast, produced only a handful of L2/L3 valid
-tasks across 2400 rounds (11 and 114 respectively), because most attempts failed before a task could
-be verified at all.
+(57/80), L3 = 58.8\% (47/80).
 
 The framework's first real-API run scored only 10\% on L2 due to a validator bug on hexadecimal
 literals; after the fix, L2 rose to 71.2\% (Appendix~\ref{app:l2_debug}).
@@ -622,33 +572,6 @@ After the fix, the remaining invalid rounds are all
 parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the
 honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a
 well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig6_improvement_comparison_real.png}
-  \caption{Before/after the four-layer constraint generation framework, 240 rounds on the real API
-  (4 conditions $\times$ 3 levels $\times$ 20 rounds). Valid-task rate with the framework is L1 =
-  98.8\% (79/80), L2 = 71.2\% (57/80), L3 = 58.8\% (47/80); the legacy teacher produced only 11
-  valid L2 and 114 valid L3 tasks across 2,400 rounds. Because the two runs differ in budget and
-  denominator, this compares capability, not rates.}
-  \label{fig:improvement_comparison}
-\end{figure*}
-
-\begin{table}[t]
-  \centering
-  \caption{Constraint framework improvement (real API).}
-  \label{tab:table5}
-  \small
-  \begin{tabular}{@{}lrrr@{}}
-    \toprule
-    Level & Valid & Total & Valid rate \\
-    \midrule
-    L1 & 79 & 80 & 98.8\% \\
-    L2 & 57 & 80 & 71.2\% \\
-    L3 & 47 & 80 & 58.8\% \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 \subsection{Statistical Validation}
 \label{sec:stat}
@@ -666,8 +589,7 @@ to $0.2000$ ($t = 13.19$, $d = 2.31$).
 
 \paragraph{Caliber-consistent L1 test.} The legacy denominators exclude failed rounds, so only L1 is
 comparable. There the improved teacher shows a lower $\Delta_t$ ($0.013$ vs $0.082$; Welch
-$t = 5.43$, $p = 6.0\times10^{-8}$, Cohen's $d = 0.89$, large). Table~\ref{tab:table5} reports the
-per-level valid rates behind this comparison.
+$t = 5.43$, $p = 6.0\times10^{-8}$, Cohen's $d = 0.89$, large).
 
 \paragraph{Caliber caveat.} The calibers of \S\ref{sec:calibers} differ only in how invalid rounds
 are treated: the global caliber charges each invalid round $\Delta_t = 1.0$, the valid-only caliber
@@ -738,7 +660,7 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
   \caption{Global-caliber $\Delta_t$ (invalid rounds encoded as $\Delta_t=1.0$).
   Condition A averages 0.2435 and Condition B averages 0.2450---they appear
   similar because B's larger invalid rate offsets its zero valid-round bias.
-  The valid-only caliber (Figure~\ref{fig:delta_t_per_round}) isolates judge
+  The valid-only caliber (Figure~\ref{fig:delta_t_per_round_appendix}) isolates judge
   behavior and is the correct view for comparing judge reliability.}
   \label{fig:delta_t_global}
 \end{figure*}
@@ -792,6 +714,27 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
   four conditions, showing that the LLM is unreliable at Z3 constraint generation from L2 upward
   regardless of which mechanisms are enabled.}
   \label{fig:validity_by_level_appendix}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig5_tau_c_curve_real.png}
+  \caption{The $\tau$-gradient sweep on the real API: 8 $\tau$ values $\times$ 2 conditions (B/D)
+  $\times$ 50 rounds = 800 rounds. Under the within-$\tau$ degeneration criterion no $\tau$ value
+  degenerates, so the reported $\tau_c = 0.55$ is the lower edge of the swept grid and should be
+  read as an upper bound, not as the system's tolerance. Panel (c) is empty because no $\tau$ value
+  degenerates under the within-$\tau$ criterion; the two vertical lines mark
+  $\tau_c(B) = \tau_c(D) = 0.55$.}
+  \label{fig:tau_c_curve_appendix}
+\end{figure*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2b_delta_t_per_round.png}
+  \caption{Each panel shows one condition; invalid rounds are marked with gray crosses. C/D show the
+  pseudo-difficulty trap after L2 transition. Vertical lines mark the first round at which the
+  difficulty controller raises the task level.}
+  \label{fig:delta_t_per_round_appendix}
 \end{figure*}
 
 \section{Theorem 1 Proof Sketch}
@@ -1006,7 +949,7 @@ the two tables it reasons about directly.
   \centering
   \caption{Budget decomposition over the full sweep of $\Delta_t^{\max}$: the judge budget left
   over once the generator bottleneck is accounted for, and the judge reliability it requires. The
-  main text shows only the $\Delta_t^{\max} = 0.60$ block.}
+  main text states the $\Delta_t^{\max} = 0.60$ case in prose; this is the complete sweep.}
   \label{tab:table4cbudget_full}
   \small
   \begin{tabularx}{\textwidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
