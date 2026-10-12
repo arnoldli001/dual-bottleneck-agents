@@ -135,7 +135,80 @@ This is the practically useful form of the result: it converts a tolerance on ev
 
 > **On the measured τ_c = 0.55.** Under the within-τ degeneration criterion no τ value degenerates, so 0.55 is the lower edge of the swept grid rather than a detected transition. It should be read as an upper bound on τ_c, not as the system's tolerance. The closed form above replaces it with a quantity that does not need to be measured.
 
-### 5.6 Relation to the Ratchet bound
+### 5.6 Theorem 1: Judge Reliability Threshold
+
+**Assumptions.**
+
+**(A1) Binary symmetric judge noise.** The judge returns a verdict in `{SAT, UNSAT}` and flips it with
+probability $p = (1-\tau)/2$, symmetrically; `error` and `unknown` verdicts are never flipped, since they
+carry no truth value to invert.
+
+**(A2) Two independent judgments per round.** Every round involves two separate judgments — the
+teacher-side judgment that validates the generated task and fixes its `expected` label, and the
+student-side judgment that validates the submitted answer. They are separate Z3 calls and therefore flip
+independently.
+
+**(A3) Agreement scoring on a binary task.** A round is scored correct iff the two verdicts **agree**. On a
+binary SAT/UNSAT task two independent random verdicts agree with probability exactly $1/2$, which fixes the
+$\tau \to 0$ limit.
+
+**Theorem 1.** *Under (A1)–(A3) the expected evaluation bias of the system is*
+
+$$\Delta_t(\tau) \;=\; \frac{1-\tau^{2}}{2}$$
+
+*with no free parameters; equivalently $P(\text{correct}) = (1+\tau^{2})/2$, and $\Delta_t(0) = 1/2$.*
+
+**Proof sketch.** The three paths are exhaustive. *Both unflipped*, probability $\left(\frac{1+\tau}{2}\right)^{2}$:
+the verdicts agree, the round is scored correct, error contribution **0**. *Exactly one flipped*,
+probability $2p(1-p) = \frac{1-\tau^{2}}{2}$: the verdicts disagree, the round is scored incorrect, error
+contribution **1**. *Both flipped*, probability $\left(\frac{1-\tau}{2}\right)^{2}$: the verdicts **still
+agree with each other**, so the round is scored correct and the joint error is invisible to the system —
+error contribution **0**. Only the middle path carries bias, so $\Delta_t$ is exactly its probability. The
+$\tau^{2}$ comes from summing the two agreement terms, whose cross terms cancel, which is why the exponent
+is the *number of independent judgments* rather than a property of the judge. Full derivation:
+`reports/theorem1_proof_sketch.md`.
+
+**Inverse (design) form.** Solving for $\tau$ gives the minimum admissible judge reliability at a tolerated
+bias $\Delta_t^{\max}$:
+
+$$\tau_c \;=\; \sqrt{1 - 2\,\Delta_t^{\max}}$$
+
+Because $\Delta_t(0) = 1/2$, no judge reliability can hold the bias below $1/2$, so the rule is defined only
+for $\Delta_t^{\max} \in [0, 1/2)$.
+
+**Corollary (judge scarcity).** $\tau_c$ is a function of the tolerated bias, **not** a constant of the
+system. At $\Delta_t^{\max} = 0.35$ a judge that errs on roughly one verdict in five ($\tau \approx 0.55$)
+still keeps the system inside the safe region; tightening the tolerance to $0.05$ requires
+$\tau \approx 0.95$. See `reports/table4d_theorem_implications.md` for the deployment rule, the runtime
+calibration proposal, and the open generalisations to M-ary tasks and to $k$ judgment layers.
+
+[Figure 5c: Theorem 1 — insert `fig5c_theorem1.png` here]
+
+> **Caption for Figure 5c.** Panel (a): the closed form $\Delta_t(\tau) = (1-\tau^2)/2$ against the
+> real-API sweep for conditions B and D, with the measured $\tau_c = 0.55$ and the corresponding
+> $\Delta_t^{\max} = 0.349$ marked. Panel (b): the same closed form against the rejected acceptance model
+> ($\Delta_t = 1-\tau^2$) and Ratchet's single-judgment bound ($(1-\tau)/2$); the acceptance model runs
+> exactly twice as high and is rejected by the discriminating test of §5.5.
+
+**Empirical validation.** Fitted against 800 real-API rounds (8 $\tau$ values × 2 conditions × 50 rounds,
+difficulty pinned to L1): MAE = **0.0258** / RMSE = 0.0329 (B) and MAE = **0.0520** / RMSE = 0.0660 (D).
+Per-$\tau$ values and signed residuals: [Table 4b: analytical fit — insert `tables/table4b_analytical_fit.md` here].
+
+**Remark (rejected alternative model).** A competing model — the judge is correct with probability $\tau$
+*and* the system accepts that judgment with probability $\tau$ — predicts $P(\text{correct}) = \tau^{2}$,
+hence $\Delta_t = 1-\tau^{2}$. It is rejected **without any fitting** by the §5.5 discriminating test:
+MAE 0.2291 against the observed `correct_rate`, versus 0.0389 for Theorem 1, with Theorem 1 closer in 13 of
+the 16 cells, tied in 2 and losing in 1. At $\tau = 0.55$ it predicts 0.6975 against a measured 0.3000 (B)
+and 0.3200 (D). No result in this paper uses $\Delta_t = 1-\tau^{2}$. Full statement and the relation to
+Ratchet: `reports/theorem1_statement.md`.
+
+**Empirical $\tau_c$.** Under L1 isolation no $\tau$ triggers the within-$\tau$ degeneration criterion, so
+the detected value is $\tau_c(B) = \tau_c(D) =$ **0.55** — the lower edge of the swept grid, to be read as
+an **upper bound** rather than the system's true tolerance. The closed form maps it to
+$\Delta_t^{\max} = (1-0.55^{2})/2 = 0.34875 \approx$ **0.349**, consistent with the measured per-cell bias
+at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
+
+### 5.7 Relation to the Ratchet bound
 
 Ratchet's analysis gives (1 − τ)/2 as the probability that a **single** judgment is flipped. Our quantity is the steady-state error of a **double**-judgment system. The two are related by the agreement probability, and the distinction is structural rather than numerical:
 
@@ -150,7 +223,7 @@ $$\Delta_t = 2p(1-p) \;\xrightarrow{p \to 0}\; 2p = 1-\tau$$
 
 So the two agree to first order in the high-reliability limit, and diverge quadratically away from it. At τ = 0.95 the single-judgment bound predicts 0.025 while the double-judgment model predicts 0.049: requiring two independent verdicts to agree costs a factor of two in tolerated error at that reliability. Ratchet's bound is the special case of a system that acts on one judgment; the formula here generalises it to systems that act on agreement between two.
 
-### 5.7 The Q4 hypothesis: refuted, then reconstructed
+### 5.8 The Q4 hypothesis: refuted, then reconstructed
 
 **Refutation.** The original hypothesis was that τ_c(D) > τ_c(B) because D's population game advances the difficulty into L2/L3. Under L1 isolation the real-API sweep returns **τ_c(D) = τ_c(B) = 0.55**, and an earlier mock-LLM gap of 0.90 vs 0.55 does not reproduce. Pinning the difficulty removes exactly the mechanism the hypothesis invoked; the mock gap was an artefact of deterministic task content collapsing Δ_t to a {0, 1} sequence. The hypothesis as stated is **not supported**.
 
@@ -230,5 +303,5 @@ Because the legacy per-level denominators exclude its failed rounds, only the L1
 | Real τ_c value filled into Section 5 | PASS | `reports/tau_c_real.json` |
 | Real valid rates filled into Section 6 | PASS | `reports/improvement_real.json` |
 | Section 5 的解析公式已交叉验证 | PASS | MAE(B)=0.0258, MAE(D)=0.0520 — see `tables/table4b_analytical_fit.md` |
-| Section 5.7 的双重瓶颈合成律已交叉验证 | PASS | 1−Δ_global = (1−Δ_gen)(1−Δ_judge) holds to 1.1e-16 — see `tables/table4c_dual_bottleneck_law.md` |
+| Section 5.8 的双重瓶颈合成律已交叉验证 | PASS | 1−Δ_global = (1−Δ_gen)(1−Δ_judge) holds to 1.1e-16 — see `tables/table4c_dual_bottleneck_law.md` |
 | References [1]–[10] complete | 待确认 | outside the scope of this script |
