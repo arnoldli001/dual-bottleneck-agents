@@ -58,6 +58,10 @@ Generator Capability in Self-Evolving Agents}
 
 \begin{document}
 
+% Diagnostic only -- prints the real column geometry to the compile log.
+% Remove once the values are recorded.
+\typeout{PROBE textwidth=\the\textwidth columnwidth=\the\columnwidth linewidth=\the\linewidth}
+
 \maketitle
 
 % ===========================================================================
@@ -173,11 +177,10 @@ could have helped before the four-layer constraint framework restored generator 
 \section{Related Work}
 
 \paragraph{Self-improving agents.}
-A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; Blind Curator~\cite{blind_curator} shows that on reference-free tasks a false-pass bias silently
-disables skill retirement altogether; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
+A growing line of work lets language-model agents improve themselves without human supervision. The Darwin Gödel Machine~\cite{dgm} modifies its own code and retains variants that pass self-generated tests; HyperAgents~\cite{hyperagents} pushes this to meta-level self-reference; EvolveR~\cite{evolver} distills reusable experience from success and failure trajectories; PopuLoRA~\cite{populora} evolves populations of low-rank adapters. These systems share one structural assumption: \emph{some} component must reliably judge whether a proposed change is an improvement. Our work makes that assumption explicit and quantifies when it fails.
 
 \paragraph{The judge-side bottleneck.}
-Two recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
+Three recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Blind Curator~\cite{blind_curator} shows that a judge whose false-pass rate crosses roughly 0.45 silently disables skill retirement, even when the judge's overall accuracy looks acceptable. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
 
 \paragraph{Agent evaluation and constraint-guided generation.}
 AgentJudgeBench~\cite{agentjudgebench} provides a multi-difficulty benchmark for judging agent behaviour; our own difficulty levels are defined by Z3 theories instead, so the two stratifications are independent. TreeCoder~\cite{treecoder} constrains code generation through syntax-directed search and InstructFlow~\cite{instructflow} guides it with symbolic constraints---the same design principle behind the skeleton and renderer layers of our framework. Unlike benchmark-oriented work, we do not propose a new evaluation suite; we use existing formal signals to locate the threshold at which self-improvement becomes self-defeating.
