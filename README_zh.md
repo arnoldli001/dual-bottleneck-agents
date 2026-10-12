@@ -16,7 +16,7 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 
 ## 核心发现
 
-在 2400 轮实验里，条件 A（纯 LLM 自评）的 Δ_t 稳定在 0.15，条件 B（加 Z3 形式锚定）的 Δ_t 稳定在 0.00（B 的 0.00 是锚定的定义性结果：无效任务被拦在门外了，不是它判得更准），代价是 LLM 生成这些任务的 invalid 率很高——L2/L3 难度下四个条件全部超过 80%，条件 D 整体达到 90.5%。我进一步把裁判可靠度 τ 和评估偏差 Δ_t 的关系推成了闭式：**Δ_t(τ) = (1 − τ²)/2**，这个式子没有自由参数，实测拟合 MAE 只有 0.026（B）和 0.052（D），反推就是 **τ_c = √(1 − 2·Δ_t_max)**。我原本假设机制更复杂的 D 条件（锚定 + 种群 + 蒸馏 + 圆桌）会更脆弱、临界点应该高于 B，结果实测 τ_c(B) 和 τ_c(D) 都是 0.55——这个假设没被支持，原因我写在 [`reports/paper_ready_final.md`](reports/paper_ready_final.md) §5.8 里了。
+在 2400 轮实验里，条件 A（纯 LLM 自评）的 Δ_t 稳定在 0.15，条件 B（加 Z3 形式锚定）的 Δ_t 稳定在 0.00（B 的 0.00 是锚定的定义性结果：无效任务被拦在门外了，不是它判得更准），代价是 LLM 生成这些任务的 invalid 率很高——整体 invalid 率为 A 11.0%、B 24.5%、C 85.5%、D 90.5%，即只有启用种群博弈的 C/D 超过 80%。我进一步把裁判可靠度 τ 和评估偏差 Δ_t 的关系推成了闭式：**Δ_t(τ) = (1 − τ²)/2**，这个式子没有自由参数，实测拟合 MAE 只有 0.026（B）和 0.052（D），反推就是 **τ_c = √(1 − 2·Δ_t_max)**。我原本假设机制更复杂的 D 条件（锚定 + 种群 + 蒸馏 + 圆桌）会更脆弱、临界点应该高于 B，结果实测 τ_c(B) 和 τ_c(D) 都是 0.55——这个假设没被支持，原因我写在 [`reports/paper_ready_final.md`](reports/paper_ready_final.md) §5.8 里了。
 
 ![四条件逐轮 Δ_t](docs/images/fig2b_delta_t_per_round.png)
 
@@ -30,7 +30,7 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 
 ![各难度级别的有效任务率](docs/images/fig3b_validity_by_level.png)
 
-*fig3b — L2/L3 的 invalid 率在四个条件下全部超过 80%。*
+*fig3b — 按难度分级的有效任务率。注意读法：无效轮次不会被分配难度等级，因此 L2/L3 的有效率在构造上就是 100%，该口径本身不能证明"L2/L3 很难"；真正说明问题的是整体 invalid 率（C 85.5%、D 90.5%，而 A 仅 11.0%、B 24.5%）。*
 
 ## 项目背景
 
@@ -52,7 +52,7 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 按概率链式法则：
 
 ```
-1 − Δ_t_global = (1 − Δ_t_gen) × (1 − Δ_t_judge)
+1 − Δ_t_global = (1 − Δ_t_gen) × (1 − Δ_t_valid)
 ```
 
 该式在 2400 轮四条件数据上成立到**机器精度（1.11e-16）**。
@@ -102,7 +102,7 @@ pip install -r requirements.txt
 
 ```bash
 pytest tests/ -q
-# 170 passed
+# 171 passed
 ```
 
 ### 2.3 完整图表与数据
@@ -181,7 +181,7 @@ python scripts/run_improved_smoke_real.py \
 | 文件 | 说明 |
 |------|------|
 | `paper_ready_final.md` | 论文 Section 4/5/6 初稿 |
-| `paper_data_final/` | 发布包：11 张图 + 9 张表（300 DPI，英文标签） |
+| `paper_data_final/` | 发布包：12 张图 + 9 张表（300 DPI，英文标签） |
 | `table*.md` | 各项统计表（Δ_t 双口径、τ_c、解析拟合、合成律、改进对比） |
 | `fig*.png` | 论文图 |
 | `data_consistency_report.md` | 4 项数据一致性交叉验证（全部 PASS） |
@@ -211,7 +211,7 @@ dual-bottleneck-agents/
 │   ├── dual_bottleneck_law.py        # 双重瓶颈合成律
 │   ├── unify_paper_outputs.py        # 论文数据包汇总
 │   └── difficulty_controller.py      # 课程控制器
-├── tests/                    # 170 个单元/集成测试
+├── tests/                    # 171 个单元/集成测试
 ├── argus-workspace/          # 实验数据（论文用，随仓库发布）
 ├── logs/                     # 实验数据（Section 5）
 ├── reports/                  # 图表、数据表、报告
@@ -297,8 +297,8 @@ dual-bottleneck-agents/
 2. **τ 扫描的难度钉定在 L1**，D 条件的种群升级机制因此被禁用；
    这使 τ_c(D) = τ_c(B)，原假设未被支持（见 `reports/paper_ready_final.md` §5.8）
 3. **约束框架验证只有 240 轮**（4 条件 × 3 难度 × 20 轮），是能力探针而非 2400 轮的完整复现
-4. **L2/L3 剩余失败全部是 `LLM did not return valid JSON`** ——
-   真实能力边界；框架能保证合法骨架被正确渲染，但无法保证模型产出合法骨架
+4. **首轮真实 API 运行的 22 个失败中，16 个是十六进制字面量（`0x0F`）护栏缺陷、6 个是 `LLM did not return valid JSON`** ——
+   前者是我们自己的 bug（已修复），后者才是真实能力边界；框架能保证合法骨架被正确渲染，但无法保证模型产出合法骨架
 5. **Mock 与真实 API 行为差异大** —— mock 无法暴露框架缺陷
    （`0x0F` 字面量缺陷即为实例，见 `reports/verification_v2.md` §3.5）
 

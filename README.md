@@ -14,7 +14,7 @@ stabilized at Δ_t = 0.15, while Condition B (Z3 anchor) held at Δ_t = 0.00.
 
 What surprised me was a second, equally critical bottleneck. Once I added population-based difficulty
 adaptation (Conditions C and D), the difficulty controller pushed tasks into Level 2/3 — and the LLM's
-task-generation validity collapsed from 89% to under 10%. The system appeared to be evolving, but was in
+task-generation validity collapsed from 89.0% (A) and 75.5% (B) to 14.5% (C) and 9.5% (D). The system appeared to be evolving, but was in
 fact spinning in place. I call this the **pseudo-difficulty trap**.
 
 This led to a joint framing: self-evolution requires *both* a reliable judge (τ > τ_c) *and* a capable
@@ -31,8 +31,10 @@ appendix.
 
 ![Validity by Level](docs/images/fig3b_validity_by_level.png)
 
-Once population-based difficulty adaptation is enabled, the controller promotes tasks to L2/L3, where the
-LLM's generation validity drops from ~89% to <10%.
+Once population-based difficulty adaptation is enabled, the controller starts promoting tasks toward
+L2/L3 — and the promotions are what fail. An invalid round never receives a difficulty level, so the
+failure sits at the promotion boundary rather than being graded *at* L2/L3. Overall valid rate falls
+from 89.0% (A) and 75.5% (B) to 14.5% (C) and 9.5% (D).
 
 ## Analytical Threshold
 
@@ -42,16 +44,18 @@ evaluation bias Δ_t:
     Δ_t(τ) = (1 − τ²) / 2
 
 which inverts to τ_c = √(1 − 2 Δ_t^max). Measured MAE is 0.026 (B) and 0.052 (D) — no free parameters.
-On Level 1 tasks, τ_c(B) = τ_c(D) = 0.55.
+On Level 1 tasks, τ_c(B) = τ_c(D) = 0.55. Caveat: 0.55 is the lower edge of the swept grid and no τ value
+degenerates under the within-τ criterion, so it should be read as an upper bound (τ_c ≤ 0.55) rather
+than as a located knee.
 
 ## Dual-Bottleneck Composition Law
 
 When both bottlenecks are simultaneously addressed, the system-level evaluation bias obeys the
 composition law:
 
-    Δ_t(τ, V) ≈ Δ_t^judge(τ) + Δ_t^gen(V) − Δ_t^judge(τ) · Δ_t^gen(V)
+    Δ_t(τ, V) ≈ Δ_t^valid(τ) + Δ_t^gen(V) − Δ_t^valid(τ) · Δ_t^gen(V)
 
-Empirically verified to 1.11e-16 precision (machine epsilon) on the combined experimental data.
+Holds to machine precision (1.11e-16) on the 2,400-round real-API data (all four conditions).
 
 This means the two bottlenecks do not merely co-exist — they compose multiplicatively in the "survival"
 of correct signals. A system must address both to reach Δ_t ≈ 0.
@@ -95,7 +99,7 @@ regenerate every figure and data table:
 
 ## Complete Figure Gallery
 
-All 12 figures (8 main text + 4 appendix) are in [docs/gallery.md](docs/gallery.md).
+All 12 figures (4 in the main text across 3 floats, 8 in the appendix) are in [docs/gallery.md](docs/gallery.md).
 
 ## Data Layout
 
@@ -106,15 +110,15 @@ Which log maps to which paper section:
 | `logs/tau_sweep_real/` | 800 rounds, τ-sweep, real API | Section 5 |
 | `argus-workspace/improved_real/logs/` | 240 rounds, constraint framework, real API | Section 6 |
 | `argus-workspace/full/logs/` | 2,400 rounds, baseline 4 conditions | Section 4 |
-| `argus-workspace/improved_real_run1_hexbug/logs/` | 49 rounds, hex-literal defect evidence | Section 6.3 |
+| `argus-workspace/improved_real_run1_hexbug/logs/` | 49 rounds, hex-literal defect evidence | §6.2 + Appendix E |
 | `argus-workspace/smoke_real/logs/` | 80 rounds, early smoke test | — |
-| `reports/paper_data_final/` | All 11 figures + 9 tables | Main text + Appendix |
+| `reports/paper_data_final/` | All 12 figures + 9 tables | Main text + Appendix |
 
 ## Project Structure
 
     argus/              Core package (20 modules: verifier, agents, memory, governance)
-    scripts/            Experiment and reproduction scripts (20, all run offline)
-    tests/              170 unit + integration tests
+    scripts/            Experiment and reproduction scripts (21, all run offline)
+    tests/              171 unit + integration tests
     constitution/       Core safety rules (JSON)
     logs/               Raw experiment logs
       tau_sweep_real/     τ-sweep (800 rounds, real API)
@@ -136,7 +140,7 @@ All 2,400 + 800 + 240 rounds are reproducible from the raw logs without API call
 provide your own `DEEPSEEK_API_KEY` via an environment variable and run
 `python scripts/run_full_experiment.py`.
 
-170 tests pass in under 15 seconds:
+171 tests pass in under 15 seconds:
 
     pytest tests/
 
