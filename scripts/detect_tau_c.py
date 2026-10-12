@@ -494,15 +494,17 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
         print("matplotlib not available, skip figure")
         return
 
-    # 2+1 布局：上排 (a)(b) 并排，下排 (c) 横跨两列。
-    # hspace=0.4 是为了让上排的 x 轴标签与下排标题不重叠。
-    # height_ratios=[1, 0.4]：within-τ 判据下没有任何 τ 退化，(c) 的柱高全为 0，
-    # 只用来展示 τ_c 竖线，因此压到上排的 40% 高度以免浪费半张图。
-    fig = plt.figure(figsize=(12, 7))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1, 0.4], hspace=0.4)
+    # One panel per row. The PNG is included at \textwidth, so the old 2+1
+    # arrangement left each panel about 2.3in wide and shrank the 10pt axis
+    # text below 5pt. Stacking gives every panel the full text width.
+    # height_ratios: under the within-tau criterion no tau degenerates at all
+    # (every bar in (c) is zero), so (c) only carries the tau_c vertical lines
+    # and gets 45% of a full panel's height.
+    fig = plt.figure(figsize=(6.5, 8.3))
+    gs = fig.add_gridspec(3, 1, height_ratios=[1, 1, 0.45], hspace=0.45)
     ax_a = fig.add_subplot(gs[0, 0])
-    ax_b = fig.add_subplot(gs[0, 1])
-    ax_c = fig.add_subplot(gs[1, :])
+    ax_b = fig.add_subplot(gs[1, 0])
+    ax_c = fig.add_subplot(gs[2, 0])
 
     # 子图 1：τ vs early/late Δ_t（条件 B 和 D）
     ax = ax_a
@@ -514,10 +516,11 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
                 label=f"{label_prefix} early Δ_t")
         ax.plot(taus, late, marker=marker, linestyle="-",
                 label=f"{label_prefix} late Δ_t")
-    ax.set_xlabel("Judge reliability τ")
-    ax.set_ylabel("Δ_t")
-    ax.set_title("(a) early vs late Δ_t per τ")
-    ax.legend(fontsize=8, loc="upper right")
+    ax.set_xlabel("Judge reliability τ", fontsize=11)
+    ax.set_ylabel("Δ_t", fontsize=11)
+    ax.set_title("(a) early vs late Δ_t per τ", fontsize=12)
+    ax.tick_params(labelsize=11)
+    ax.legend(fontsize=11, loc="upper right")
     ax.grid(True, alpha=0.3)
 
     # 子图 2：τ vs early/late 正确率
@@ -530,10 +533,11 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
                 label=f"{label_prefix} early correct")
         ax.plot(taus, late, marker=marker, linestyle="-",
                 label=f"{label_prefix} late correct")
-    ax.set_xlabel("Judge reliability τ")
-    ax.set_ylabel("Correct rate")
-    ax.set_title("(b) early vs late correct rate per τ")
-    ax.legend(fontsize=8, loc="lower right")
+    ax.set_xlabel("Judge reliability τ", fontsize=11)
+    ax.set_ylabel("Correct rate", fontsize=11)
+    ax.set_title("(b) early vs late correct rate per τ", fontsize=12)
+    ax.tick_params(labelsize=11)
+    ax.legend(fontsize=11, loc="lower right")
     ax.grid(True, alpha=0.3)
 
     # 子图 3：退化标记 + τ_c（横跨下排）
@@ -552,18 +556,19 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
     if results_d["tau_c"] is not None:
         ax.axvline(results_d["tau_c"], color="#3366cc", linestyle=":",
                    label=f"τ_c(D)={results_d['tau_c']}")
-    ax.set_xlabel("Judge reliability τ")
-    ax.set_ylabel("Degenerate (1=yes, 0=no)")
-    ax.set_title("(c) degeneration flags and τ_c")
+    ax.set_xlabel("Judge reliability τ", fontsize=11)
+    ax.set_ylabel("Degenerate (1=yes, 0=no)", fontsize=11)
+    ax.set_title("(c) degeneration flags and τ_c", fontsize=12)
     ax.set_yticks([0, 1])
-    ax.legend(fontsize=8, loc="upper left")
+    ax.tick_params(labelsize=11)
+    ax.legend(fontsize=11, loc="upper left")
     ax.grid(True, alpha=0.3)
 
     fig.suptitle("τ_c detection (within-τ degeneration: late-half vs early-half)",
                  fontsize=13)
     # gridspec 已控制子图间距。tight_layout 与 gridspec + suptitle 不兼容，
     # 会抛 UserWarning 并可能覆盖 hspace，因此改为显式边距。
-    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.07, right=0.98)
+    fig.subplots_adjust(top=0.93, bottom=0.06, left=0.11, right=0.98)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=300, bbox_inches="tight")
     plt.close(fig)
