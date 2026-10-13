@@ -83,8 +83,21 @@ P(correct) = (1−p)² + p² = (1+τ²)/2
 
 把"LLM 自由生成 Z3 代码"换成四层约束管线
 （JSON 骨架 → 确定性渲染 → 符号反馈 → 课程控制）后，
-真实 API 下有效任务率：**L1 100.0% / L2 73.8% / L3 83.8%**
-（基线在 2400 轮内只产出 11 个有效 L2 与 114 个有效 L3 任务）。
+真实 API 下有效任务率：**L1 100.0%（80/80）/ L2 73.8%（59/80）/ L3 83.8%（67/80）**
+（基线在 2400 轮内只产出 11 个有效 L2 与 114 个有效 L3 任务——旧教师其实从未真正跑通 L2/L3）。
+
+34 个无效轮次全部出自模型侧：33 个是 `error_code=1: LLM did not return valid JSON`，
+1 个是不支持的变量类型；没有一个是框架自身造成的。正因如此，这组比率衡量的是**生成器能力**，
+而不是工具链的可靠性。
+
+生成器瓶颈真正绑定的地方效果很大：global 口径下 C 从 Δ_t = 0.8823 降到 0.1500
+（Welch t = 15.26，Cohen's d = 2.46），D 从 0.9050 降到 0.1333（t = 16.83，d = 2.59）。
+唯一口径可比的 L1 上，改进后 Δ_t = 0.000 对基线 0.082（t = 34.61，p < 1e-15，d = 1.13）。
+
+![改进前后对比](docs/images/fig6_improvement_comparison_real.png)
+
+逐格数据、口径注意事项与失败归因见
+[`reports/improvement_validation_real.md`](reports/improvement_validation_real.md)。
 
 ---
 
@@ -170,8 +183,12 @@ python scripts/run_improved_smoke_real.py \
 | `argus-workspace/full/logs/` | 4 条件 × 200 轮 × 3 次基线实验 | 2,400 | **Section 4**（双重瓶颈证据） |
 | `logs/tau_sweep_real/` | 8 个 τ 值 × 2 条件 × 50 轮 | 800 | **Section 5**（τ 梯度与解析公式） |
 | `argus-workspace/improved_real/logs/` | 4 条件 × 3 难度 × 20 轮框架验证 | 240 | **Section 6**（约束生成框架） |
-| `argus-workspace/improved_real_run1_hexbug/logs/` | 缺陷复现证据 | 49 | `reports/verification_v2.md` §3.5 |
+| `argus-workspace/improved_real_run1_hexbug/logs/` | 第一代校验器缺陷复现证据 | 49 | `reports/improvement_validation_real.md` §6 |
+| `argus-workspace/improved_real_v1_lexbug/logs/` | 第二代校验器缺陷（中间态）| 240 | `reports/improvement_validation_real.md` §6 |
 | `argus-workspace/smoke_real/logs/` | 早期冒烟测试 | 80 | 开发过程记录 |
+
+两组修复前的日志保留入库，是因为改进报告写明了它们产生的中间比率、并明确称其为下界而非结果；
+把来源日志一并发布，这个说法才是可核查的，而不是只能选择相信。论文本身只报告最终的实测比率。
 
 每个 `round_*.jsonl` 是该轮的事件流（`task_generated` / `solution_verified` /
 `invalid_task` 等），可直接用 `jq` 或 Python 逐轮读取。
@@ -311,7 +328,7 @@ dual-bottleneck-agents/
     @article{dual_bottleneck_2026,
       title  = {The Dual Bottleneck: A Composition Law for Judge Reliability
                 and Generator Capability in Self-Evolving Agents},
-      author = {[Your Name]},
+      author = {李浩},
       year   = {2026},
       note   = {Code available at github.com/arnoldli001/dual-bottleneck-agents}
     }

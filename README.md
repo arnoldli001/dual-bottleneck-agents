@@ -64,6 +64,38 @@ This is equivalent to the multiplicative form:
 
     1 − Δ_t^global = (1 − Δ_t^gen)(1 − Δ_t^valid).
 
+## The Fix: A Four-Layer Constraint Framework
+
+The generator bottleneck is a *generation* problem, so the fix is to stop letting the LLM emit
+free-form Z3 code. A task is authored as a JSON skeleton and rendered deterministically:
+
+    JSON skeleton → deterministic rendering → symbolic feedback → curriculum control
+
+On **240 real-API rounds** (4 conditions × 3 levels × 20 rounds) the valid-task rate is
+
+| Level | Valid rate | Baseline (2,400-round legacy teacher) |
+|-------|-----------|----------------------------------------|
+| L1 | **100.0%** (80/80) | 1,006 valid tasks |
+| L2 | **73.8%** (59/80) | 11 valid tasks in 2,400 rounds |
+| L3 | **83.8%** (67/80) | 114 valid tasks in 2,400 rounds |
+
+The baseline numbers are the pseudo-difficulty trap in its raw form: the legacy teacher never really
+ran at L2/L3 at all.
+
+All 34 invalid rounds are model-side — 33 are `error_code=1: LLM did not return valid JSON` and 1 is an
+unsupported variable type. None is attributable to the framework, which is what makes these rates a
+measurement of generator capability rather than of harness plumbing.
+
+![Improvement comparison](docs/images/fig6_improvement_comparison_real.png)
+
+Where the generator bottleneck binds, the effect is large. Under the global caliber C moves from
+Δ_t = 0.8823 to 0.1500 (Welch t = 15.26, Cohen's d = 2.46) and D from 0.9050 to 0.1333 (t = 16.83,
+d = 2.59). On the caliber-consistent L1 comparison, which is the only level whose denominators match,
+the improved teacher gives Δ_t = 0.000 against the legacy 0.082 (t = 34.61, p < 1e-15, d = 1.13).
+
+Full per-cell tables, the caliber caveats, and the failure attribution are in
+[`reports/improvement_validation_real.md`](reports/improvement_validation_real.md).
+
 ## Reproducing All Figures Offline (no API key required)
 
 The repository contains the raw logs used in the paper. The following commands read them directly and
@@ -105,14 +137,20 @@ All 12 figures (4 in the main text across 3 floats, 8 in the appendix) are in [d
 
 Which log maps to which paper section:
 
-| Path | Content | Paper Section |
+| Path | Content | Referenced by |
 |------|---------|---------------|
-| `logs/tau_sweep_real/` | 800 rounds, τ-sweep, real API | Section 5 |
-| `argus-workspace/improved_real/logs/` | 240 rounds, constraint framework, real API | Section 6 |
-| `argus-workspace/full/logs/` | 2,400 rounds, baseline 4 conditions | Section 4 |
-| `argus-workspace/improved_real_run1_hexbug/logs/` | 49 rounds, hex-literal defect evidence | §6.2 + Appendix E |
+| `logs/tau_sweep_real/` | 800 rounds, τ-sweep, real API | Paper §5 |
+| `argus-workspace/full/logs/` | 2,400 rounds, baseline 4 conditions | Paper §4 |
+| `argus-workspace/improved_real/logs/` | 240 rounds, constraint framework, real API | Paper §6 |
+| `argus-workspace/improved_real_run1_hexbug/logs/` | 49 rounds, first-generation validator defect | `reports/improvement_validation_real.md` §6 |
+| `argus-workspace/improved_real_v1_lexbug/logs/` | 240 rounds, second-generation validator defect | `reports/improvement_validation_real.md` §6 |
 | `argus-workspace/smoke_real/logs/` | 80 rounds, early smoke test | — |
-| `reports/paper_data_final/` | All 12 figures + 9 tables | Main text + Appendix |
+| `reports/paper_data_final/` | All 12 figures + 9 tables | Paper, main text + appendix |
+
+The two pre-fix log sets are kept because the improvement report states the intermediate rates they
+produced and calls them lower bounds rather than results. Publishing the logs they came from is what
+makes that claim checkable instead of something a reader has to take on trust. The paper itself reports
+only the final measured rates.
 
 ## Project Structure
 
@@ -125,7 +163,8 @@ Which log maps to which paper section:
     argus-workspace/    Published experiment data
       full/logs/          2,400-round baseline (4 conditions)
       improved_real/      Constraint-framework validation (240 rounds, real API)
-      improved_real_run1_hexbug/  Hex-literal defect evidence (49 rounds)
+      improved_real_run1_hexbug/  First-generation validator defect (49 rounds)
+      improved_real_v1_lexbug/    Second-generation validator defect (240 rounds)
       smoke_real/         Early smoke test (80 rounds)
     reports/            Paper figures, data tables, and analysis
     docs/               README figures, the full gallery, and the architecture note
@@ -168,7 +207,7 @@ If you find this work useful, please cite:
     @article{dual_bottleneck_2026,
       title  = {The Dual Bottleneck: A Composition Law for Judge Reliability
                 and Generator Capability in Self-Evolving Agents},
-      author = {[Your Name]},
+      author = {Hao Li},
       year   = {2026},
       note   = {Code available at github.com/arnoldli001/dual-bottleneck-agents}
     }

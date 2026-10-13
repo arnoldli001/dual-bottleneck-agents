@@ -400,9 +400,9 @@
     </p>
     <h3>6.2 约束框架效果（真实 API）</h3>
     <div class="metric-row">
-      <div class="metric"><div class="label">L1 有效任务率</div><div class="value">98.8%</div><div class="note">79/80</div></div>
-      <div class="metric"><div class="label">L2 有效任务率</div><div class="value">71.2%</div><div class="note">57/80（验收线 30%）</div></div>
-      <div class="metric"><div class="label">L3 有效任务率</div><div class="value">58.8%</div><div class="note">47/80（验收线 15%）</div></div>
+      <div class="metric"><div class="label">L1 有效任务率</div><div class="value">100.0%</div><div class="note">80/80</div></div>
+      <div class="metric"><div class="label">L2 有效任务率</div><div class="value">73.8%</div><div class="note">59/80（验收线 30%）</div></div>
+      <div class="metric"><div class="label">L3 有效任务率</div><div class="value">83.8%</div><div class="note">67/80（验收线 15%）</div></div>
     </div>
     <p style="font-size:13px; color:#64748b; margin-top:12px;">
       基线在 2400 轮内只产出 11 个有效 L2 与 114 个有效 L3 任务 —— 它从未真正跑通 L2/L3。
@@ -413,7 +413,7 @@
   <h2>七、仓库实际目录结构</h2>
   <div class="dir-tree">
 <span class="folder">dual-bottleneck-agents/</span>
-├── <span class="folder">argus/</span>                      <span class="comment"># 核心代码（20 模块，~2700 行）</span>
+├── <span class="folder">argus/</span>                      <span class="comment"># 核心代码（20 模块，~3200 行）</span>
 │   ├── <span class="highlight">llm_client.py</span>           <span class="comment"># Mock + Real 双模式 · 缓存/熔断/退避 · 成本单一函数</span>
 │   ├── <span class="highlight">z3_runner.py</span>            <span class="comment"># Z3 持久 worker 沙箱 + JSON→Z3 确定性渲染器</span>
 │   ├── <span class="highlight">z3_anchor.py</span>            <span class="comment"># 形式锚定 + τ 噪声注入 verify_with_noise</span>
@@ -433,7 +433,7 @@
 │   ├── log_write.py / config.py  <span class="comment"># 日志落盘 / 配置管理</span>
 │   └── __init__.py
 │
-├── <span class="folder">scripts/</span>                    <span class="comment"># 实验与复现脚本（20 个）</span>
+├── <span class="folder">scripts/</span>                    <span class="comment"># 实验与复现脚本（21 个）</span>
 │   ├── <span class="data">run_tau_sweep_real.py</span>    <span class="comment"># 800 轮 τ 扫描（真实 API）</span>
 │   ├── <span class="data">run_improved_smoke_real.py</span> <span class="comment"># 240 轮框架验证（真实 API）</span>
 │   ├── run_full_experiment.py    <span class="comment"># 2400 轮编排（断点续跑 + 成本监控）</span>
@@ -445,27 +445,28 @@
 │   ├── reanalyze_delta_t.py      <span class="comment"># Δ_t 双口径重分析</span>
 │   └── …（分析 / 绘图 / 报告脚本）
 │
-├── <span class="folder">tests/</span>                     <span class="comment"># 170 个单元/集成测试</span>
+├── <span class="folder">tests/</span>                     <span class="comment"># 172 个单元/集成测试</span>
 │
 ├── <span class="folder">argus-workspace/</span>           <span class="comment"># 【实验数据 · 随仓库发布】</span>
 │   ├── <span class="folder">full/logs/</span>             <span class="data">#   Section 4：2400 轮基线</span>
 │   ├── <span class="folder">full/state/</span>            <span class="data">#   每 run 的最终难度</span>
 │   ├── <span class="folder">improved_real/logs/</span>    <span class="data">#   Section 6：240 轮框架验证</span>
-│   ├── <span class="folder">improved_real_run1_hexbug/logs/</span> <span class="data"># 缺陷复现证据（49 轮）</span>
+│   ├── <span class="folder">improved_real_run1_hexbug/logs/</span> <span class="data"># 第一代校验器缺陷（49 轮）</span>
+│   ├── <span class="folder">improved_real_v1_lexbug/logs/</span> <span class="data">#   第二代校验器缺陷（240 轮，中间态）</span>
 │   └── <span class="folder">smoke_real/logs/</span>       <span class="data">#   早期冒烟（80 轮）</span>
 │
 ├── <span class="folder">logs/</span>
 │   └── <span class="folder">tau_sweep_real/</span>         <span class="data">#   Section 5：800 轮 τ 扫描</span>
 │
 ├── <span class="folder">reports/</span>                   <span class="comment"># 论文图表与数据表</span>
-│   ├── <span class="folder">paper_data_final/</span>      <span class="comment">#   发布包：11 图 + 9 表 + tables/</span>
+│   ├── <span class="folder">paper_data_final/</span>      <span class="comment">#   发布包：12 图 + 9 表 + tables/</span>
 │   ├── paper_ready_final.md      <span class="comment">#   论文 Section 4/5/6 初稿</span>
 │   ├── data_consistency_report.md <span class="comment">#  4 项数据一致性交叉验证</span>
 │   ├── verification_v2.md        <span class="comment">#   验证报告（含缺陷复盘）</span>
 │   └── fig*.png / table*.md / *.json
 │
 ├── <span class="folder">docs/</span>                      <span class="comment"># 公开文档（本文件位于此）</span>
-│   ├── gallery.md                <span class="comment">#   完整图库：11 图 + 9 表</span>
+│   ├── gallery.md                <span class="comment">#   完整图库：12 图 + 9 表</span>
 │   ├── architecture.html         <span class="comment">#   ← 本文件</span>
 │   └── images/                   <span class="comment">#   README 与图库引用的 11 张 PNG</span>
 │
