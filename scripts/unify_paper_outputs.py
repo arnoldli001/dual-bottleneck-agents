@@ -1156,8 +1156,9 @@ at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
 
     md.append("### 6.3 A valve defect the mock could not find\n\n")
     md.append(
-        "The first real-API run of the framework scored 100% on L1 but only 10% on L2. "
-        "Every failure carried the same diagnostic:\n\n")
+        "The first real-API run of the framework was stopped after 49 rounds; it scored "
+        "100% on L1 but only 5% on L2 (1 of 20). Sixteen of its 22 failures carried the "
+        "same diagnostic:\n\n")
     md.append("```\n")
     md.append("schema_invalid: constraint '(a & b) == 0x0F' references undeclared "
               "identifier 'x0F'\n")

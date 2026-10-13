@@ -268,7 +268,7 @@ With the framework in place, valid rates under the real API are L1 = 100.0% (80/
 
 ### 6.3 A valve defect the mock could not find
 
-The first real-API run of the framework scored 100% on L1 but only 10% on L2. Every failure carried the same diagnostic:
+The first real-API run of the framework was stopped after 49 rounds; it scored 100% on L1 but only 5% on L2 (1 of 20). Sixteen of its 22 failures carried the same diagnostic:
 
 ```
 schema_invalid: constraint '(a & b) == 0x0F' references undeclared identifier 'x0F'

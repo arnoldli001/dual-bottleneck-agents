@@ -290,7 +290,7 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
 
     md.append("## 6. 真实 API 暴露并修复的一个框架缺陷（重要）\n\n")
     md.append("### 6.1 现象\n\n")
-    md.append("首轮真实 API 运行（240 轮计划）在 A/L2 上只得到 **2/20 = 10%** 的 valid 率，\n")
+    md.append("首轮真实 API 运行（240 轮计划，实际在 49 轮后停止）在 A/L2 上只得到 **1/20 = 5%** 的 valid 率，\n")
     md.append("远低于 L1 的 100%。失败原因高度一致：\n\n")
     md.append("```\n")
     md.append("error_code=1  schema_invalid: 约束 '(a & b) == 0x0F' 中引用了\n")
@@ -316,7 +316,7 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
     for lv in (1, 2, 3):
         im = improved_lvl.get(lv, {"valid": 0, "total": 0, "valid_rate": 0.0})
         v1_txt = {1: "79/80 = 98.8%", 2: "**57/80 = 71.2%**", 3: "47/80 = 58.8%"}[lv]
-        pre_txt = {1: "20/20 = 100%", 2: "**2/20 = 10%**", 3: "（未跑到）"}[lv]
+        pre_txt = {1: "20/20 = 100%", 2: "**1/20 = 5%**", 3: "6/9（未跑完）"}[lv]
         final_txt = (f"**{im['valid']}/{im['total']} = {im['valid_rate']*100:.1f}%**"
                      if lv == 2 else f"{im['valid']}/{im['total']} = {im['valid_rate']*100:.1f}%")
         md.append(f"| L{lv} | {pre_txt} | {v1_txt} | {final_txt} |\n")

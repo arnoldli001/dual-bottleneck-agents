@@ -565,12 +565,12 @@ Figure~\ref{fig:improvement_comparison}.
 With the framework in place, valid rates under the real API are L1 = 100.0\% (80/80), L2 = 73.8\%
 (59/80), L3 = 83.8\% (67/80).
 
-The framework's first real-API run scored only 10\% on L2 because our own validator mis-tokenised
-hexadecimal literals. Fixing that defect was not enough: the first fix introduced a second-generation
-lexer defect that still rejected 23 of the 240 rounds (22 of them at L3), which is why an earlier
-version of these rates read 98.8\% / 71.2\% / 58.8\%. With both generations corrected and the
-experiment re-run end to end, the rates above are the final ones; Appendix~\ref{app:l2_debug}
-documents both.
+The framework's first real-API run scored only 5\% on L2 (1 of 20) because our own validator
+mis-tokenised hexadecimal literals. Fixing that defect was not enough: the first fix introduced a
+second-generation lexer defect that still rejected 23 of the 240 rounds (22 of them at L3), which is
+why an earlier version of these rates read 98.8\% / 71.2\% / 58.8\%. With both generations corrected
+and the experiment re-run end to end, the rates above are the final ones;
+Appendix~\ref{app:l2_debug} documents both.
 
 Of the 34 invalid rounds, 33 are \texttt{error\_code=1: LLM did not return valid JSON} --- the model
 produced output that could not be parsed at all --- and 1 is a schema violation (an unsupported
@@ -997,8 +997,9 @@ the two tables it reasons about directly.
 \section{Debugging the L2 Validator}
 \label{app:l2_debug}
 
-The framework's first real-API run scored 100\% on L1 but only 10\% on L2. Of its 22 failures, 16
-carried one diagnostic: the validator tokenised constraints with a bare identifier regex, which splits
+The framework's first real-API run was stopped after 49 rounds. It scored 100\% on L1 but only 5\% on
+L2 (1 of 20). Of its 22 failures, 16 carried one diagnostic: the validator tokenised constraints with a
+bare identifier regex, which splits
 the hexadecimal literal \texttt{0x0F} into \texttt{0} and \texttt{x0F}; the fragment was then
 rejected as an undeclared variable. The remaining 6 were model-side JSON parse failures. L1 (integer
 arithmetic) rarely uses hex masks, so it was unaffected; L2 is bit-vector theory, where
