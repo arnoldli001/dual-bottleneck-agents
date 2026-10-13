@@ -22,15 +22,33 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 
 *fig2b — 逐轮 Δ_t，每格一个条件；灰色叉为无效轮，竖线是难度控制器首次升级的轮次。*
 
-**在有效轮次口径下，Z3 锚定完全消除了自评偏差**：条件 A 稳定在 0.15，条件 B 稳定在 0.00。在全局口径下两者看起来相同（0.2435 vs 0.2450），因为条件 B 的无效轮次被记为 Δ_t = 1.0 —— 见论文附录 Figure A.1。
+**在有效轮次口径下，Z3 锚定完全消除了自评偏差**：条件 A 稳定在 0.15，条件 B 稳定在 0.00。在全局口径下两者看起来相同（0.2435 vs 0.2450），因为条件 B 的无效轮次被记为 Δ_t = 1.0。
+
+![条件 A（LLM 自评）vs 条件 B（Z3 锚定）的 Δ_t](docs/images/fig2_delta_t_AB.png)
+
+*fig2 — A 与 B 的 Δ_t 曲线（裁判侧瓶颈）。*
+
+![两种口径下的 L1 阶段 Δ_t](docs/images/fig2c_delta_t_L1_only.png)
+
+*fig2c — L1 阶段的 Δ_t。**两种口径是本项目最容易读错的地方**：`Table 2a`（全局）与 `Table 2b`（仅有效轮）对同一批轮次给出不同数字，两张表都随仓库发布，`Table 2c` 专门解释差异从哪来。*
 
 ## 伪难度陷阱
 
-打开难度控制器（条件 C/D）之后，任务被推向 L2/L3，而教师写不出可靠的位向量与数组约束——有效任务率从 89.0%（A）/ 75.5%（B）崩到 14.5%（C）/ 9.5%（D）。失效不是按难度均匀分布的，而是**聚在升级那一刻**：级别一旦被抬高，教师持续失败，控制器却把级别维持在高位。系统以为自己正在解更难的题，实际把预算烧在了无法解析或不可满足的任务提案上。
+打开难度控制器（条件 C/D）之后，任务被推向 L2/L3，而教师写不出可靠的位向量与数组约束——有效任务率从 89.0%（A）/ 75.5%（B）崩到 14.5%（C）/ 9.5%（D）。
+
+![四条件的有效任务率](docs/images/fig3_validity_rate.png)
+
+*fig3 — 按条件的有效 / 无效占比，这是"崩溃"最直接的证据。*
+
+失效不是按难度均匀分布的，而是**聚在升级那一刻**：级别一旦被抬高，教师持续失败，控制器却把级别维持在高位。系统以为自己正在解更难的题，实际把预算烧在了无法解析或不可满足的任务提案上。
+
+![条件 C/D 的难度升级轨迹](docs/images/fig4_difficulty_trajectory.png)
+
+*fig4 — C/D 的难度升级轨迹：失效与升级时刻对齐。*
 
 ![各难度级别的有效任务率](docs/images/fig3b_validity_by_level.png)
 
-*fig3b — 按难度分级的有效任务率。注意读法：无效轮次不会被分配难度等级，因此 L2/L3 的有效率在构造上就是 100%，该口径本身不能证明"L2/L3 很难"；真正说明问题的是整体 invalid 率（C 85.5%、D 90.5%，而 A 仅 11.0%、B 24.5%）。*
+*fig3b — 按难度分级的有效任务率。注意读法：无效轮次不会被分配难度等级，因此 L2/L3 的有效率在构造上就是 100%，该口径本身**不能**证明"L2/L3 很难"——所以要配着 fig3 和 `Table 3` 一起看。真正说明问题的是整体 invalid 率（C 85.5%、D 90.5%，而 A 仅 11.0%、B 24.5%）。*
 
 ## 项目背景
 
@@ -59,6 +77,8 @@ The internal project codename is ARGUS; the Python package under `argus/` retain
 两个瓶颈**共享同一个 Δ_t 预算** —— 这是双重瓶颈框架的定量形式。
 等价于乘形式：1 − Δ_t^global = (1 − Δ_t^gen)(1 − Δ_t^valid)。
 
+[`Table 4c`](reports/paper_data_final/tables/table4c_dual_bottleneck_law.md) 同时给出逐条件核对和由此得到的**设计规则**：留给裁判噪声的额度是 Δ_judge = 1 − (1 − Δ_t^max)/(1 − Δ_t^gen)；在 Δ_t^max = 0.60 下，条件 B（Δ_t^gen = 0.245）只需要 τ_c ≈ 0.24，而 C/D 因为生成侧一个人就吃穿预算，**在任何裁判可靠度下都不可达**。
+
 ### 1.2 裁判噪声的解析形式
 
 设单次判决翻转概率 p = (1−τ)/2。每轮有**两次独立判决**（教师任务验证 + 学生答案验证），
@@ -78,6 +98,24 @@ P(correct) = (1−p)² + p² = (1+τ²)/2
 实测拟合 **MAE = 0.026（条件 B）/ 0.052（条件 D）**。
 判别性检验：实测 `correct_rate` 支持本模型（MAE 0.039），
 排除"裁判判断 + 系统接受"模型（MAE 0.229）。
+
+![τ 与 Δ_t 的关系曲线和实测 τ_c](docs/images/fig5_tau_c_curve_real.png)
+
+*fig5 — τ 扫描（8 个 τ × 2 条件 × 50 轮 = 800 轮真实 API，难度钉死在 L1）。面板 (c) 是退化指示量：8 个 τ 上均为 0，即没有任何 τ 触发退化判据。*
+
+![Δ_t(τ) = (1−τ²)/2 的解析拟合](docs/images/fig5b_tau_c_analytical.png)
+
+*fig5b — 闭式与实测逐格均值的对照；`Table 4b` 给出逐 τ 的数值与带符号残差。这个式子是从"每轮两次独立判决"推出来的，不是拟合出来的。*
+
+![Theorem 1：闭式与已被否掉的接受模型](docs/images/fig5c_theorem1.png)
+
+*fig5c — 一个同样能产生 τ² 形状的竞争模型（"裁判以概率 τ 判对，系统再以概率 τ 接受"，即 Δ_t = 1 − τ²）被数据否掉：MAE 0.229 对 0.039，且不需要任何拟合。*
+
+还有一个假设**没有被支持**，我照实写在论文里：早先的估计给出 τ_c(D) = 0.90、τ_c(B) = 0.55，即"D 的种群博弈要付出裁判可靠度的代价"。在 L1 隔离下两个条件都是 0.55，这个差距不复现（`Table 4`）。
+
+![τ_c gap 分析：被否证的假设](docs/images/fig7_tau_c_gap.png)
+
+*fig7 — 左图把先导估计与实测的 τ_c 并置，右图比较 B 与 D 的难度分布。*
 
 ### 1.3 约束生成框架的效果
 
@@ -124,6 +162,21 @@ pytest tests/ -q
 
 中文注记版的 12 张图在 [`paper/figures_zh/`](paper/figures_zh/) —— 与英文版一一对应、
 长宽比一致（差异 <2%），供中文版论文使用；生成方式与复现命令见该目录的 README。
+
+**9 张数据表**都在 [`reports/paper_data_final/tables/`](reports/paper_data_final/tables/)，
+由 `scripts/unify_paper_outputs.py` 从原始日志重算（不调用 API）：
+
+| 表 | 内容 |
+|---|---|
+| [`table1_experiment_setup.md`](reports/paper_data_final/tables/table1_experiment_setup.md) | 模型、条件、轮数、预算 |
+| [`table2a_delta_t_global.md`](reports/paper_data_final/tables/table2a_delta_t_global.md) | 全局口径 Δ_t（无效轮记 1.0） |
+| [`table2b_delta_t_valid_only.md`](reports/paper_data_final/tables/table2b_delta_t_valid_only.md) | 仅有效轮口径 Δ_t |
+| [`table2c_delta_t_semantics.md`](reports/paper_data_final/tables/table2c_delta_t_semantics.md) | Δ_t 的统一定义，以及 2a 与 2b 为何不同 |
+| [`table3_validity_rate.md`](reports/paper_data_final/tables/table3_validity_rate.md) | 各条件的有效 / 无效数与比率 |
+| [`table4_tau_c_results.md`](reports/paper_data_final/tables/table4_tau_c_results.md) | 三种口径下的 τ_c（真实 API） |
+| [`table4b_analytical_fit.md`](reports/paper_data_final/tables/table4b_analytical_fit.md) | Δ_t(τ)：逐 τ 的理论值与实测值、带符号残差 |
+| [`table4c_dual_bottleneck_law.md`](reports/paper_data_final/tables/table4c_dual_bottleneck_law.md) | 合成律核对 + Δ_t^max = 0.60 / 0.70 / 0.80 的预算分解 |
+| [`table5_improvement.md`](reports/paper_data_final/tables/table5_improvement.md) | 约束框架：各级别有效任务率（真实 API） |
 
 ### 2.4 离线复现全部图表（**不需要 API key**）
 

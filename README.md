@@ -24,17 +24,35 @@ generator (V > V_c). Neither alone suffices.
 
 **Under the valid-only caliber, Z3 anchoring eliminates self-score drift entirely**: Condition A
 holds at Δ_t = 0.15, Condition B at Δ_t = 0.00. Under the global caliber the two look alike (0.2435
-vs 0.2450) because Condition B's invalid rounds are charged Δ_t = 1.0 — see Figure A.1 in the paper
-appendix.
+vs 0.2450) because Condition B's invalid rounds are charged Δ_t = 1.0.
+
+![Δ_t: condition A (LLM self-score) vs condition B (Z3 anchor)](docs/images/fig2_delta_t_AB.png)
+
+![L1-phase Δ_t under both calibers](docs/images/fig2c_delta_t_L1_only.png)
+
+The two calibers are the single easiest way to misread this project: `Table 2a` (global) and
+`Table 2b` (valid-only) report different numbers for the same rounds. Both are published, and
+`Table 2c` explains exactly why they differ.
 
 ## The Pseudo-Difficulty Trap
 
-![Validity by Level](docs/images/fig3b_validity_by_level.png)
+![Valid task rate by condition](docs/images/fig3_validity_rate.png)
 
 Once population-based difficulty adaptation is enabled, the controller starts promoting tasks toward
-L2/L3 — and the promotions are what fail. An invalid round never receives a difficulty level, so the
-failure sits at the promotion boundary rather than being graded *at* L2/L3. Overall valid rate falls
-from 89.0% (A) and 75.5% (B) to 14.5% (C) and 9.5% (D).
+L2/L3 — and the promotions are what fail. Overall valid rate falls from 89.0% (A) and 75.5% (B) to
+14.5% (C) and 9.5% (D).
+
+![Difficulty trajectory of conditions C and D](docs/images/fig4_difficulty_trajectory.png)
+
+The failure is not spread evenly across difficulty — it clusters at the moment of escalation.
+An invalid round never receives a difficulty level, so the failure sits at the promotion boundary
+rather than being graded *at* L2/L3. That is also why the by-level view below cannot, on its own,
+demonstrate the trap, and why it should be read together with `Table 3`:
+
+![Validity by level](docs/images/fig3b_validity_by_level.png)
+
+Every round that reached L2/L3 did produce a valid task; the 85.5% and 90.5% invalid rates of C and D
+occur *before* level assignment.
 
 ## Analytical Threshold
 
@@ -47,6 +65,24 @@ which inverts to τ_c = √(1 − 2 Δ_t^max). Measured MAE is 0.026 (B) and 0.0
 On Level 1 tasks, τ_c(B) = τ_c(D) = 0.55. Caveat: 0.55 is the lower edge of the swept grid and no τ value
 degenerates under the within-τ criterion, so it should be read as an upper bound (τ_c ≤ 0.55) rather
 than as a located knee.
+
+![τ vs Δ_t with the detected τ_c](docs/images/fig5_tau_c_curve_real.png)
+
+![Analytical fit of Δ_t(τ) against the measured per-cell means](docs/images/fig5b_tau_c_analytical.png)
+
+The closed form is a derivation, not a fit — two independent noisy verdicts per round give
+P(correct) = (1+τ²)/2. `Table 4b` lists the per-τ theory/observed pair and the signed residuals;
+the 800-round real-API sweep behind it is in `logs/tau_sweep_real/`. A competing model that produces
+the same τ² shape — "the judge is right with probability τ *and* the system accepts it with probability
+τ", i.e. Δ_t = 1 − τ² — is rejected by the data with no fitting at all (MAE 0.229 against 0.039):
+
+![Theorem 1: the closed form vs the rejected acceptance model](docs/images/fig5c_theorem1.png)
+
+One hypothesis did **not** survive, and it is reported as such. An earlier estimate had suggested
+τ_c(D) = 0.90 against τ_c(B) = 0.55 — i.e. that D's population game costs judge reliability. Under L1
+isolation both conditions return 0.55, so the gap does not reproduce (`Table 4`):
+
+![τ_c gap analysis: the refuted hypothesis](docs/images/fig7_tau_c_gap.png)
 
 ## Dual-Bottleneck Composition Law
 
@@ -63,6 +99,11 @@ of correct signals. A system must address both to reach Δ_t ≈ 0.
 This is equivalent to the multiplicative form:
 
     1 − Δ_t^global = (1 − Δ_t^gen)(1 − Δ_t^valid).
+
+[`Table 4c`](reports/paper_data_final/tables/table4c_dual_bottleneck_law.md) carries both the
+per-condition check and the resulting design rule: the budget left for judge noise is
+Δ_judge = 1 − (1 − Δ_t^max)/(1 − Δ_t^gen), which at Δ_t^max = 0.60 asks condition B (Δ_t^gen = 0.245)
+for τ_c ≈ 0.24 and rules C and D unreachable at *any* judge reliability.
 
 ## The Fix: A Four-Layer Constraint Framework
 
@@ -136,6 +177,24 @@ All 12 figures (4 in the main text across 3 floats, 8 in the appendix) are in [d
 A Chinese-annotated copy of the same 12 figures is in [`paper/figures_zh/`](paper/figures_zh/) — one-to-one
 by filename with matching aspect ratios (within 2%), used by the Chinese edition. See that directory's
 README for how they are generated and how to regenerate them.
+
+## Data Tables
+
+Nine tables back the twelve figures. All are under
+[`reports/paper_data_final/tables/`](reports/paper_data_final/tables/), regenerated from the raw logs by
+`scripts/unify_paper_outputs.py`:
+
+| Table | Content |
+|---|---|
+| [`table1_experiment_setup.md`](reports/paper_data_final/tables/table1_experiment_setup.md) | Model, conditions, round counts, budget |
+| [`table2a_delta_t_global.md`](reports/paper_data_final/tables/table2a_delta_t_global.md) | Δ_t under the global caliber (invalid rounds charged 1.0) |
+| [`table2b_delta_t_valid_only.md`](reports/paper_data_final/tables/table2b_delta_t_valid_only.md) | Δ_t under the valid-only caliber |
+| [`table2c_delta_t_semantics.md`](reports/paper_data_final/tables/table2c_delta_t_semantics.md) | The unified definition of Δ_t, and why 2a and 2b differ |
+| [`table3_validity_rate.md`](reports/paper_data_final/tables/table3_validity_rate.md) | Valid / invalid counts and rates per condition |
+| [`table4_tau_c_results.md`](reports/paper_data_final/tables/table4_tau_c_results.md) | τ_c under three calibers, real API |
+| [`table4b_analytical_fit.md`](reports/paper_data_final/tables/table4b_analytical_fit.md) | Δ_t(τ): per-τ theory vs observed, with signed residuals |
+| [`table4c_dual_bottleneck_law.md`](reports/paper_data_final/tables/table4c_dual_bottleneck_law.md) | Composition-law check + budget decomposition at Δ_t^max = 0.60 / 0.70 / 0.80 |
+| [`table5_improvement.md`](reports/paper_data_final/tables/table5_improvement.md) | Constraint framework: valid rate per level, real API |
 
 ## Data Layout
 
