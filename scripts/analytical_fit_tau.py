@@ -214,7 +214,7 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
 
     ax.set_xlabel(r"Judge reliability $\tau$")
     ax.set_ylabel(r"$\Delta_t$")
-    ax.legend(loc="upper right", fontsize=14.4)
+    ax.legend(loc="upper right")
     ax.grid(True, alpha=0.3)
     ax.set_xlim(0.52, 1.02)
     ax.set_ylim(-0.02, 0.42)
@@ -227,7 +227,7 @@ def render_figure(rows: list[dict], mae: dict, rmse: dict, out_png: Path,
         f"RMSE(D) = {rmse['D']:.4f}\n"
         f"data: {mode}",
         xy=(0.035, 0.045), xycoords="axes fraction",
-        fontsize=14.4, color="#003366", ha="left", va="bottom",
+        color="#003366", ha="left", va="bottom",
         bbox=dict(boxstyle="round", facecolor="#eef4fb", alpha=0.95),
     )
 

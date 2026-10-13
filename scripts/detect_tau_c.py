@@ -503,7 +503,7 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
     # (every bar in (c) is zero), so (c) only carries the tau_c vertical lines
     # and gets 45% of a full panel's height.
     fig = plt.figure(figsize=(6.5, 8.3))
-    gs = fig.add_gridspec(3, 1, height_ratios=[1, 1, 0.45], hspace=0.45)
+    gs = fig.add_gridspec(3, 1, height_ratios=[1, 1, 0.60], hspace=0.45)
     ax_a = fig.add_subplot(gs[0, 0])
     ax_b = fig.add_subplot(gs[1, 0])
     ax_c = fig.add_subplot(gs[2, 0])
@@ -542,29 +542,54 @@ def render_figure_within(results_b: dict, results_d: dict, out_png: Path) -> Non
     ax.legend(fontsize=11, loc="lower right")
     ax.grid(True, alpha=0.3)
 
-    # 子图 3：退化标记 + τ_c（横跨下排）
+    # 子图 3：退化标记 + τ_c
+    #
+    # 在 within-τ 判据下没有任何 τ 触发退化，因此 B/D 的指示量在八个 τ 上全是 0。
+    # 旧版画的是零高柱状图：柱子不可见，只留下一个图例和一对面板，看起来像绘制失败。
+    # 改为把 0 值显式画成标记点（两个条件在 x 上微微错开，数值本身不变），
+    # 并写明"八个 τ 全为 0"，让"没有退化"这个结论可见而不是缺席。
     ax = ax_c
     taus = [r["tau"] for r in results_b["table"]]
     b_deg = [1 if r["degenerate"] else 0 for r in results_b["table"]]
     d_deg = [1 if r["degenerate"] else 0 for r in results_d["table"]]
-    width = 0.02
-    ax.bar([t - width/2 for t in taus], b_deg, width=width,
-           label="B degenerate", color="#cc3333")
-    ax.bar([t + width/2 for t in taus], d_deg, width=width,
-           label="D degenerate", color="#3366cc")
+    dx = 0.012
+    ax.plot([t - dx for t in taus], b_deg, marker="o", markersize=6,
+            linestyle="none", color="#cc3333", label="B degenerate")
+    ax.plot([t + dx for t in taus], d_deg, marker="s", markersize=6,
+            linestyle="none", color="#3366cc", label="D degenerate")
     if results_b["tau_c"] is not None:
-        ax.axvline(results_b["tau_c"], color="#cc3333", linestyle=":",
-                   label=f"τ_c(B)={results_b['tau_c']}")
+        ax.axvline(results_b["tau_c"], color="#cc3333", linestyle=":")
     if results_d["tau_c"] is not None:
-        ax.axvline(results_d["tau_c"], color="#3366cc", linestyle=":",
-                   label=f"τ_c(D)={results_d['tau_c']}")
+        ax.axvline(results_d["tau_c"], color="#3366cc", linestyle=":")
     ax.set_xlabel("Judge reliability τ", fontsize=11)
     ax.set_ylabel("Degenerate (1=yes, 0=no)", fontsize=11)
     ax.set_title("(c)", fontsize=12)
+    # 显式给 y 轴留出 0/1 两个刻度，否则全 0 数据会把 ylim 压成一条线。
+    # 上限 1.60 让图例、τ_c 标注、说明文字各占一条横带，互不遮挡。
+    ax.set_ylim(-0.30, 1.60)
     ax.set_yticks([0, 1])
+    ax.set_xlim(0.50, 1.05)
+    ax.axhline(0.0, color="#888888", linewidth=0.8, zorder=0)
     ax.tick_params(labelsize=11)
-    ax.legend(fontsize=11, loc="upper left")
+    ax.legend(fontsize=11, loc="upper left", ncol=2, framealpha=0.95)
     ax.grid(True, alpha=0.3)
+    # τ_c 直接标在线上，不再占用图例（两条线同值，两个 legend 条目是冗余的）。
+    tc_txt = []
+    if results_b["tau_c"] is not None:
+        tc_txt.append(f"{results_b['tau_c']}")
+    if results_d["tau_c"] is not None and results_d["tau_c"] != results_b["tau_c"]:
+        tc_txt.append(f"{results_d['tau_c']}")
+    if tc_txt:
+        ax.text(0.98, 0.88, "τ_c(B) = τ_c(D) = " + " / ".join(tc_txt),
+                transform=ax.transAxes, ha="right", va="center",
+                fontsize=11, color="#333333")
+    n_tau = len(taus)
+    ax.text(0.5, 0.52,
+            f"no τ degenerates: the indicator is 0 at all {n_tau} τ values "
+            f"for both B and D\n"
+            f"(within-τ criterion: late/early Δt < 1.5, correct-rate ratio > 0.7)",
+            transform=ax.transAxes, ha="center", va="center",
+            fontsize=10, color="#333333")
 
     # gridspec 已控制子图间距。tight_layout 与 gridspec + suptitle 不兼容，
     # 会抛 UserWarning 并可能覆盖 hspace，因此改为显式边距。

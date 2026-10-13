@@ -83,32 +83,27 @@ def render_fig3b(records: list[dict], out_png: Path) -> None:
                     h / 2 if inside else h + 2,
                     f"{h:.1f}%", ha="center",
                     va="center" if inside else "bottom", rotation=90,
-                    fontsize=14.4, color="white" if inside else colors[cond])
+                    color="white" if inside else colors[cond])
 
     ax.set_xticks(x)
     ax.set_xticklabels(["L1", "L2", "L3"])
-    ax.set_xlabel("Difficulty Level", fontsize=14.4)
-    ax.set_ylabel("Valid Task Rate (%)", fontsize=14.4)
-    ax.tick_params(labelsize=14.4)
+    ax.set_xlabel("Difficulty Level")
+    ax.set_ylabel("Valid Task Rate (%)")
     ax.set_ylim(0, 150)
     ax.set_xlim(-0.55, 2.55)
     ax.grid(True, alpha=0.3, axis="y")
-    # 关键注释
+    # 关键注释：两条阈值线由 legend 标注，说明文字交给图注。
+    # 原先这里还有两块自由浮动的 ax.text（L1 高有效 / L2/L3 极低有效）。
+    # 465b391 把画布从 10x6 缩到 4.8x4.0 之后，它们无论放在哪里都会压住柱子：
+    # 柱顶在 100/150，legend 占据 100-150 的空档，两块两行文字没有可用空间。
+    # 这两句的内容已在 (a) 两条阈值线的 legend 标签和论文图注中表达，故删除。
     ax.axhline(75, color="#006600", linestyle=":", alpha=0.6,
                label="L1 ≥75%")
     ax.axhline(15, color="#aa0000", linestyle=":", alpha=0.6,
                label="L2/L3 ≤15%")
-    ax.text(0.10, 0.56, "L1: high validity\n(simple LIA, LLM succeeds)",
-            transform=ax.transAxes, ha="left", va="center",
-            fontsize=14.4, color="#006600",
-            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
-    ax.text(0.98, 0.20, "L2/L3: very low validity\n(BV/Array fail ~85-100%)",
-            transform=ax.transAxes, ha="right", va="center",
-            fontsize=14.4, color="#aa0000",
-            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=2))
     # Legend inside the axes so it costs neither width nor height.
     ax.legend(loc="upper left", bbox_to_anchor=(0.0, 1.0), ncol=2,
-              fontsize=14.4, framealpha=0.95, borderaxespad=0.15,
+              framealpha=0.95, borderaxespad=0.15,
               columnspacing=1.0, handletextpad=0.5)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)

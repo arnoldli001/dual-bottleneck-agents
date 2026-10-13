@@ -353,25 +353,25 @@ def fig1_dual_bottleneck(out_png: Path,
                                                 edgecolor="#cc9933")
     ax.add_patch(gen_low)
     ax.text(0.85, 0.15, "Safe Zone\n(formal anchor\nsustains evolution)",
-            ha="center", va="center", fontsize=14.4, color="#003366")
+            ha="center", va="center", color="#003366")
     # Kept inside xlim: at 0.35 this label sat outside the axes and collided
     # with the y-axis label once the figure was reduced to 60% width.
     ax.text(0.6, 0.55, "Judge-Noise\nCollapse\n(τ ↓ → Δ_t ↑)",
-            ha="center", va="center", fontsize=14.4, color="#660000")
+            ha="center", va="center", color="#660000")
     ax.text(0.85, 0.65, "Generation\nBottleneck\n(LLM can't author\nL2+ tasks)",
-            ha="center", va="center", fontsize=14.4, color="#664400")
-    # 箭头标签
-    ax.annotate("τ ↓", xy=(0.6, 0.95), fontsize=16.8, color="#cc3333", ha="center")
-    ax.annotate("τ ↑", xy=(0.85, 0.95), fontsize=16.8, color="#3366cc", ha="center")
+            ha="center", va="center", color="#664400")
+    # 箭头标签。y 从 0.95 降到 0.90：字号还原为默认后，右上角图例的下沿约在
+    # y=0.93，0.95 会把"τ ↑"压在图例里。
+    ax.annotate("τ ↓", xy=(0.58, 0.90), color="#cc3333", ha="center")
+    ax.annotate("τ ↑", xy=(0.80, 0.90), color="#3366cc", ha="center")
     if tau_c_b is not None and tau_c_d is not None:
         ax.axvline(min(tau_c_b, tau_c_d), color="purple", linestyle="--", alpha=0.7,
                    label=f"τ_c ≈ {min(tau_c_b, tau_c_d):.2f}")
-        ax.legend(loc="upper right", fontsize=14.4)
+        ax.legend(loc="upper right")
     ax.set_xlim(0.5, 1.0)
     ax.set_ylim(0.0, 1.0)
-    ax.set_xlabel("Judge Reliability τ", fontsize=14.4)
-    ax.set_ylabel("Invalid Rate", fontsize=14.4)
-    ax.tick_params(labelsize=14.4)
+    ax.set_xlabel("Judge Reliability τ")
+    ax.set_ylabel("Invalid Rate")
     ax.grid(True, alpha=0.2)
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -438,16 +438,19 @@ def fig3_validity_rate(records: list[dict], out_png: Path) -> bool:
     ax.bar(x, invalid_rates, bottom=valid_rates, label="Invalid", color="#c44033")
     for i, cond in enumerate(conds):
         ax.text(i, valid_rates[i] / 2, f"{valid_rates[i]*100:.1f}%",
-                ha="center", va="center", color="white", fontweight="bold", fontsize=14.4)
+                ha="center", va="center", color="white", fontweight="bold")
         ax.text(i, valid_rates[i] + invalid_rates[i] / 2, f"{invalid_rates[i]*100:.1f}%",
-                ha="center", va="center", color="white", fontweight="bold", fontsize=14.4)
+                ha="center", va="center", color="white", fontweight="bold")
     ax.set_xticks(x)
     ax.set_xticklabels(conds)
-    ax.set_xlabel("Condition", fontsize=14.4)
-    ax.set_ylabel("Ratio", fontsize=14.4)
-    ax.tick_params(labelsize=14.4)
-    ax.legend(loc="upper center", ncol=2, fontsize=14.4, framealpha=0.95)
-    ax.set_ylim(0, 2.00)
+    ax.set_xlabel("Condition")
+    ax.set_ylabel("Ratio")
+    ax.legend(loc="upper center", ncol=2, framealpha=0.95)
+    # Bars reach 1.0; ylim only needs enough headroom for the two-column legend.
+    # The previous 2.00 was chosen for the 14.4pt legend and squeezed the bars
+    # into the lower half of the axes, which pushed the in-bar percentage labels
+    # across the segment boundaries (the visible overlap in fig3).
+    ax.set_ylim(0, 1.40)
     ax.grid(True, alpha=0.3, axis="y")
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
