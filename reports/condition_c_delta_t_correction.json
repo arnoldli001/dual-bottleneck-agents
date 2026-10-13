@@ -1,0 +1,248 @@
+{
+  "reason": "runner.py population branch fabricated the Z3 status from `correct`, so llm_self_score compared it against `expected` incorrectly; Δ_t re-derived from the logged (expected, correct) pair",
+  "fix": "argus/runner.py observed_status = expected if correct else opposite",
+  "policy": "raw logs preserved byte-exact under *_pre_c_fix/",
+  "count": 24,
+  "entries": [
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0002.jsonl",
+      "line": 4,
+      "task_id": "r0002_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0002.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0006.jsonl",
+      "line": 3,
+      "task_id": "r0006_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0006.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0114.jsonl",
+      "line": 2,
+      "task_id": "r0114_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0114.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0136.jsonl",
+      "line": 2,
+      "task_id": "r0136_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0136.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0140.jsonl",
+      "line": 3,
+      "task_id": "r0140_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0140.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0140.jsonl",
+      "line": 6,
+      "task_id": "r0140_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0140.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0166.jsonl",
+      "line": 2,
+      "task_id": "r0166_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0166.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r1/C/round_0167.jsonl",
+      "line": 3,
+      "task_id": "r0167_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r1/C/round_0167.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0002.jsonl",
+      "line": 4,
+      "task_id": "r0002_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0002.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0006.jsonl",
+      "line": 3,
+      "task_id": "r0006_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0006.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0037.jsonl",
+      "line": 2,
+      "task_id": "r0037_l2_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0037.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0048.jsonl",
+      "line": 2,
+      "task_id": "r0048_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0048.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0064.jsonl",
+      "line": 2,
+      "task_id": "r0064_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0064.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0096.jsonl",
+      "line": 2,
+      "task_id": "r0096_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0096.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0113.jsonl",
+      "line": 2,
+      "task_id": "r0113_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0113.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r2/C/round_0140.jsonl",
+      "line": 6,
+      "task_id": "r0140_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r2/C/round_0140.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0002.jsonl",
+      "line": 4,
+      "task_id": "r0002_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0002.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0006.jsonl",
+      "line": 3,
+      "task_id": "r0006_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0006.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0052.jsonl",
+      "line": 2,
+      "task_id": "r0052_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0052.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0113.jsonl",
+      "line": 2,
+      "task_id": "r0113_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0113.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0136.jsonl",
+      "line": 2,
+      "task_id": "r0136_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0136.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0140.jsonl",
+      "line": 6,
+      "task_id": "r0140_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0140.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0166.jsonl",
+      "line": 2,
+      "task_id": "r0166_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0166.jsonl"
+    },
+    {
+      "file": "argus-workspace/full/logs/C_r3/C/round_0181.jsonl",
+      "line": 2,
+      "task_id": "r0181_l3_a0",
+      "expected": "unsat",
+      "correct": true,
+      "delta_t_old": 0.7,
+      "delta_t_new": 0.15,
+      "backup": "argus-workspace/full/logs_pre_c_fix/C_r3/C/round_0181.jsonl"
+    }
+  ]
+}

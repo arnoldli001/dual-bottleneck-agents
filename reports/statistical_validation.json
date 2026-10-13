@@ -29,14 +29,14 @@
     "condition": "C",
     "n_legacy": 600,
     "n_improved": 60,
-    "mean_legacy": 0.8823,
+    "mean_legacy": 0.8767,
     "mean_improved": 0.15,
-    "std_legacy": 0.2911,
+    "std_legacy": 0.2995,
     "std_improved": 0.3601,
-    "t": 15.2611,
-    "df": 66.9,
+    "t": 15.1191,
+    "df": 67.4,
     "p_value": 0.0,
-    "cohens_d": 2.458
+    "cohens_d": 2.3792
   },
   {
     "condition": "D",

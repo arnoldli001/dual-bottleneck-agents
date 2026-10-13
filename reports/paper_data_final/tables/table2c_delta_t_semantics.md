@@ -52,8 +52,8 @@ $$\Delta_t = |\text{score}(y) - \text{label}(y^*)|$$
 | global (口径 2) | A | 600 | 0.2435 | Table 2c |
 | valid-only (口径 1) | B | 453 | 0.0000 | Table 2b |
 | global (口径 2) | B | 600 | 0.2450 | Table 2c |
-| valid-only (口径 1) | C | 87 | 0.1879 | Table 2b |
-| global (口径 2) | C | 600 | 0.8823 | Table 2c |
+| valid-only (口径 1) | C | 87 | 0.1500 | Table 2b |
+| global (口径 2) | C | 600 | 0.8767 | Table 2c |
 | valid-only (口径 1) | D | 57 | 0.0000 | Table 2b |
 | global (口径 2) | D | 600 | 0.9050 | Table 2c |
 

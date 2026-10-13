@@ -92,9 +92,9 @@ reports/_zhb.txt
 paper_notes/
 
 # LaTeX 论文源码（paper/main.tex、refs.bib、checklist.tex、figures/）
-# NeurIPS 双盲期间谨慎入库：源码与仓库绑定有泄露作者身份的风险。
+# 源码与仓库绑定会暴露作者身份，是否入库由作者自行决定（当前选择：入库）。
 # 用 `paper/*` 而非 `paper/`：父目录被整体排除后，内部文件无法再被 `!` 重新包含。
-# main.tex 的 \author 仍是占位符，可以入库。
+# main.tex 的 \author 自 2026-10-13 起为真实署名与联系邮箱（作者确认保留）。
 # refs.bib 自 2026-10-13 起入库：已逐条核实 10 条文献全部为第三方工作、
 #   不含任何自引，双盲理由不成立；且 main.tex 里写着 \bibliography{refs}，
 #   只提交 main.tex 会让克隆者拿到一个无法编译的论文。
@@ -119,6 +119,13 @@ paper/*
 !paper/figures_zh/README.md
 !paper/_zh_figs.py
 !paper/_zh_fig_terms.py
+
+# 条件 C Δ_t 修正前的原始日志备份
+# scripts/rederive_condition_c_delta_t.py --apply 会把改动过的 round_*.jsonl
+# 逐字节备份到 <logs_root>_pre_c_fix/ 再就地改写 delta_t 字面量。
+# 改动清单（含每个旧值）已入库：reports/condition_c_delta_t_correction.json；
+# 原始值同时存在于 git 历史中，因此备份目录不入库。
+argus-workspace/full/logs_pre_c_fix/
 
 # 归档脚本（目录尚不存在，预留规则）
 archive/deprecated_scripts/

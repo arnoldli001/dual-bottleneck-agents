@@ -130,7 +130,7 @@ measurement of generator capability rather than of harness plumbing.
 ![Improvement comparison](docs/images/fig6_improvement_comparison_real.png)
 
 Where the generator bottleneck binds, the effect is large. Under the global caliber C moves from
-Δ_t = 0.8823 to 0.1500 (Welch t = 15.26, Cohen's d = 2.46) and D from 0.9050 to 0.1333 (t = 16.83,
+Δ_t = 0.8767 to 0.1500 (Welch t = 15.12, Cohen's d = 2.38) and D from 0.9050 to 0.1333 (t = 16.83,
 d = 2.59). On the caliber-consistent L1 comparison, which is the only level whose denominators match,
 the improved teacher gives Δ_t = 0.000 against the legacy 0.082 (t = 34.61, p < 1e-15, d = 1.13).
 
@@ -153,6 +153,11 @@ regenerate every figure and data table:
 
     # Dual-bottleneck law → table4c
     python scripts/dual_bottleneck_law.py
+
+    # Condition-C Δ_t re-derivation. The population branch used to fabricate the Z3
+    # status before scoring it against `expected`, which mis-scored six C rounds.
+    # Already applied to the logs; --check is now a no-op. Kept for auditability.
+    python scripts/rederive_condition_c_delta_t.py --check
 
     # τ_c detection → tau_c_analysis_real.md / tau_c_real.json / fig5_tau_c_curve_real.png
     # (defaults point at the real P0-2 sweep in logs/tau_sweep_real/; --raw_root is derived from --summary)

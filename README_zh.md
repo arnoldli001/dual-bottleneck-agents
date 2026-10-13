@@ -128,8 +128,8 @@ P(correct) = (1−p)² + p² = (1+τ²)/2
 1 个是不支持的变量类型；没有一个是框架自身造成的。正因如此，这组比率衡量的是**生成器能力**，
 而不是工具链的可靠性。
 
-生成器瓶颈真正绑定的地方效果很大：global 口径下 C 从 Δ_t = 0.8823 降到 0.1500
-（Welch t = 15.26，Cohen's d = 2.46），D 从 0.9050 降到 0.1333（t = 16.83，d = 2.59）。
+生成器瓶颈真正绑定的地方效果很大：global 口径下 C 从 Δ_t = 0.8767 降到 0.1500
+（Welch t = 15.12，Cohen's d = 2.38），D 从 0.9050 降到 0.1333（t = 16.83，d = 2.59）。
 唯一口径可比的 L1 上，改进后 Δ_t = 0.000 对基线 0.082（t = 34.61，p < 1e-15，d = 1.13）。
 
 ![改进前后对比](docs/images/fig6_improvement_comparison_real.png)
@@ -194,6 +194,10 @@ python scripts/analytical_fit_tau.py
 
 # 双重瓶颈合成律 → table4c
 python scripts/dual_bottleneck_law.py
+
+# 条件 C 的 Δ_t 重导：种群分支曾先用 correct 反推一个 Z3 状态、再拿它与 expected
+# 比对，导致 6 个 C 轮次被打错分。该修正已写入日志，--check 现在是空操作，保留以备审计。
+python scripts/rederive_condition_c_delta_t.py --check
 
 # τ_c 检测 → tau_c_analysis_real.md / tau_c_real.json / fig5_tau_c_curve_real.png
 # （默认已指向 logs/tau_sweep_real/ 的真实 P0-2 sweep；--raw_root 自动取 summary 所在目录）
