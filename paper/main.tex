@@ -101,7 +101,7 @@ tasks using real DeepSeek V4 Flash API, and derive the parameter-free formula
 $\tau_c = \sqrt{1-2\Delta_t^{\max}}$. We identify a pseudo-difficulty trap: when the difficulty
 controller upgrades to Level 2/3, the LLM's task-generation validity collapses from $\sim$89\% to
 $<$10\%, causing the system to spin without progress. We propose a four-layer constraint generation
-framework that restores validity to 98.8\% at L1, 71.2\% at L2, and 58.8\% at L3 on real API.
+framework that restores validity to 100\% at L1, 73.8\% at L2, and 83.8\% at L3 on real API.
 \end{abstract}
 
 % ===========================================================================
@@ -562,24 +562,29 @@ We validate the constraint framework on 240 rounds (4 conditions $\times$ 3 leve
 rounds) using real DeepSeek V4 Flash API. Improvement across conditions is shown in
 Figure~\ref{fig:improvement_comparison}.
 
-With the framework in place, valid rates under the real API are L1 = 98.8\% (79/80), L2 = 71.2\%
-(57/80), L3 = 58.8\% (47/80).
+With the framework in place, valid rates under the real API are L1 = 100.0\% (80/80), L2 = 73.8\%
+(59/80), L3 = 83.8\% (67/80).
 
-The framework's first real-API run scored only 10\% on L2 due to a validator bug on hexadecimal
-literals; after the fix, L2 rose to 71.2\% (Appendix~\ref{app:l2_debug}).
+The framework's first real-API run scored only 10\% on L2 because our own validator mis-tokenised
+hexadecimal literals. Fixing that defect was not enough: the first fix introduced a second-generation
+lexer defect that still rejected 23 of the 240 rounds (22 of them at L3), which is why an earlier
+version of these rates read 98.8\% / 71.2\% / 58.8\%. With both generations corrected and the
+experiment re-run end to end, the rates above are the final ones; Appendix~\ref{app:l2_debug}
+documents both.
 
-After the fix, the remaining invalid rounds are all
-\texttt{error\_code=1: LLM did not return valid JSON} --- the model produced output that could not be
-parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the
-honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a
-well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
+Of the 34 invalid rounds, 33 are \texttt{error\_code=1: LLM did not return valid JSON} --- the model
+produced output that could not be parsed at all --- and 1 is a schema violation (an unsupported
+variable type). No round is rejected by our own guardrail any more. The JSON failures are a genuine
+capability boundary rather than a framework defect, and they are the honest floor for this approach:
+the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it
+cannot guarantee that the model emits a well-formed skeleton.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=0.7\textwidth]{figures/fig6_improvement_comparison_real.png}
   \caption{Before/after the four-layer constraint generation framework, 240 rounds on the real API
   (4 conditions $\times$ 3 levels $\times$ 20 rounds). Valid-task rate with the framework is L1 =
-  98.8\% (79/80), L2 = 71.2\% (57/80), L3 = 58.8\% (47/80); the legacy teacher produced only 11
+  100.0\% (80/80), L2 = 73.8\% (59/80), L3 = 83.8\% (67/80); the legacy teacher produced only 11
   valid L2 and 114 valid L3 tasks across 2,400 rounds. Because the two runs differ in budget and
   denominator, this compares capability, not rates.}
   \label{fig:improvement_comparison}
@@ -594,14 +599,15 @@ in generator quality. We therefore apply Welch's $t$-test to the released real-A
 resampling procedure.
 
 \paragraph{Per-condition test.} The 60 framework rounds against the 600 legacy rounds give
-$t = 0.18$ ($p = 0.86$, $d = 0.04$) for A and $t = -0.08$ ($p = 0.93$, $d = -0.01$) for B --- both
-null, as expected where the generator bottleneck does not bind. Where it does, the shifts are
-decisive: C moves from $\Delta_t = 0.8823$ to $0.2667$ ($t = 10.47$, $d = 2.00$) and D from $0.9050$
-to $0.2000$ ($t = 13.19$, $d = 2.31$).
+$t = 4.26$ ($p = 2\times10^{-5}$, $d = 0.60$) for A and $t = 0.82$ ($p = 0.41$, $d = 0.11$) for B.
+A improves measurably while B stays null, consistent with the framework binding on the generator
+rather than on the judge. Where the generator bottleneck does bind, the shifts are
+decisive: C moves from $\Delta_t = 0.8823$ to $0.1500$ ($t = 15.26$, $d = 2.46$) and D from $0.9050$
+to $0.1333$ ($t = 16.83$, $d = 2.59$).
 
 \paragraph{Caliber-consistent L1 test.} The legacy denominators exclude failed rounds, so only L1 is
-comparable. There the improved teacher shows a lower $\Delta_t$ ($0.013$ vs $0.082$; Welch
-$t = 5.43$, $p = 6.0\times10^{-8}$, Cohen's $d = 0.89$, large).
+comparable. There the improved teacher shows a lower $\Delta_t$ ($0.000$ vs $0.082$; Welch
+$t = 34.61$, $p < 10^{-15}$, Cohen's $d = 1.13$, large).
 
 \paragraph{Caliber caveat.} The calibers of \S\ref{sec:calibers} differ only in how invalid rounds
 are treated: the global caliber charges each invalid round $\Delta_t = 1.0$, the valid-only caliber
@@ -991,23 +997,43 @@ the two tables it reasons about directly.
 \section{Debugging the L2 Validator}
 \label{app:l2_debug}
 
-The framework's first real-API run scored 100\% on L1 but only 10\% on L2. Every failure carried
-the same diagnostic: the validator tokenised constraints with a bare identifier regex, which splits
+The framework's first real-API run scored 100\% on L1 but only 10\% on L2. Of its 22 failures, 16
+carried one diagnostic: the validator tokenised constraints with a bare identifier regex, which splits
 the hexadecimal literal \texttt{0x0F} into \texttt{0} and \texttt{x0F}; the fragment was then
-rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex masks, so it was
-unaffected; L2 is bit-vector theory, where \texttt{0xFF}-style masks are the standard idiom, so the
-validator rejected essentially every well-formed task. The failure was in our own guardrail, not in
-the model.
+rejected as an undeclared variable. The remaining 6 were model-side JSON parse failures. L1 (integer
+arithmetic) rarely uses hex masks, so it was unaffected; L2 is bit-vector theory, where
+\texttt{0xFF}-style masks are the standard idiom, so the validator rejected essentially every
+well-formed task. The 16 were failures of our own guardrail, not of the model.
 
 The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific)
 with placeholders before scanning, and extends the Z3 builtin whitelist (\texttt{BitVecVal},
-\texttt{BV2Int}, \texttt{LShR}, \ldots). L2 rose from 10\% to 71.2\% and L3 reached 58.8\%. Seven
-regression tests pin the behaviour.
+\texttt{BV2Int}, \texttt{LShR}, \ldots). L2 rose from 10\% to 71.2\% and L3 reached 58.8\%.
+
+That fix was itself incomplete. The substitution regex had no word boundary, so it also deleted digits
+\emph{inside} identifiers: \texttt{x1} became \texttt{x}, \texttt{BV2Int} became \texttt{BV} +
+\texttt{2} + \texttt{Int}, and \texttt{a0} became \texttt{a}. Names on the builtin whitelist were
+therefore destroyed before the whitelist was ever consulted. Re-validating the 240 round logs against
+the corrected lexer showed that 23 of the 240 rounds (9.6\%) were rejected by our own guardrail rather
+than by the model, 22 of them at L3, where digit-suffixed variables and BV/Int conversions are common.
+The intermediate rates --- L1 = 98.8\%, L2 = 71.2\%, L3 = 58.8\% --- were therefore lower bounds, not
+results.
+
+We treat the lexer as a single defect with two generations, both now repaired, and we report the
+intermediate numbers because they are what an incomplete fix looks like. After the second generation
+was fixed the experiment was re-run end to end. The guardrail rejections disappear from the failure
+records entirely --- 0 of the 240 rounds are now rejected by our own validator --- and the remaining 34
+failures are 33 model-side JSON parse failures plus 1 unsupported variable type. The final rates are
+L1 = 100.0\%, L2 = 73.8\%, L3 = 83.8\% (Section~\ref{sec:api}).
 
 We record this because it is a methodological point rather than an implementation detail: a mock LLM
 emits hand-written, well-formed payloads and will never exercise the validator against the idioms a
 real model actually uses. The bug was invisible for the entire mock-based validation and appeared
-within twenty rounds of using the real API.
+within twenty rounds of using the real API. Seven regression tests were added alongside the first
+fix. Its second generation sharpens the point: those tests left the suite exactly as green with the
+residual defect as without it, so a passing suite did not certify the guardrail. What exposed it was
+re-reading the \texttt{error\_reason} of every failed round against the raw \texttt{task\_json} ---
+attribution over the real failure records, not the test suite. The regression suite now pins both
+generations, including true negatives that must still be rejected.
 
 % ---------------------------------------------------------------------------
 % UNPLACED FLOATS

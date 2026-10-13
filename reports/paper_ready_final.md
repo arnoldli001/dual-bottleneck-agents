@@ -260,7 +260,7 @@ Section 4.3 showed that free-form code generation is the binding constraint on t
 
 We validate the constraint framework on 240 rounds (4 conditions × 3 levels × 20 rounds) using real DeepSeek V4 Flash API. This is a capability probe rather than a full replication of the 2400-round baseline: the legacy comparison uses the existing 2400-round logs, while the framework is measured on a deliberately smaller budget because each level is requested explicitly rather than left to the difficulty controller.
 
-With the framework in place, valid rates under the real API are L1 = 98.8% (79/80), L2 = 71.2% (57/80), L3 = 58.8% (47/80). The legacy teacher, by contrast, produced only a handful of L2/L3 valid tasks across 2400 rounds (11 and 114 respectively), because most attempts failed before a task could be verified at all. Because the two runs use different round budgets and different denominators, Section 6.2 compares **capability**, not rates; `reports/improvement_validation_real.md` §2.1 documents the caliber difference.
+With the framework in place, valid rates under the real API are L1 = 100.0% (80/80), L2 = 73.8% (59/80), L3 = 83.8% (67/80). The legacy teacher, by contrast, produced only a handful of L2/L3 valid tasks across 2400 rounds (11 and 114 respectively), because most attempts failed before a task could be verified at all. Because the two runs use different round budgets and different denominators, Section 6.2 compares **capability**, not rates; `reports/improvement_validation_real.md` §2.1 documents the caliber difference.
 
 [Table 5: improvement — insert `tables/table5_improvement.md` here]
 
@@ -276,17 +276,21 @@ schema_invalid: constraint '(a & b) == 0x0F' references undeclared identifier 'x
 
 The validator tokenised constraints with a bare identifier regex, which splits the hexadecimal literal `0x0F` into `0` and `x0F`; the fragment was then rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex masks, so it was unaffected; L2 is bit-vector theory, where `0xFF`-style masks are the standard idiom, so the validator rejected essentially every well-formed task. The failure was in our own guardrail, not in the model.
 
-The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific) with placeholders before scanning, and extends the Z3 builtin whitelist (`BitVecVal`, `BV2Int`, `LShR`, …). L2 rose from 10% to 71.2% and L3 reached 58.8%. Seven regression tests pin the behaviour.
+The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific) with placeholders before scanning, and extends the Z3 builtin whitelist (`BitVecVal`, `BV2Int`, `LShR`, …). L2 rose from 10% to 71.2% and L3 reached 58.8%.
 
-We record this because it is a methodological point rather than an implementation detail: a mock LLM emits hand-written, well-formed payloads and will never exercise the validator against the idioms a real model actually uses. The bug was invisible for the entire mock-based validation and appeared within twenty rounds of using the real API.
+That fix was itself incomplete. The substitution regex had no word boundary, so it also deleted digits inside identifiers: `x1` became `x`, `BV2Int` became `BV` + `2` + `Int`, and `a0` became `a`; names on the builtin whitelist were destroyed before the whitelist was consulted. Re-validating the 240 round logs against the corrected lexer showed 23 of 240 rounds (9.6%) had been rejected by our own guardrail. Those intermediate rates — L1 = 98.8%, L2 = 71.2%, L3 = 58.8% — were lower bounds, not results.
+
+We treat the lexer as one defect with two generations, both now repaired. After the second fix the experiment was re-run end to end: 0 of 240 rounds are rejected by our own validator, and the remaining 34 failures are 33 model-side JSON parse failures plus 1 unsupported variable type. The final rates are L1 = 100.0%, L2 = 73.8%, L3 = 83.8%.
+
+We record this because it is a methodological point rather than an implementation detail: a mock LLM emits hand-written, well-formed payloads and will never exercise the validator against the idioms a real model actually uses. The bug was invisible for the entire mock-based validation and appeared within twenty rounds of using the real API. The second generation sharpens the point: the regression suite stayed exactly as green with the residual defect as without it, so a passing suite did not certify the guardrail.
 
 ### 6.4 Validity Rates Under the Real API
 
-After the fix, the remaining invalid rounds are all `error_code=1: LLM did not return valid JSON` — the model produced output that could not be parsed at all. That is a genuine capability boundary rather than a framework defect, and it is the honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
+After both fixes, 34 of the 240 rounds are invalid: 33 are `error_code=1: LLM did not return valid JSON` — the model produced output that could not be parsed at all — and 1 is an unsupported variable type. No round is rejected by our own guardrail any more. That is a genuine capability boundary rather than a framework defect, and it is the honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
 
 ### 6.5 Statistical Tests
 
-Because the legacy per-level denominators exclude its failed rounds, only the L1 comparison is caliber-consistent. There the improved teacher shows a lower Δ_t (0.013 vs 0.082; Welch t = 5.43, p = 6.0e-8, Cohen's d = 0.89, large). Full results and the caliber caveats are in `reports/improvement_validation_real.md`.
+Because the legacy per-level denominators exclude its failed rounds, only the L1 comparison is caliber-consistent. There the improved teacher shows a lower Δ_t (0.000 vs 0.082; Welch t = 34.61, p < 1e-15, Cohen's d = 1.13, large). On condition A the framework gives t = 4.26, p = 2e-5, d = 0.60; condition B stays null (t = 0.82, p = 0.41). Full results and the caliber caveats are in `reports/improvement_validation_real.md`.
 
 ---
 

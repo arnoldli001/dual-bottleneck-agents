@@ -71,8 +71,8 @@ test.
 ### Figure 7 — Improvement comparison (fig6_improvement_comparison_real.png · §6.2)
 
 Before/after the four-layer constraint generation framework, 240 rounds on the real API (4
-conditions × 3 levels × 20 rounds). Valid-task rate with the framework is L1 = 98.8% (79/80),
-L2 = 71.2% (57/80), L3 = 58.8% (47/80); the legacy teacher produced only 11 valid L2 and 114 valid
+conditions × 3 levels × 20 rounds). Valid-task rate with the framework is L1 = 100.0% (80/80),
+L2 = 73.8% (59/80), L3 = 83.8% (67/80); the legacy teacher produced only 11 valid L2 and 114 valid
 L3 tasks across 2,400 rounds. Because the two runs differ in budget and denominator, this compares
 capability, not rates.
 

@@ -118,7 +118,7 @@ Which log maps to which paper section:
 
     argus/              Core package (20 modules: verifier, agents, memory, governance)
     scripts/            Experiment and reproduction scripts (21, all run offline)
-    tests/              171 unit + integration tests
+    tests/              172 unit + integration tests
     constitution/       Core safety rules (JSON)
     logs/               Raw experiment logs
       tau_sweep_real/     τ-sweep (800 rounds, real API)
@@ -140,7 +140,7 @@ All 2,400 + 800 + 240 rounds are reproducible from the raw logs without API call
 provide your own `DEEPSEEK_API_KEY` via an environment variable and run
 `python scripts/run_full_experiment.py`.
 
-171 tests pass in under 15 seconds:
+172 tests pass in under 15 seconds:
 
     pytest tests/
 

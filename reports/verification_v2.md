@@ -151,19 +151,23 @@ error_code=1  schema_invalid: 约束 '(a & b) == 0x0F' 中引用了未声明的�
    替换为占位符，再做标识符扫描
 2. 补齐 z3 内置白名单（`BitVecVal` / `BV2Int` / `LShR` / `RotateLeft` / `PbEq` 等）
 
-**回归测试**：`tests/test_constraint_generation.py::TestNumericLiteralRegression`（7 例）
+**回归测试**：`tests/test_constraint_generation.py::TestNumericLiteralRegression`（9 例，
+覆盖两代缺陷）
 覆盖 `0x0F` / `0b1010` / `0o17` / `1_000` / `BitVecVal` / 真实 LLM payload，
 并保留 2 例「真正的未声明变量仍须拒绝」的反向保护。
 
-**修复效果**：
+**修复效果（两代）**：
 
-| 级别 | 修复前（run 1） | 修复后（run 2） |
-|------|---------------|---------------|
-| L1 | 20/20 = 100% | 79/80 = 98.8% |
-| L2 | **2/20 = 10%** | **57/80 = 71.2%** |
-| L3 | （未跑到） | 47/80 = 58.8% |
+| 级别 | 修复前（run 1） | 第一代修复后（run 2，中间态） | 两代修复后（run 3，最终） |
+|------|---------------|---------------------------|----------------------|
+| L1 | 20/20 = 100% | 79/80 = 98.8% | 80/80 = 100.0% |
+| L2 | **2/20 = 10%** | **57/80 = 71.2%** | **59/80 = 73.8%** |
+| L3 | （未跑到） | 47/80 = 58.8% | 67/80 = 83.8% |
 
-修复前数据保留在 `argus-workspace/improved_real_run1_hexbug/` 作为证据。
+修复前数据保留在 `argus-workspace/improved_real_run1_hexbug/` 作为证据；
+中间态日志保留在 `argus-workspace/improved_real_v1_lexbug/`。
+两代修复后重跑，护栏拒绝已从失败记录中彻底消失（240 轮中 0 轮被自家校验器拒绝），
+余下 34 个无效轮次为 33 个模型侧 JSON 解析失败 + 1 个不支持的变量类型。
 
 **方法论教训**：MockLLM 对 L2 返回的是**手写的、合法格式的 payload**，
 永远走不到「模型按自己习惯写十六进制」这条路径。
@@ -176,7 +180,7 @@ error_code=1  schema_invalid: 约束 '(a & b) == 0x0F' 中引用了未声明的�
 > ⚠️ **本节结论已被真实 API 数据取代。** 下表基于 mock improved 数据，
 > 其 Cohen's d（2.6 / 3.2）远高于真实效应量。
 > 真实 API 的统计检验见 `reports/improvement_validation_real.md` §4：
-> L1 上 t = 5.43, p = 6.0e-8, d = 0.89（large）。
+> L1 上 t = 34.61, p < 1e-15, d = 1.13（large）；条件 A 为 t = 4.26, p = 2e-5, d = 0.60。
 > 保留本节仅作方法演示。
 
 数据来源（mock 阶段）：

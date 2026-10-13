@@ -1,4 +1,4 @@
-﻿"""P0-3 报告生成器：改进框架真实 API 验证
+"""P0-3 报告生成器：改进框架真实 API 验证
 
 输入：
 - reports/improvement_real.json          （run_improved_smoke_real.py 产出）
@@ -250,17 +250,21 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
               "t | p | Cohen's d | 效应量 |\n")
     md.append("|------|----------|------------|-------------|---------------|"
               "---|-----|-----------|--------|\n")
+    l1_means = None
     for lv in (1,):
         lg_dt = legacy_lvl.get(lv, {}).get("delta_ts", [])
         im_dt = improved_lvl.get(lv, {}).get("delta_ts", [])
         tt = welch_t_test(lg_dt, im_dt)
         d = cohens_d(lg_dt, im_dt)
+        mean_lg, mean_im = _mean(lg_dt), _mean(im_dt)
+        l1_means = (mean_lg, mean_im)
         md.append(f"| L{lv} | {len(lg_dt)} | {len(im_dt)} | "
-                  f"{_mean(lg_dt):.3f} | {_mean(im_dt):.3f} | "
+                  f"{mean_lg:.3f} | {mean_im:.3f} | "
                   f"{tt['t']:.3f} | {tt['p_value']:.2e} | "
                   f"{d:.3f} | {effect_size_label(d)} |\n")
-    md.append("\n> L1 上 improved 的 Δ_t 更低（0.013 vs 0.082），"
-              "说明约束框架在 L1 也顺带降低了评估偏差\n")
+    if l1_means is not None:
+        md.append(f"\n> L1 上 improved 的 Δ_t 更低（{l1_means[1]:.3f} vs {l1_means[0]:.3f}），"
+                  "说明约束框架在 L1 也顺带降低了评估偏差\n")
     md.append("> （JSON 骨架 → 渲染 → Z3 锚定的链路更干净）。\n\n")
 
     md.append("\n## 5. 与 mock 数据对比\n\n")
@@ -299,23 +303,35 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
     md.append("L1（LIA/Int）几乎不用十六进制，所以毫发无伤；\n")
     md.append("**L2 是位向量理论，掩码 `0xFF` / `0x0F` 是标准写法**，于是全线误杀。\n\n")
     md.append("这是**框架自身的假阳性**，不是 LLM 的能力问题。\n\n")
-    md.append("### 6.3 修复\n\n")
-    md.append("先替换数字字面量（十六进制/二进制/八进制/十进制/下划线/科学计数）为占位符，\n")
+    md.append("### 6.3 修复（两代）\n\n")
+    md.append("**第一代**：先替换数字字面量（十六进制/二进制/八进制/十进制/下划线/科学计数）为占位符，\n")
     md.append("再做标识符扫描；同时补齐 z3 内置白名单（`BitVecVal` / `BV2Int` / `LShR` 等）。\n\n")
-    md.append("回归测试：`tests/test_constraint_generation.py::TestNumericLiteralRegression`（7 例）。\n\n")
+    md.append("**第二代**：上述替换正则缺少词边界，会连带删掉标识符*内部*的数字——\n")
+    md.append("`x1` → `x`、`BV2Int` → `BV` + `2` + `Int`、`a0` → `a`——\n")
+    md.append("于是白名单里的名字在被查询之前就已被破坏。现已用前后视断言（lookaround）收紧。\n\n")
+    md.append("回归测试：`tests/test_constraint_generation.py::TestNumericLiteralRegression`（9 例，覆盖两代）。\n\n")
     md.append("### 6.4 修复前后对比\n\n")
-    md.append("| 级别 | 修复前（run 1，49 轮后停止） | 修复后（run 2，240 轮） |\n")
-    md.append("|------|---------------------------|----------------------|\n")
-    md.append("| L1 | 20/20 = 100% | 79/80 = 98.8% |\n")
-    md.append("| L2 | **2/20 = 10%** | **57/80 = 71.2%** |\n")
-    md.append("| L3 | （未跑到） | 47/80 = 58.8% |\n\n")
-    md.append("> 修复前数据保留在 `argus-workspace/improved_real_run1_hexbug/` 作为证据。\n")
-    md.append("> 修复后剩余失败全部是 `error_code=1: LLM did not return valid JSON`，\n")
-    md.append("> 即真实模型输出无法解析——这是真实的能力边界，不再是框架缺陷。\n\n")
+    md.append("| 级别 | 修复前（run 1，49 轮后停止） | 第一代修复后（run 2，中间态） | 两代修复后（run 3，最终） |\n")
+    md.append("|------|---------------------------|---------------------------|----------------------|\n")
+    for lv in (1, 2, 3):
+        im = improved_lvl.get(lv, {"valid": 0, "total": 0, "valid_rate": 0.0})
+        v1_txt = {1: "79/80 = 98.8%", 2: "**57/80 = 71.2%**", 3: "47/80 = 58.8%"}[lv]
+        pre_txt = {1: "20/20 = 100%", 2: "**2/20 = 10%**", 3: "（未跑到）"}[lv]
+        final_txt = (f"**{im['valid']}/{im['total']} = {im['valid_rate']*100:.1f}%**"
+                     if lv == 2 else f"{im['valid']}/{im['total']} = {im['valid_rate']*100:.1f}%")
+        md.append(f"| L{lv} | {pre_txt} | {v1_txt} | {final_txt} |\n")
+    md.append("\n> 中间态数值为历史记录（第一代修复后的 run 2）；最终列为当前 `--out_dir` 实测值。\n")
+    md.append("> 修复前数据保留在 `argus-workspace/improved_real_run1_hexbug/` 作为证据，\n")
+    md.append("> 中间态日志保留在 `argus-workspace/improved_real_v1_lexbug/`。\n")
+    md.append("> 两代修复后，护栏拒绝已从失败记录中彻底消失；剩余失败是模型侧 JSON 解析失败\n")
+    md.append("> 与 1 例不支持的变量类型——这是真实的能力边界，不再是框架缺陷。\n\n")
     md.append("### 6.5 方法论意义\n\n")
     md.append("这一发现本身就是 Task 3 的价值证明：**mock LLM 永远发现不了这个 bug**，\n")
     md.append("因为 MockLLM 对 L2 返回的是手写的合法 payload。\n")
     md.append("只有真实模型按自己的习惯写 `0xFF`，才会把这个假阳性暴露出来。\n\n")
+    md.append("第二代缺陷把这一点推得更尖锐：**测试套件在有残留缺陷时与没有时一样全绿**，\n")
+    md.append("所以「测试通过」并不能为护栏背书。真正暴露它的是逐个重读失败轮次的\n")
+    md.append("`error_reason` 并与原始 `task_json` 对照——靠真实失败记录做归因，而不是靠测试。\n\n")
 
     md.append("## 7. 结论\n\n")
     for lv in (1, 2, 3):
@@ -330,7 +346,7 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
     md.append("> 四层约束生成框架在被显式要求生成 L2/L3 时，分别达到\n")
     md.append(f"> {improved_lvl.get(2, {}).get('valid_rate', 0)*100:.1f}% 和 "
               f"{improved_lvl.get(3, {}).get('valid_rate', 0)*100:.1f}% 的成功率，\n")
-    md.append("> 且 L1 保持 98.8% 不退化。\n\n")
+    md.append(f"> 且 L1 保持 {improved_lvl.get(1, {}).get('valid_rate', 0)*100:.1f}% 不退化。\n\n")
     md.append("## 8. 图表\n\n")
     md.append("- `reports/fig6_improvement_comparison_real.png`\n\n")
 

@@ -1173,30 +1173,47 @@ at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
         "The fix substitutes numeric literals (hex, binary, octal, decimal, "
         "underscore-separated, scientific) with placeholders before scanning, and "
         "extends the Z3 builtin whitelist (`BitVecVal`, `BV2Int`, `LShR`, …). L2 rose "
-        "from 10% to 71.2% and L3 reached 58.8%. Seven regression tests pin the "
-        "behaviour.\n\n")
+        "from 10% to 71.2% and L3 reached 58.8%.\n\n")
+    md.append(
+        "That fix was itself incomplete. The substitution regex had no word boundary, so "
+        "it also deleted digits inside identifiers: `x1` became `x`, `BV2Int` became "
+        "`BV` + `2` + `Int`, and `a0` became `a`; names on the builtin whitelist were "
+        "destroyed before the whitelist was consulted. Re-validating the 240 round logs "
+        "against the corrected lexer showed 23 of 240 rounds (9.6%) had been rejected by "
+        "our own guardrail. Those intermediate rates — L1 = 98.8%, L2 = 71.2%, L3 = 58.8% "
+        "— were lower bounds, not results.\n\n")
+    md.append(
+        "We treat the lexer as one defect with two generations, both now repaired. After "
+        "the second fix the experiment was re-run end to end: 0 of 240 rounds are "
+        "rejected by our own validator, and the remaining 34 failures are 33 model-side "
+        "JSON parse failures plus 1 unsupported variable type. The final rates are "
+        "L1 = 100.0%, L2 = 73.8%, L3 = 83.8%.\n\n")
     md.append(
         "We record this because it is a methodological point rather than an "
         "implementation detail: a mock LLM emits hand-written, well-formed payloads and "
         "will never exercise the validator against the idioms a real model actually "
         "uses. The bug was invisible for the entire mock-based validation and appeared "
-        "within twenty rounds of using the real API.\n\n")
+        "within twenty rounds of using the real API. The second generation sharpens the "
+        "point: the regression suite stayed exactly as green with the residual defect as "
+        "without it, so a passing suite did not certify the guardrail.\n\n")
 
     md.append("### 6.4 Validity Rates Under the Real API\n\n")
     md.append(
-        "After the fix, the remaining invalid rounds are all `error_code=1: LLM did not "
-        "return valid JSON` — the model produced output that could not be parsed at all. "
-        "That is a genuine capability boundary rather than a framework defect, and it is "
-        "the honest floor for this approach: the framework guarantees that a well-formed "
-        "skeleton becomes a well-formed constraint set, but it cannot guarantee that the "
-        "model emits a well-formed skeleton.\n\n")
+        "After both fixes, 34 of the 240 rounds are invalid: 33 are `error_code=1: LLM "
+        "did not return valid JSON` — the model produced output that could not be parsed "
+        "at all — and 1 is an unsupported variable type. No round is rejected by our own "
+        "guardrail any more. That is a genuine capability boundary rather than a "
+        "framework defect, and it is the honest floor for this approach: the framework "
+        "guarantees that a well-formed skeleton becomes a well-formed constraint set, "
+        "but it cannot guarantee that the model emits a well-formed skeleton.\n\n")
 
     md.append("### 6.5 Statistical Tests\n\n")
     md.append(
         "Because the legacy per-level denominators exclude its failed rounds, only the "
         "L1 comparison is caliber-consistent. There the improved teacher shows a lower "
-        "Δ_t (0.013 vs 0.082; Welch t = 5.43, p = 6.0e-8, Cohen's d = 0.89, large). "
-        "Full results and the caliber caveats are in "
+        "Δ_t (0.000 vs 0.082; Welch t = 34.61, p < 1e-15, Cohen's d = 1.13, large). On "
+        "condition A the framework gives t = 4.26, p = 2e-5, d = 0.60; condition B stays "
+        "null (t = 0.82, p = 0.41). Full results and the caliber caveats are in "
         "`reports/improvement_validation_real.md`.\n\n")
 
     # ---------------- Part 5: checklist ----------------

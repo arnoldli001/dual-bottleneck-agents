@@ -261,6 +261,49 @@ class TestNumericLiteralRegression:
         with pytest.raises(TaskJSONInvalid):
             validate_task_json(t)
 
+    def test_identifiers_containing_digits_survive_tokenisation(self):
+        """第二代切词缺陷回归：数字替换正则必须带词边界。
+
+        第一代缺陷：裸正则把十六进制字面量 ``0x0F`` 切成 ``0`` + ``x0F``，
+        ``x0F`` 被判为未声明变量。
+        第二代缺陷（第一代的修复引入）：改成"先替换数字字面量、再扫标识符"之后，
+        替换正则没有词边界，于是把标识符里的数字也一并挖走 —— ``x1`` -> ``x``、
+        ``BV2Int`` -> ``BV`` + ``2`` + ``Int``、``a0`` -> ``a``。白名单里的
+        ``BV2Int`` / ``Int2BV`` 因此在被查白名单**之前**就已碎掉，永远救不回来。
+        真实 API 的 240 轮里，这使 23 轮（其中 22 轮在 L3）被自有护栏误杀。
+        """
+        t = {
+            "variables": [
+                {"name": "x1", "type": "Int"},
+                {"name": "x2", "type": "Int"},
+                {"name": "a0", "type": "Int"},
+                {"name": "x_1", "type": "Int"},
+                {"name": "b8", "type": "BitVec8"},
+                {"name": "flags", "type": "BitVec8"},
+                {"name": "j", "type": "Int"},
+            ],
+            "constraints": [
+                "x1 + x2 == 5",              # 标识符含数字
+                "BV2Int(b8) == j",           # 白名单函数名含数字
+                "Int2BV(8, x1) == b8",       # 同上，且含独立字面量 8
+                "(flags & 0x0F) == 0x03",    # 十六进制掩码（第一代缺陷形态）
+                "x_1 == a0",                 # 下划线 + 数字
+            ],
+            "expected_sat": True,
+        }
+        validate_task_json(t)               # 不抛 → 通过
+
+    def test_declared_names_are_still_enforced(self):
+        """真阴性：带数字的标识符被放行后，未声明的仍必须被拒。"""
+        for declared, constraint in (("x", "x1 == 1"), ("x1", "zz == 1")):
+            t = {
+                "variables": [{"name": declared, "type": "Int"}],
+                "constraints": [constraint],
+                "expected_sat": True,
+            }
+            with pytest.raises(TaskJSONInvalid, match="未声明"):
+                validate_task_json(t)
+
 
 class TestRenderer:
     """渲染引擎：JSON → Z3 代码。"""

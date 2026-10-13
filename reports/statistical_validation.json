@@ -4,51 +4,51 @@
     "n_legacy": 600,
     "n_improved": 60,
     "mean_legacy": 0.2435,
-    "mean_improved": 0.2333,
+    "mean_improved": 0.0833,
     "std_legacy": 0.2662,
-    "std_improved": 0.4265,
-    "t": 0.1811,
-    "df": 63.7,
-    "p_value": 0.856257,
-    "cohens_d": 0.0358
+    "std_improved": 0.2787,
+    "t": 4.2612,
+    "df": 70.2,
+    "p_value": 2e-05,
+    "cohens_d": 0.5991
   },
   {
     "condition": "B",
     "n_legacy": 600,
     "n_improved": 60,
     "mean_legacy": 0.245,
-    "mean_improved": 0.25,
+    "mean_improved": 0.2,
     "std_legacy": 0.4304,
-    "std_improved": 0.4367,
-    "t": -0.0847,
-    "df": 71.0,
-    "p_value": 0.932519,
-    "cohens_d": -0.0116
+    "std_improved": 0.4034,
+    "t": 0.8188,
+    "df": 73.1,
+    "p_value": 0.412919,
+    "cohens_d": 0.1051
   },
   {
     "condition": "C",
     "n_legacy": 600,
     "n_improved": 60,
     "mean_legacy": 0.8823,
-    "mean_improved": 0.2667,
+    "mean_improved": 0.15,
     "std_legacy": 0.2911,
-    "std_improved": 0.4459,
-    "t": 10.4718,
-    "df": 64.1,
+    "std_improved": 0.3601,
+    "t": 15.2611,
+    "df": 66.9,
     "p_value": 0.0,
-    "cohens_d": 1.9977
+    "cohens_d": 2.458
   },
   {
     "condition": "D",
     "n_legacy": 600,
     "n_improved": 60,
     "mean_legacy": 0.905,
-    "mean_improved": 0.2,
+    "mean_improved": 0.1333,
     "std_legacy": 0.2935,
-    "std_improved": 0.4034,
-    "t": 13.1934,
-    "df": 65.4,
+    "std_improved": 0.3428,
+    "t": 16.8307,
+    "df": 67.9,
     "p_value": 0.0,
-    "cohens_d": 2.312
+    "cohens_d": 2.5876
   }
 ]

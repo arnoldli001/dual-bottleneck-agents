@@ -28,6 +28,12 @@ argus-workspace/_runtime/
 !argus-workspace/improved_real/
 !argus-workspace/improved_real_run1_hexbug/
 !argus-workspace/smoke_real/
+# 第二代词法缺陷修复前的中间态日志（240 轮）。放行的理由：
+# paper/main.tex 附录 E 与 reports/improvement_validation_real.md §6.4
+# 都明确报告了这一中间态的数值（L1/L2/L3 = 98.8% / 71.2% / 58.8%）
+# 并称其为"下界而非结果"。若不放行，读者无法核实这一说法，
+# 只能选择相信或不相信——这与本仓库"日志可离线复现"的前提相矛盾。
+!argus-workspace/improved_real_v1_lexbug/
 
 # 课程控制器状态文件（运行时生成）
 # 用 `/state/` 而非 `state/`：后者会匹配任意深度的 state/ 目录，

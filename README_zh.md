@@ -83,7 +83,7 @@ P(correct) = (1−p)² + p² = (1+τ²)/2
 
 把"LLM 自由生成 Z3 代码"换成四层约束管线
 （JSON 骨架 → 确定性渲染 → 符号反馈 → 课程控制）后，
-真实 API 下有效任务率：**L1 98.8% / L2 71.2% / L3 58.8%**
+真实 API 下有效任务率：**L1 100.0% / L2 73.8% / L3 83.8%**
 （基线在 2400 轮内只产出 11 个有效 L2 与 114 个有效 L3 任务）。
 
 ---
@@ -102,7 +102,7 @@ pip install -r requirements.txt
 
 ```bash
 pytest tests/ -q
-# 171 passed
+# 172 passed
 ```
 
 ### 2.3 完整图表与数据
@@ -211,7 +211,7 @@ dual-bottleneck-agents/
 │   ├── dual_bottleneck_law.py        # 双重瓶颈合成律
 │   ├── unify_paper_outputs.py        # 论文数据包汇总
 │   └── difficulty_controller.py      # 课程控制器
-├── tests/                    # 171 个单元/集成测试
+├── tests/                    # 172 个单元/集成测试
 ├── argus-workspace/          # 实验数据（论文用，随仓库发布）
 ├── logs/                     # 实验数据（Section 5）
 ├── reports/                  # 图表、数据表、报告
