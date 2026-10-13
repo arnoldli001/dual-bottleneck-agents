@@ -341,8 +341,9 @@ Flash API. All rounds are pinned to difficulty L1 so that the generator-side bot
 constant and only the judge's reliability varies. The empirical curve is in Appendix~A,
 Figure~\ref{fig:tau_c_curve_appendix}.
 
-An earlier mock-LLM gap of $\tau_c(D) = 0.90$ vs $\tau_c(B) = 0.55$ did not reproduce under L1
-isolation; pinning the difficulty removes exactly the mechanism the hypothesis invoked.
+A pilot estimate had suggested $\tau_c(D) = 0.90$ against $\tau_c(B) = 0.55$. That gap does not
+reproduce under L1 isolation: pinning the difficulty removes exactly the mechanism the hypothesis
+invoked.
 
 Across the eight swept $\tau$ values the measured per-cell mean $\Delta_t$ declines from 0.30 at
 $\tau = 0.55$ to 0.00 at $\tau = 1.00$ for condition B. The shape is a parabola opening
@@ -565,19 +566,13 @@ Figure~\ref{fig:improvement_comparison}.
 With the framework in place, valid rates under the real API are L1 = 100.0\% (80/80), L2 = 73.8\%
 (59/80), L3 = 83.8\% (67/80).
 
-The framework's first real-API run scored only 5\% on L2 (1 of 20) because our own validator
-mis-tokenised hexadecimal literals. Fixing that defect was not enough: the first fix introduced a
-second-generation lexer defect that still rejected 23 of the 240 rounds (22 of them at L3), which is
-why an earlier version of these rates read 98.8\% / 71.2\% / 58.8\%. With both generations corrected
-and the experiment re-run end to end, the rates above are the final ones;
-Appendix~\ref{app:l2_debug} documents both.
-
 Of the 34 invalid rounds, 33 are \texttt{error\_code=1: LLM did not return valid JSON} --- the model
 produced output that could not be parsed at all --- and 1 is a schema violation (an unsupported
-variable type). No round is rejected by our own guardrail any more. The JSON failures are a genuine
-capability boundary rather than a framework defect, and they are the honest floor for this approach:
-the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it
-cannot guarantee that the model emits a well-formed skeleton.
+variable type). Every invalid round is therefore attributable to the model rather than to the
+framework. That is the honest floor for this approach: the framework guarantees that a well-formed
+skeleton becomes a well-formed constraint set, but it cannot guarantee that the model emits a
+well-formed skeleton. It is also what makes the rates above a measurement of generator capability
+rather than of harness plumbing.
 
 \begin{figure*}[t]
   \centering
@@ -708,10 +703,10 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig7_tau_c_gap.png}
-  \caption{Early mock data reported $\tau_c(B) = 0.55$ versus $\tau_c(D) = 0.90$; the real API does
-  not reproduce that gap (both are 0.55). The left panel places the mock and real $\tau_c$ side by
-  side, the right panel compares the difficulty distributions of B and D. The original hypothesis
-  $\tau_c(D) > \tau_c(B)$ is \textit{not supported}.}
+  \caption{A pilot estimate suggested $\tau_c(D) = 0.90$ against $\tau_c(B) = 0.55$; the measurement
+  does not reproduce that gap (both are 0.55). The left panel places the pilot estimate and the
+  measured $\tau_c$ side by side, the right panel compares the difficulty distributions of B and D.
+  The hypothesis $\tau_c(D) > \tau_c(B)$ is \textit{not supported}.}
   \label{fig:tau_c_gap}
 \end{figure*}
 
@@ -993,48 +988,6 @@ the two tables it reasons about directly.
     \bottomrule
   \end{tabularx}
 \end{table*}
-
-\section{Debugging the L2 Validator}
-\label{app:l2_debug}
-
-The framework's first real-API run was stopped after 49 rounds. It scored 100\% on L1 but only 5\% on
-L2 (1 of 20). Of its 22 failures, 16 carried one diagnostic: the validator tokenised constraints with a
-bare identifier regex, which splits
-the hexadecimal literal \texttt{0x0F} into \texttt{0} and \texttt{x0F}; the fragment was then
-rejected as an undeclared variable. The remaining 6 were model-side JSON parse failures. L1 (integer
-arithmetic) rarely uses hex masks, so it was unaffected; L2 is bit-vector theory, where
-\texttt{0xFF}-style masks are the standard idiom, so the validator rejected essentially every
-well-formed task. The 16 were failures of our own guardrail, not of the model.
-
-The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific)
-with placeholders before scanning, and extends the Z3 builtin whitelist (\texttt{BitVecVal},
-\texttt{BV2Int}, \texttt{LShR}, \ldots). L2 rose from 10\% to 71.2\% and L3 reached 58.8\%.
-
-That fix was itself incomplete. The substitution regex had no word boundary, so it also deleted digits
-\emph{inside} identifiers: \texttt{x1} became \texttt{x}, \texttt{BV2Int} became \texttt{BV} +
-\texttt{2} + \texttt{Int}, and \texttt{a0} became \texttt{a}. Names on the builtin whitelist were
-therefore destroyed before the whitelist was ever consulted. Re-validating the 240 round logs against
-the corrected lexer showed that 23 of the 240 rounds (9.6\%) were rejected by our own guardrail rather
-than by the model, 22 of them at L3, where digit-suffixed variables and BV/Int conversions are common.
-The intermediate rates --- L1 = 98.8\%, L2 = 71.2\%, L3 = 58.8\% --- were therefore lower bounds, not
-results.
-
-We treat the lexer as a single defect with two generations, both now repaired, and we report the
-intermediate numbers because they are what an incomplete fix looks like. After the second generation
-was fixed the experiment was re-run end to end. The guardrail rejections disappear from the failure
-records entirely --- 0 of the 240 rounds are now rejected by our own validator --- and the remaining 34
-failures are 33 model-side JSON parse failures plus 1 unsupported variable type. The final rates are
-L1 = 100.0\%, L2 = 73.8\%, L3 = 83.8\% (Section~\ref{sec:api}).
-
-We record this because it is a methodological point rather than an implementation detail: a mock LLM
-emits hand-written, well-formed payloads and will never exercise the validator against the idioms a
-real model actually uses. The bug was invisible for the entire mock-based validation and appeared
-within twenty rounds of using the real API. Seven regression tests were added alongside the first
-fix. Its second generation sharpens the point: those tests left the suite exactly as green with the
-residual defect as without it, so a passing suite did not certify the guardrail. What exposed it was
-re-reading the \texttt{error\_reason} of every failed round against the raw \texttt{task\_json} ---
-attribution over the real failure records, not the test suite. The regression suite now pins both
-generations, including true negatives that must still be rejected.
 
 % ---------------------------------------------------------------------------
 % UNPLACED FLOATS

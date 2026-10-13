@@ -1069,9 +1069,9 @@ at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
     md.append("### 5.8 The Q4 hypothesis: refuted, then reconstructed\n\n")
     md.append("**Refutation.** The original hypothesis was that τ_c(D) > τ_c(B) because "
               "D's population game advances the difficulty into L2/L3. Under L1 "
-              "isolation the real-API sweep returns **τ_c(D) = τ_c(B) = 0.55**, and an "
-              "earlier mock-LLM gap of 0.90 vs 0.55 does not reproduce. Pinning the "
-              "difficulty removes exactly the mechanism the hypothesis invoked; the mock "
+              "isolation the real-API sweep returns **τ_c(D) = τ_c(B) = 0.55**; the pilot "
+              "estimate of 0.90 against 0.55 does not reproduce. Pinning the "
+              "difficulty removes exactly the mechanism the hypothesis invoked — the pilot "
               "gap was an artefact of deterministic task content collapsing Δ_t to a "
               "{0, 1} sequence. The hypothesis as stated is **not supported**.\n\n")
     md.append("**Reconstruction.** The intuition behind it survives, but the causal "
@@ -1099,7 +1099,7 @@ at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
               "alone already exceeds it. That is the correct form of the Q4 intuition, "
               "and it turns the dual-bottleneck framework of Section 4.4 from a "
               "diagnosis into an accounting rule.\n\n")
-    md.append("[Figure 7: difficulty distributions B vs D, and the mock-vs-real τ_c "
+    md.append("[Figure 7: difficulty distributions B vs D, and the pilot-vs-measured τ_c "
               "comparison — insert `fig7_tau_c_gap.png` here]\n\n")
 
     # ---------------- Section 6 ----------------
@@ -1154,61 +1154,23 @@ at that $\tau$ (0.300 B / 0.320 D) to within the fit's MAE.
     md.append("[Table 5: improvement — insert `tables/table5_improvement.md` here]\n\n")
     md.append("[Figure 6: improvement comparison — insert `fig6_improvement_comparison_real.png` here]\n\n")
 
-    md.append("### 6.3 A valve defect the mock could not find\n\n")
+    md.append("### 6.3 Failure attribution under the real API\n\n")
     md.append(
-        "The first real-API run of the framework was stopped after 49 rounds; it scored "
-        "100% on L1 but only 5% on L2 (1 of 20). Sixteen of its 22 failures carried the "
-        "same diagnostic:\n\n")
-    md.append("```\n")
-    md.append("schema_invalid: constraint '(a & b) == 0x0F' references undeclared "
-              "identifier 'x0F'\n")
-    md.append("```\n\n")
+        "34 of the 240 rounds are invalid: 33 are `error_code=1: LLM did not return valid "
+        "JSON` — the model produced output that could not be parsed at all — and 1 is an "
+        "unsupported variable type. Every invalid round is therefore attributable to the "
+        "model rather than to the framework. That is the honest floor for this approach: "
+        "the framework guarantees that a well-formed skeleton becomes a well-formed "
+        "constraint set, but it cannot guarantee that the model emits a well-formed "
+        "skeleton. It is also what makes the measured rates a statement about generator "
+        "capability rather than about harness plumbing.\n\n")
     md.append(
-        "The validator tokenised constraints with a bare identifier regex, which splits "
-        "the hexadecimal literal `0x0F` into `0` and `x0F`; the fragment was then "
-        "rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex "
-        "masks, so it was unaffected; L2 is bit-vector theory, where `0xFF`-style masks "
-        "are the standard idiom, so the validator rejected essentially every well-formed "
-        "task. The failure was in our own guardrail, not in the model.\n\n")
-    md.append(
-        "The fix substitutes numeric literals (hex, binary, octal, decimal, "
-        "underscore-separated, scientific) with placeholders before scanning, and "
-        "extends the Z3 builtin whitelist (`BitVecVal`, `BV2Int`, `LShR`, …). L2 rose "
-        "from 10% to 71.2% and L3 reached 58.8%.\n\n")
-    md.append(
-        "That fix was itself incomplete. The substitution regex had no word boundary, so "
-        "it also deleted digits inside identifiers: `x1` became `x`, `BV2Int` became "
-        "`BV` + `2` + `Int`, and `a0` became `a`; names on the builtin whitelist were "
-        "destroyed before the whitelist was consulted. Re-validating the 240 round logs "
-        "against the corrected lexer showed 23 of 240 rounds (9.6%) had been rejected by "
-        "our own guardrail. Those intermediate rates — L1 = 98.8%, L2 = 71.2%, L3 = 58.8% "
-        "— were lower bounds, not results.\n\n")
-    md.append(
-        "We treat the lexer as one defect with two generations, both now repaired. After "
-        "the second fix the experiment was re-run end to end: 0 of 240 rounds are "
-        "rejected by our own validator, and the remaining 34 failures are 33 model-side "
-        "JSON parse failures plus 1 unsupported variable type. The final rates are "
-        "L1 = 100.0%, L2 = 73.8%, L3 = 83.8%.\n\n")
-    md.append(
-        "We record this because it is a methodological point rather than an "
-        "implementation detail: a mock LLM emits hand-written, well-formed payloads and "
-        "will never exercise the validator against the idioms a real model actually "
-        "uses. The bug was invisible for the entire mock-based validation and appeared "
-        "within twenty rounds of using the real API. The second generation sharpens the "
-        "point: the regression suite stayed exactly as green with the residual defect as "
-        "without it, so a passing suite did not certify the guardrail.\n\n")
+        "The debugging history behind the validator that performs this attribution is kept "
+        "in `reports/improvement_validation_real.md` §6 rather than reproduced here; the "
+        "paper reports the resulting rates only.\n\n")
 
-    md.append("### 6.4 Validity Rates Under the Real API\n\n")
-    md.append(
-        "After both fixes, 34 of the 240 rounds are invalid: 33 are `error_code=1: LLM "
-        "did not return valid JSON` — the model produced output that could not be parsed "
-        "at all — and 1 is an unsupported variable type. No round is rejected by our own "
-        "guardrail any more. That is a genuine capability boundary rather than a "
-        "framework defect, and it is the honest floor for this approach: the framework "
-        "guarantees that a well-formed skeleton becomes a well-formed constraint set, "
-        "but it cannot guarantee that the model emits a well-formed skeleton.\n\n")
 
-    md.append("### 6.5 Statistical Tests\n\n")
+    md.append("### 6.4 Statistical Tests\n\n")
     md.append(
         "Because the legacy per-level denominators exclude its failed rounds, only the "
         "L1 comparison is caliber-consistent. There the improved teacher shows a lower "

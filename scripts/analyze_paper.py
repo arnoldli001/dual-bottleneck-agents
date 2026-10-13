@@ -564,7 +564,8 @@ def fig6_improvement_comparison(records_old: list[dict],
     ax.set_xticklabels([f"L{lv}" for lv in levels])
     ax.set_xlabel("Difficulty Level")
     ax.set_ylabel("Valid Rate (constraint framework)")
-    ax.set_title("Smoke run: framework achieves 100% valid across L1/L2/L3 (mock LLM)")
+    ax.set_title("[DEPRECATED — mock LLM smoke, not for publication]\n"
+                 "framework reaches 100% valid across L1/L2/L3")
     ax.set_ylim(0, 1.15)
     ax.grid(True, alpha=0.3, axis="y")
 

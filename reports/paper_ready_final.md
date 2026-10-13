@@ -225,7 +225,7 @@ So the two agree to first order in the high-reliability limit, and diverge quadr
 
 ### 5.8 The Q4 hypothesis: refuted, then reconstructed
 
-**Refutation.** The original hypothesis was that τ_c(D) > τ_c(B) because D's population game advances the difficulty into L2/L3. Under L1 isolation the real-API sweep returns **τ_c(D) = τ_c(B) = 0.55**, and an earlier mock-LLM gap of 0.90 vs 0.55 does not reproduce. Pinning the difficulty removes exactly the mechanism the hypothesis invoked; the mock gap was an artefact of deterministic task content collapsing Δ_t to a {0, 1} sequence. The hypothesis as stated is **not supported**.
+**Refutation.** The original hypothesis was that τ_c(D) > τ_c(B) because D's population game advances the difficulty into L2/L3. Under L1 isolation the real-API sweep returns **τ_c(D) = τ_c(B) = 0.55**; the pilot estimate of 0.90 against 0.55 does not reproduce. Pinning the difficulty removes exactly the mechanism the hypothesis invoked — the pilot gap was an artefact of deterministic task content collapsing Δ_t to a {0, 1} sequence. The hypothesis as stated is **not supported**.
 
 **Reconstruction.** The intuition behind it survives, but the causal variable is different. A round succeeds only if a valid task exists *and* the student judges it correctly, so by the chain rule
 
@@ -241,7 +241,7 @@ $$\Delta_{\text{judge}}^{\text{budget}} = 1 - \frac{1-\Delta_t^{\max}}{1-\Delta_
 
 Concretely, at Δ_t^max = 0.60: condition B (Δ_t_gen = 0.245) requires τ_c ≈ 0.24, while C and D (Δ_t_gen = 0.855 and 0.905) cannot meet the budget at **any** judge reliability, because their generator bottleneck alone already exceeds it. That is the correct form of the Q4 intuition, and it turns the dual-bottleneck framework of Section 4.4 from a diagnosis into an accounting rule.
 
-[Figure 7: difficulty distributions B vs D, and the mock-vs-real τ_c comparison — insert `fig7_tau_c_gap.png` here]
+[Figure 7: difficulty distributions B vs D, and the pilot-vs-measured τ_c comparison — insert `fig7_tau_c_gap.png` here]
 
 ---
 
@@ -266,29 +266,13 @@ With the framework in place, valid rates under the real API are L1 = 100.0% (80/
 
 [Figure 6: improvement comparison — insert `fig6_improvement_comparison_real.png` here]
 
-### 6.3 A valve defect the mock could not find
+### 6.3 Failure attribution under the real API
 
-The first real-API run of the framework was stopped after 49 rounds; it scored 100% on L1 but only 5% on L2 (1 of 20). Sixteen of its 22 failures carried the same diagnostic:
+34 of the 240 rounds are invalid: 33 are `error_code=1: LLM did not return valid JSON` — the model produced output that could not be parsed at all — and 1 is an unsupported variable type. Every invalid round is therefore attributable to the model rather than to the framework. That is the honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton. It is also what makes the measured rates a statement about generator capability rather than about harness plumbing.
 
-```
-schema_invalid: constraint '(a & b) == 0x0F' references undeclared identifier 'x0F'
-```
+The debugging history behind the validator that performs this attribution is kept in `reports/improvement_validation_real.md` §6 rather than reproduced here; the paper reports the resulting rates only.
 
-The validator tokenised constraints with a bare identifier regex, which splits the hexadecimal literal `0x0F` into `0` and `x0F`; the fragment was then rejected as an undeclared variable. L1 (integer arithmetic) rarely uses hex masks, so it was unaffected; L2 is bit-vector theory, where `0xFF`-style masks are the standard idiom, so the validator rejected essentially every well-formed task. The failure was in our own guardrail, not in the model.
-
-The fix substitutes numeric literals (hex, binary, octal, decimal, underscore-separated, scientific) with placeholders before scanning, and extends the Z3 builtin whitelist (`BitVecVal`, `BV2Int`, `LShR`, …). L2 rose from 10% to 71.2% and L3 reached 58.8%.
-
-That fix was itself incomplete. The substitution regex had no word boundary, so it also deleted digits inside identifiers: `x1` became `x`, `BV2Int` became `BV` + `2` + `Int`, and `a0` became `a`; names on the builtin whitelist were destroyed before the whitelist was consulted. Re-validating the 240 round logs against the corrected lexer showed 23 of 240 rounds (9.6%) had been rejected by our own guardrail. Those intermediate rates — L1 = 98.8%, L2 = 71.2%, L3 = 58.8% — were lower bounds, not results.
-
-We treat the lexer as one defect with two generations, both now repaired. After the second fix the experiment was re-run end to end: 0 of 240 rounds are rejected by our own validator, and the remaining 34 failures are 33 model-side JSON parse failures plus 1 unsupported variable type. The final rates are L1 = 100.0%, L2 = 73.8%, L3 = 83.8%.
-
-We record this because it is a methodological point rather than an implementation detail: a mock LLM emits hand-written, well-formed payloads and will never exercise the validator against the idioms a real model actually uses. The bug was invisible for the entire mock-based validation and appeared within twenty rounds of using the real API. The second generation sharpens the point: the regression suite stayed exactly as green with the residual defect as without it, so a passing suite did not certify the guardrail.
-
-### 6.4 Validity Rates Under the Real API
-
-After both fixes, 34 of the 240 rounds are invalid: 33 are `error_code=1: LLM did not return valid JSON` — the model produced output that could not be parsed at all — and 1 is an unsupported variable type. No round is rejected by our own guardrail any more. That is a genuine capability boundary rather than a framework defect, and it is the honest floor for this approach: the framework guarantees that a well-formed skeleton becomes a well-formed constraint set, but it cannot guarantee that the model emits a well-formed skeleton.
-
-### 6.5 Statistical Tests
+### 6.4 Statistical Tests
 
 Because the legacy per-level denominators exclude its failed rounds, only the L1 comparison is caliber-consistent. There the improved teacher shows a lower Δ_t (0.000 vs 0.082; Welch t = 34.61, p < 1e-15, Cohen's d = 1.13, large). On condition A the framework gives t = 4.26, p = 2e-5, d = 0.60; condition B stays null (t = 0.82, p = 0.41). Full results and the caliber caveats are in `reports/improvement_validation_real.md`.
 

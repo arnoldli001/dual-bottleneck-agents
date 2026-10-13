@@ -65,6 +65,16 @@ Thumbs.db
 *.log
 *.err
 
+# 中文图生成的中转产物
+# paper/_zh_figs.py 先把无边框原图写到 reports/_zh_raw/，再用 normalize()
+# 加边框输出到 paper/figures_zh/（那才是交付物）。中转目录 2.4 MB 且随时可
+# 重生成，不入库。_zh_strings.json / _zh_hash*.txt 是同一流程的清单与校验快照。
+reports/_zh_raw/
+reports/_zh_scratch/
+reports/_zh_strings.json
+reports/_zh_hash*.txt
+reports/_zhb.txt
+
 # 归档（如不上传，去掉注释）
 # archive/
 

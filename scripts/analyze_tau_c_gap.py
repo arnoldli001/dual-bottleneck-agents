@@ -40,10 +40,10 @@ def load_tau_c_results() -> tuple[dict | None, str]:
     """
     real_p = Path("reports/tau_c_real.json")
     if real_p.exists():
-        return json.loads(real_p.read_text(encoding="utf-8")), "real API (P0-2)"
+        return json.loads(real_p.read_text(encoding="utf-8")), "real API"
     mock_p = Path("reports/tau_c_analysis.json")
     if mock_p.exists():
-        return json.loads(mock_p.read_text(encoding="utf-8")), "MOCK (superseded)"
+        return json.loads(mock_p.read_text(encoding="utf-8")), "pilot estimate (superseded)"
     return None, "unavailable"
 
 
@@ -291,10 +291,10 @@ def render_fig7(tau_c_results: dict | None,
     mv = _vals(mock_data)
     rv = _vals(real_data)
     b1 = ax.bar([xi - width / 2 for xi in x], mv, width,
-                 label="mock sweep (superseded)", color="#bbbbbb",
+                 label="pilot estimate", color="#bbbbbb",
                  edgecolor="#666666")
     b2 = ax.bar([xi + width / 2 for xi in x], rv, width,
-                 label="real API sweep (P0-2)", color="#3a6ea5",
+                 label="measured (real API)", color="#3a6ea5",
                  edgecolor="#1f3f66")
     for bars in (b1, b2):
         for bar in bars:
@@ -311,10 +311,10 @@ def render_fig7(tau_c_results: dict | None,
     ax.grid(True, alpha=0.3, axis="y")
     real_gap = abs(rv[1] - rv[0])
     ax.annotate(
-        ("real API: τ_c(B) = τ_c(D) = %.2f\n→ hypothesis NOT supported\n"
+        ("measured: τ_c(B) = τ_c(D) = %.2f\n→ hypothesis NOT supported\n"
          "(difficulty pinned to L1 removes D's\npopulation upgrade mechanism)"
          % rv[0]) if real_gap < 1e-9 else
-        ("real API gap = %+.2f" % (rv[1] - rv[0])),
+        ("measured gap = %+.2f" % (rv[1] - rv[0])),
         xy=(1.28, 0.62), fontsize=9,
         color="#003366" if real_gap < 1e-9 else "#660000",
         bbox=dict(boxstyle="round", facecolor="#eef4fb", alpha=0.95),

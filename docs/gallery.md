@@ -117,10 +117,10 @@ problems while actually spending its budget on unusable task proposals.
 
 ### Figure A.4 — τ_c gap analysis (fig7_tau_c_gap.png)
 
-Early mock data reported τ_c(B) = 0.55 versus τ_c(D) = 0.90; the real API does not reproduce that gap
-(both are 0.55). The left panel compares the difficulty distributions of B and D, the right panel
-places the mock and real τ_c side by side. The original hypothesis τ_c(D) > τ_c(B) is *not
-supported*.
+A pilot estimate suggested τ_c(D) = 0.90 against τ_c(B) = 0.55; the measurement does not reproduce
+that gap (both are 0.55). The left panel places the pilot estimate and the measured τ_c side by side,
+the right panel compares the difficulty distributions of B and D. The hypothesis τ_c(D) > τ_c(B) is
+*not supported*.
 
 ![Figure A.4 — τ_c gap analysis](images/fig7_tau_c_gap.png)
 

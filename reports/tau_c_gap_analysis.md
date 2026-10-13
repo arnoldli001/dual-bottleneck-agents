@@ -1,6 +1,6 @@
 # Task 4 (P1) — τ_c(D) vs τ_c(B): hypothesis audit
 
-> **τ_c 数据来源**：`real API (P0-2)`
+> **τ_c 数据来源**：`real API`
 
 > **结论先行：受控实验不支持「τ_c(D) > τ_c(B)」这一假设。**
 > 在难度钉定于 L1 的真实 API τ 扫描中，B 与 D 得到相同的 τ_c，
