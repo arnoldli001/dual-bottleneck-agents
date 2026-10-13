@@ -161,7 +161,7 @@ which inverts to $\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$. Measured MAE is 0.026 (
 
 \textbf{This formula has three implications.} First, it establishes the critical judge reliability
 as a \textit{function of system tolerance}, not a fixed constant---a system that can tolerate more
-evaluation bias requires a less reliable judge. Second, it explains the ``judge scarcity '' problem
+evaluation bias requires a less reliable judge. Second, it explains the ``judge scarcity'' problem
 quantitatively: even a 55\%-reliable judge suffices if the system's tolerance is 0.35. Third, it
 identifies a structural distinction from prior work: Ratchet's $(1-\tau)/2$ governs \textit{single}
 judgment (skill elimination), while our $(1-\tau^2)/2$ governs \textit{double} judgment (task
@@ -202,7 +202,7 @@ A growing line of work lets language-model agents improve themselves without hum
 Three recent results frame the problem we study. The self-verification cliff~\cite{self_verification_cliff} shows that a generator's ability to produce candidates can outpace its ability to select among them, so self-improvement stalls even as raw capability grows. Ratchet~\cite{ratchet} asks the complementary question---how reliable must an LLM judge be before a skill can be safely retired---and derives a threshold under a specific skill-retirement protocol. Blind Curator~\cite{blind_curator} reports that a judge whose false-pass rate crosses roughly 0.45 \textit{in its own setting} silently disables skill retirement, even when the judge's overall accuracy looks acceptable. Our Theorem~1 generalizes this from skill retirement to iterative self-improvement, giving a closed-form $\tau_c$ that depends on the noise-injection protocol rather than on a single decision rule.
 
 \paragraph{Agent evaluation and constraint-guided generation.}
-AgentJudgeBench~\cite{agentjudgebench} provides a multi-difficulty benchmark for judging agent behaviour; we define our  difficulty levels using Z3 theories instead, so the two stratifications are independent. TreeCoder~\cite{treecoder} constrains code generation through syntax-directed search and InstructFlow~\cite{instructflow} guides it with symbolic constraints---the same design principle behind the skeleton and renderer layers of our framework. Unlike benchmark-oriented work, we do not propose a new evaluation suite; we use existing formal signals to locate the threshold at which self-improvement becomes self-defeating.
+AgentJudgeBench~\cite{agentjudgebench} provides a multi-difficulty benchmark for judging agent behaviour; we define our difficulty levels using Z3 theories instead, so the two stratifications are independent. TreeCoder~\cite{treecoder} constrains code generation through syntax-directed search and InstructFlow~\cite{instructflow} guides it with symbolic constraints---the same design principle behind the skeleton and renderer layers of our framework. Unlike benchmark-oriented work, we do not propose a new evaluation suite; we use existing formal signals to locate the threshold at which self-improvement becomes self-defeating.
 
 \paragraph{Position of this work.}
 Existing work either assumes a reliable judge, or studies judge reliability in a single decision setting. We provide a \emph{dual-bottleneck} account: the judge-side threshold $\tau_c$ and the generator-side four-layer constraint framework are derived from the same composition law, and the budget decomposition shows how reliability and capability trade off under a fixed annotation budget. This is, to our knowledge, the first treatment that unifies both bottlenecks under one analytical formula and validates it on real API trajectories.
@@ -227,7 +227,7 @@ invalid tasks, and the effective evolution rate approaches zero.
 We ran 4 conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 runs = 2400 rounds on DeepSeek V4
 Flash (\texttt{deepseek-flash}). Difficulty spans L1 (linear integer arithmetic, $\le$10 Int vars),
 L2 (bit-vectors, $\le$20 vars), and L3 (mixed LIA+BV+Array, $\le$30 vars). The primary metric is
-$\Delta_t$; The secondary metric is valid task rate.
+$\Delta_t$; the secondary metric is valid task rate.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
@@ -647,7 +647,7 @@ pseudo-difficulty trap: once the generator bottleneck exceeds the tolerance, no 
 rescue the loop. Second, $\tau_c$ is not a constant of the system --- a system with population game,
 distillation, and round-table consensus returns the same $\tau_c$ as a minimal Z3-anchored loop,
 because the formula cares only how much budget the generator leaves over. This reframes the
-self-evolution problem from ``add more mechanisms '' to ``measure the budget split first.''
+self-evolution problem from ``add more mechanisms'' to ``measure the budget split first.''
 
 % ===========================================================================
 % REFERENCES
@@ -685,7 +685,7 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
   is \textit{not} worse than A/B, so the population game itself does not hurt performance --- C/D's
   later degradation comes from difficulty escalation, not from a defect in the mechanism. Note:
   C/D's L1-phase sample sizes ($n = 13$, $n = 6$) are small because the difficulty controller
-  escalates quickly. The claim ``populations do not hurt at L1   '' is directional; a larger-sample
+  escalates quickly. The claim ``populations do not hurt at L1'' is directional; a larger-sample
   confirmation is left to future work.}
   \label{fig:delta_t_L1_phase}
 \end{figure*}

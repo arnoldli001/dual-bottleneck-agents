@@ -48,7 +48,7 @@ TRANSLATIONS = {
     "D invalid (× at y=0)": "D 无效（× 位于 y=0）",
     "stable at 0.15\n(LLM self-score drift)": "稳定于 0.15\n（LLM 自评漂移）",
     "stable at 0.00\n(Z3 anchor eliminates drift)": "稳定于 0.00\n（Z3 锚定消除漂移）",
-    "rises after L2\n(pseudo-difficulty trap)": "L2 之后上升\n（伪难度陷阱）",
+    "invalid rounds dominate\n(pseudo-difficulty trap)": "无效轮次占绝大多数\n（伪难度陷阱）",
     "L2 start = R8": "L2 起点 = R8",
     "L2 start = R31": "L2 起点 = R31",
 

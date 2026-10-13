@@ -232,7 +232,12 @@ def render_fig2b(records: list[dict], out_path: Path) -> None:
                     verticalalignment="top", horizontalalignment="center",
                     bbox=dict(boxstyle="round", facecolor="white", alpha=0.7))
         elif cond in "CD":
-            ax.text(0.5, 0.92, "rises after L2\n(pseudo-difficulty trap)",
+            # 原文案是 "rises after L2"，但 Δ_t 在修正后是水平线（C 恒为 0.15、D 恒为
+            # 0.00），"上升"指不上；而且 C/D 的 level 轨迹里，invalid 轮的 invalid_task
+            # 事件不带 level 字段，那条 L2 线标的其实是"首个 level>=2 的有效轮"。
+            # 改成直接描述画面里看得见的事实：绝大多数轮次是无效轮（run 1 中 C 175/200、
+            # D 187/200），这也是伪难度陷阱的定义性表现。
+            ax.text(0.5, 0.92, "invalid rounds dominate\n(pseudo-difficulty trap)",
                     transform=ax.transAxes, fontsize=9, color="#664400",
                     verticalalignment="top", horizontalalignment="center",
                     bbox=dict(boxstyle="round", facecolor="white", alpha=0.7))
