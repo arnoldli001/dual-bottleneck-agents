@@ -404,6 +404,8 @@ FIGURE_MAP = [
      "τ vs Δ_t curve with τ_c (real API)"),
     ("reports/fig5b_tau_c_analytical.png", "fig5b_tau_c_analytical.png",
      "Analytical fit Δ_t(τ) = (1−τ²)/2 with observed scatter"),
+    ("reports/fig5c_theorem1.png", "fig5c_theorem1.png",
+     "Theorem 1 closed form vs the rejected acceptance model"),
     ("reports/fig6_improvement_comparison_real.png",
      "fig6_improvement_comparison_real.png",
      "Improvement comparison (real API)"),
