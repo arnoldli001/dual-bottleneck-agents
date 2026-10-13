@@ -130,8 +130,18 @@ def run_round(
         if cfg["formal_anchor"]:
             delta_t = 0.0 if correct else 1.0
         else:
+            # 修正：这里原来传的是 {"status": "sat" if correct else "unsat"}——用 correct
+            # 反推一个"状态"再交给 llm_self_score 与 expected 比对。那是错的：correct 为真
+            # 只说明"判定与 expected 一致"，把它一律写成 "sat" 之后，凡是 expected="unsat"
+            # 的轮次都会被判成不一致（答对得 Δ_t=0.70），expected="sat" 的错答反而得 0.15。
+            # 正确的状态是"与 expected 一致时等于 expected，否则取相反值"——这也正是单教师
+            # 分支里 correct ⟺ (status == expected) 的等价写法。
+            observed_status = (
+                task.expected if correct
+                else ("unsat" if task.expected == "sat" else "sat")
+            )
             score = llm_self_score(
-                {"status": "sat" if correct else "unsat", "error_code": 0},
+                {"status": observed_status, "error_code": 0},
                 task.expected,
             )
             delta_t = abs(score - 100) / 100.0
