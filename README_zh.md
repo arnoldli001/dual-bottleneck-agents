@@ -122,6 +122,9 @@ pytest tests/ -q
 
 全部 12 张图 + 9 张数据表在 [docs/gallery.md](docs/gallery.md)。
 
+中文注记版的 12 张图在 [`paper/figures_zh/`](paper/figures_zh/) —— 与英文版一一对应、
+长宽比一致（差异 <2%），供中文版论文使用；生成方式与复现命令见该目录的 README。
+
 ### 2.4 离线复现全部图表（**不需要 API key**）
 
 仓库内已包含论文使用的原始日志，以下命令直接读取它们并生成所有图表与数据表：

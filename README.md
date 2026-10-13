@@ -133,6 +133,10 @@ regenerate every figure and data table:
 
 All 12 figures (4 in the main text across 3 floats, 8 in the appendix) are in [docs/gallery.md](docs/gallery.md).
 
+A Chinese-annotated copy of the same 12 figures is in [`paper/figures_zh/`](paper/figures_zh/) — one-to-one
+by filename with matching aspect ratios (within 2%), used by the Chinese edition. See that directory's
+README for how they are generated and how to regenerate them.
+
 ## Data Layout
 
 Which log maps to which paper section:

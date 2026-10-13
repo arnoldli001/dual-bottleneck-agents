@@ -98,11 +98,23 @@ paper_notes/
 #   一张图都没有，克隆者无法编译。注意必须先放行目录本身，否则其中的文件
 #   无法再被 `!` 重新包含。
 # checklist.tex 仍排除。
+#
+# 中文版图 figures_zh/ 自 2026-10-13 起入库：这是 figures/ 那 12 张的中文注记版，
+#   尺寸与长宽比一一对应（差异 <2%），换过去不影响图片位置与版式。
+#   生成脚本 _zh_figs.py + _zh_fig_terms.py 一并入库，克隆者才能重出这套图：
+#   它们不修改那 8 个英文生成脚本，而是拦下 matplotlib 的文字 API、按术语表
+#   把图内文字换成中文，再统一加边框输出。
+#   注意：main_zh.tex 仍排除（中文论文源码是否公开另议）。
 paper/*
 !paper/main.tex
 !paper/refs.bib
 !paper/figures/
 !paper/figures/*.png
+!paper/figures_zh/
+!paper/figures_zh/*.png
+!paper/figures_zh/README.md
+!paper/_zh_figs.py
+!paper/_zh_fig_terms.py
 
 # 归档脚本（目录尚不存在，预留规则）
 archive/deprecated_scripts/
