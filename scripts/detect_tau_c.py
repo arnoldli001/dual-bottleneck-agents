@@ -1,13 +1,15 @@
 """τ_c 检测：从 τ sweep 结果中找出临界阈值。
 
 方法：
-1. 读取 ``reports/tau_sweep/summary.json`` 或对应的 jsonl 文件
+1. 读取 ``logs/tau_sweep_real/summary.json`` 或对应的 jsonl 文件
+   （默认即 P0-2 真实 API sweep；mock sweep 目录已删除）
 2. 对每个 τ 值，计算后 1/2 轮的 Δ_t 均值（"稳态"）
 3. 拐点判定：当前 τ 的稳态 Δ_t > 上一个 τ 的稳态 Δ_t × 1.5
 4. τ_c = 最大的"还在安全区"的 τ 值（即未触发退化的最大 τ）
 
 输出：
-- ``reports/tau_c_analysis.md``（含表格、曲线图、τ_c 的经验值）
+- ``reports/tau_c_analysis_real.md``（含表格、曲线图、τ_c 的经验值）
+- ``reports/tau_c_real.json``、``reports/fig5_tau_c_curve_real.png``
 - PNG 300 DPI 直接可用作论文图
 """
 from __future__ import annotations
@@ -579,7 +581,15 @@ def render_markdown(results_b: dict, results_d: dict, out_path: Path,
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     md: list[str] = []
-    md.append("# τ_c 经验值分析报告\n")
+    md.append("# τ_c 经验值分析报告\n\n")
+    md.append("> ⚠️ **本报告是 mock 数据，已作废，不得作为结果引用。**\n")
+    md.append("> 论文全部数字来自真实 API：τ_c 见 "
+              "`reports/tau_c_analysis_real.md` / `tau_c_real.json`。\n")
+    md.append("> 本文件唯一的保留用途，是给 fig7 左panel 与 "
+              "`tau_c_gap_analysis.md` §1.1 提供\n")
+    md.append("> 「mock 曾给出 τ_c(D)=0.90 > τ_c(B)=0.55，真实 API 未能复现该 gap」"
+              "这一纠错对比。\n")
+    md.append("> 现仍被引用的 mock 数值只有 τ_c 对比本身，其下所有逐轮曲线均已作废。\n\n")
     md.append("> 测量\"裁判可靠度 τ\" vs \"系统进化效率（Δ_t）\"的关系曲线。\n")
     md.append("> Ratchet 理论给出噪声翻转下界 ``(1-τ)/2``，本文在 ARGUS 难度自适应\n")
     md.append("> + 个体辩论情境下做经验测量。\n\n")
@@ -717,9 +727,13 @@ def render_figure(results_b: dict, results_d: dict, out_png: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="τ_c detection from sweep data")
-    ap.add_argument("--summary", type=str, default="reports/tau_sweep/summary.json")
-    ap.add_argument("--out_md", type=str, default="reports/tau_c_analysis.md")
-    ap.add_argument("--out_png", type=str, default="reports/tau_c_curve.png")
+    ap.add_argument("--summary", type=str,
+                    default="logs/tau_sweep_real/summary.json",
+                    help="默认 = P0-2 真实 API sweep（logs/tau_sweep_real/）。"
+                         "mock sweep 目录已删除：论文数字全部来自 real，"
+                         "mock 结果不得作为结果引用。")
+    ap.add_argument("--out_md", type=str, default="reports/tau_c_analysis_real.md")
+    ap.add_argument("--out_png", type=str, default="reports/fig5_tau_c_curve_real.png")
     ap.add_argument("--ratio", type=float, default=1.5,
                     help="退化判定阈值 (late_dt / prev_late_dt >= ratio)")
     ap.add_argument("--correct_floor", type=float, default=0.80,
@@ -730,10 +744,12 @@ def main() -> None:
                     help="τ 内 Δ_t 退化阈值（late/early）")
     ap.add_argument("--cr-ratio", type=float, default=0.7,
                     help="τ 内正确率退化阈值（late/early）")
-    ap.add_argument("--out_json", type=str, default="",
-                    help="JSON 输出路径（默认与 out_md 同名）")
-    ap.add_argument("--mock_json", type=str, default="",
-                    help="mock τ_c 结果 JSON（用于 real 报告的对比段）")
+    ap.add_argument("--out_json", type=str, default="reports/tau_c_real.json",
+                    help="JSON 输出路径")
+    ap.add_argument("--mock_json", type=str, default="reports/tau_c_analysis.json",
+                    help="mock τ_c 结果 JSON。唯一用途是给 real 报告提供"
+                         "「mock 曾给出错误的 gap」这一对比段——是纠错披露，"
+                         "不是数据来源。")
     ap.add_argument("--raw_root", type=str, default="",
                     help="原始 jsonl 根目录（用于统计显著性护栏）；"
                          "默认 = summary 所在目录")

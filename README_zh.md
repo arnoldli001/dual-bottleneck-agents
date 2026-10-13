@@ -126,9 +126,9 @@ python scripts/analytical_fit_tau.py
 # 双重瓶颈合成律 → table4c
 python scripts/dual_bottleneck_law.py
 
-# τ_c 检测 → tau_c_analysis.md / .json / tau_c_curve.png
-# （summary.json 与 tau_* 同级，--raw_root 会自动取 summary 所在目录）
-python scripts/detect_tau_c.py --within-tau --summary logs/tau_sweep_real/summary.json
+# τ_c 检测 → tau_c_analysis_real.md / tau_c_real.json / fig5_tau_c_curve_real.png
+# （默认已指向 logs/tau_sweep_real/ 的真实 P0-2 sweep；--raw_root 自动取 summary 所在目录）
+python scripts/detect_tau_c.py --within-tau
 
 # τ_c 反直觉现象分析 → tau_c_gap_analysis.md, fig7
 python scripts/analyze_tau_c_gap.py

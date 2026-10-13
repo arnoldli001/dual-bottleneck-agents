@@ -8,11 +8,14 @@ Ratchet 理论给出噪声翻转概率下界 ``(1-τ)/2``，但 ARGUS 的难度�
 实验设置：
 - 对每个 τ 值（默认 0.55..1.00 八档），跑条件 B 和 D 各 50 轮
 - 仅用 L1 任务（隔离生成器瓶颈；L2/L3 invalid 率 >95% 会掩盖 τ 的影响）
-- 输出 reports/tau_sweep/{tau}/condition_{X}/round_*.jsonl
+- 输出 argus-workspace/tau_sweep/{tau}/condition_{X}/round_*.jsonl
+  （旧默认 reports/tau_sweep/ 是已删除的 mock sweep 路径，不再复用以免
+   把 real 数据写进 mock 命名的目录；论文用 canonical 的真实 sweep 是
+   ``scripts/run_tau_sweep_real.py`` → logs/tau_sweep_real/）
 
 用法：
-    python -m scripts.run_tau_sweep --mode mock --rounds 10        # smoke
     python -m scripts.run_tau_sweep --mode real --rounds 50        # 真 API（需 key）
+    python -m scripts.run_tau_sweep --mode mock --rounds 10        # 仅离线自测
 
 依赖：
     argus.z3_anchor（Z3Anchor + verify_with_noise）
@@ -162,9 +165,12 @@ def main() -> None:
                     help="rounds per (τ, condition) combo")
     ap.add_argument("--level", type=int, default=1,
                     help="difficulty level (1=isolates generator bottleneck)")
-    ap.add_argument("--mode", type=str, default="mock", choices=["mock", "real"])
-    ap.add_argument("--out_root", type=str, default="reports/tau_sweep",
-                    help="root dir for jsonl outputs")
+    ap.add_argument("--mode", type=str, default="real", choices=["mock", "real"],
+                    help="默认 real（真实 API）。mock 仅供离线自测；"
+                         "论文全部数字来自 real，mock 结果不得作为结果引用。")
+    ap.add_argument("--out_root", type=str, default="argus-workspace/tau_sweep",
+                    help="root dir for jsonl outputs（旧默认 reports/tau_sweep/ 是"
+                         "已删除的 mock sweep 路径）")
     ap.add_argument("--seed_base", type=int, default=42)
     args = ap.parse_args()
 

@@ -6,6 +6,20 @@
 > 生成于 CLEAN-1-EXEC-v2。本文件是**清单**，不是删除指令。
 > 清理策略：只删缓存与临时脚本，保留一切可能是论文素材的内容。
 
+> **关于 mock 材料（2026-10-13 补充）**：本仓库的结论一律以真实 API 为准。
+> mock 产物**保留在原位**（按上面的保留策略），但已全部与真实产物明确区分：
+>
+> - 默认路径不再指向 mock：`scripts/detect_tau_c.py` 的 `--summary` / `--out_md` /
+>   `--out_json` / `--out_png` 默认值已改为真实 P0-2 sweep 与 `*_real` 产物；
+>   `run_full_experiment.py` / `run_tau_sweep.py` / `run_improved_smoke.py` 的
+>   `--mode` 默认已由 `mock` 改为 `real`。
+> - `reports/tau_c_analysis.md` 顶部已加"已作废、不得引用"横幅。
+> - 论文 12 图 9 表全部来自真实日志；唯一保留的 mock 数值是 τ_c 的
+>   mock-vs-real 纠错对比（fig7 左panel、`tau_c_gap_analysis.md` §1.1）。
+>
+> 下表中标记为 mock 的文件（`fig5_tau_c_curve.png`、`fig6_improvement_comparison.png`、
+> `tau_c_analysis.md` / `.json`、`paper_ready.md`）**仅供追溯，不得作为结果引用**。
+
 ---
 
 ## Reports

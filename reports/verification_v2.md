@@ -271,6 +271,19 @@ error_code=1  schema_invalid: 约束 '(a & b) == 0x0F' 中引用了未声明的�
 | `reports/fig6_improvement_comparison.png` | 改进前后 valid 数对比 | ✓ |
 | `reports/verification_v2.md` | 本报告 | ✓ |
 
+> ⚠️ **上表是 Task 2 当时的交付清单（mock 阶段），不是最终论文素材清单。**
+> 其中三项已被真实 API 版本取代，**不得再作为结果引用**：
+>
+> | mock 阶段产物 | 取代它的真实产物 |
+> |---|---|
+> | `reports/fig5_tau_c_curve.png` | `reports/fig5_tau_c_curve_real.png` |
+> | `reports/fig6_improvement_comparison.png` | `reports/fig6_improvement_comparison_real.png` |
+> | `reports/tau_c_analysis.md` / `.json`、`reports/paper_ready.md` | `tau_c_analysis_real.md` / `tau_c_real.json`、`paper_ready_final.md` |
+>
+> 论文 12 张图、9 张表**全部**来自真实 API 日志（`argus-workspace/full`、
+> `logs/tau_sweep_real`、`argus-workspace/improved_real`）。
+> 唯一保留的 mock 数值是 τ_c 的 mock-vs-real 纠错对比（fig7 左panel）。
+
 ---
 
 ## 7. 总结

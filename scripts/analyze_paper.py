@@ -4,7 +4,8 @@
 - ``argus-workspace/full/logs/{{condition}}_r{{run}}/{{condition}}/round_*.jsonl``
   4 条件 × 3 run × 200 轮 = 2400 jsonl 文件
 - ``argus-workspace/full/state/{{condition}}_r{{run}}.txt`` 当前难度状态
-- ``reports/tau_sweep/summary.json``（Task 2 产出的 τ 实验汇总）
+- ``reports/tau_c_analysis_real.md``（真实 API τ sweep 汇总；
+  早期版本读 ``reports/tau_sweep/summary.json``，该 mock 目录已删除）
 
 输出（图，全部 PNG 300 DPI）：
 - fig1_dual_bottleneck.png：双重瓶颈概念图（τ-C 平面，安全区 vs 崩溃区）
@@ -619,7 +620,7 @@ def make_paper_ready(out_path: Path,
     md.append(f"- **τ_c (ARGUS empirical) ≈ {tau_c_overall}**\n")
     md.append("- Conservative estimate based on both Δ_t ratio and correct_rate criteria.\n\n")
     md.append("![fig1](../reports/fig1_dual_bottleneck.png)\n\n")
-    md.append("![fig5](../reports/tau_c_curve.png)\n\n")
+    md.append("![fig5](../reports/fig5_tau_c_curve_real.png)\n\n")
 
     md.append("## Section 6 — 改进前后对比（约束生成框架）\n\n")
     md.append("- 改进前的隐性瓶颈：LLM 自由生成 Z3 代码时频繁出现语法错误、变量未声明、约束矛盾。\n")
@@ -628,7 +629,7 @@ def make_paper_ready(out_path: Path,
     md.append("  2. **确定性渲染**：JSON 模板拼成 Z3 代码，杜绝括号/声明错误。\n")
     md.append("  3. **符号反馈**：Z3 错误码 → 符号级 prompt hint，下一轮自动注入。\n")
     md.append("  4. **课程控制器**：子档位升级（5 连 ≥80% 升；3 连 <50% 降），防难度震荡。\n\n")
-    md.append("![fig6](../reports/fig6_improvement_comparison.png)\n\n")
+    md.append("![fig6](../reports/fig6_improvement_comparison_real.png)\n\n")
 
     md.append("## 双重瓶颈（Dual Bottleneck）核心定义\n\n")
     md.append("> ARGUS 的进化效率同时受**两类瓶颈**制约：\n\n")

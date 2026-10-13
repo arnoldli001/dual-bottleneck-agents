@@ -88,9 +88,17 @@ L2/L3 因 legacy 分母不含失败轮次，检验结果无解释力，故不报
 > （JSON 骨架 → 渲染 → Z3 锚定的链路更干净）。
 
 
-## 5. 与 mock 数据对比
+## 5. 与 mock 数据对比（已移除）
 
-（未提供 mock 数据）
+早期版本在本节并列过 mock smoke 的 valid 率（数据源 `argus-workspace/improved_teacher_smoke/`，该目录已删除）。
+现在本仓库不再用 mock 结果做任何对照，理由有两条：
+
+1. **mock 测不出问题**。MockLLM 对 L2 返回的是手写的合法 payload，因此它永远不会触发 §6 的护栏缺陷，会给出"框架无问题"的误导性结论。
+2. **对照本身没有信息量**。mock 的 valid 率接近 100% 只反映「确定性 JSON 一定能解析」，不构成任何关于生成器能力的证据。
+
+唯一保留的 mock 材料是 τ_c 的 mock-vs-real 对比（`reports/tau_c_gap_analysis.md` §1.1、论文 fig7 左panel）：
+mock 曾给出 τ_c(D)=0.90 > τ_c(B)=0.55，真实 API 未能复现该 gap。
+那是**纠错披露**——说明 mock 结论错在哪里——不是数据来源。
 
 ## 6. 真实 API 暴露并修复的一个框架缺陷（重要）
 

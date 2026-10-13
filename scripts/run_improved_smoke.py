@@ -1,7 +1,8 @@
 """改进教师 Smoke 测试：用 Task 1 的约束生成框架，按 multi-level 跑小样本。
 
 输出：
-- argus-workspace/improved_teacher_smoke/logs/{cond}/{cond}/round_*.jsonl
+- argus-workspace/improved_smoke/logs/{cond}/{cond}/round_*.jsonl
+  （旧默认 improved_teacher_smoke 是已删除的 mock 目录名，不再复用）
 - 每个 jsonl 包含一条含 ``level`` 字段的 record（smoke 简化布局）
 
 设计：
@@ -45,9 +46,13 @@ def main() -> None:
     ap.add_argument("--rounds_per_level", type=int, default=10)
     ap.add_argument("--levels", type=str, default="1,2,3")
     ap.add_argument("--conditions", type=str, default="A,B,C,D")
-    ap.add_argument("--out_dir", type=str,
-                    default="argus-workspace/improved_teacher_smoke")
-    ap.add_argument("--mode", type=str, default="mock", choices=["mock", "real"])
+    ap.add_argument("--out_dir", type=str, default="argus-workspace/improved_smoke",
+                    help="默认 argus-workspace/improved_smoke。"
+                         "旧默认 improved_teacher_smoke 是已删除的 mock 目录名，"
+                         "不再复用以免把 real 数据写进 mock 命名的路径。")
+    ap.add_argument("--mode", type=str, default="real", choices=["mock", "real"],
+                    help="默认 real（真实 API）。mock 仅供离线自测；"
+                         "论文全部数字来自 real，mock 结果不得作为结果引用。")
     args = ap.parse_args()
 
     config = Config.load()

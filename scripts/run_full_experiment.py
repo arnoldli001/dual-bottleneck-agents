@@ -138,7 +138,9 @@ def main() -> None:
     ap.add_argument("--rounds", type=int, default=200)
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--conditions", type=str, default="A,B,C,D")
-    ap.add_argument("--mode", type=str, default="mock", choices=["mock", "real"])
+    ap.add_argument("--mode", type=str, default="real", choices=["mock", "real"],
+                    help="默认 real（真实 API）。mock 仅供离线自测；"
+                         "论文全部数字来自 real，mock 结果不得作为结果引用。")
     ap.add_argument("--resume", action="store_true",
                     help="断点续跑：跳过已完成的轮")
     ap.add_argument("--max_cost", type=float, default=50.0,

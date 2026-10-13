@@ -159,8 +159,7 @@ def level_summary(cells: dict, levels=(1, 2, 3)) -> dict:
 # ---------------- 渲染 ----------------
 def render_markdown(improved_cells: dict, legacy_cells: dict,
                      improved_lvl: dict, legacy_lvl: dict,
-                     state: dict, mock_summary: dict | None,
-                     out_path: Path) -> None:
+                     state: dict, out_path: Path) -> None:
     md: list[str] = []
     md.append("# 改进框架验证报告（真实 API）\n\n")
     md.append("> **数据来源**：DeepSeek V4 Flash（`deepseek-flash`）真实 API\n")
@@ -267,26 +266,18 @@ def render_markdown(improved_cells: dict, legacy_cells: dict,
                   "说明约束框架在 L1 也顺带降低了评估偏差\n")
     md.append("> （JSON 骨架 → 渲染 → Z3 锚定的链路更干净）。\n\n")
 
-    md.append("\n## 5. 与 mock 数据对比\n\n")
-    if mock_summary:
-        md.append("| 难度 | mock valid rate | real valid rate | 差异 |\n")
-        md.append("|------|----------------|-----------------|------|\n")
-        by_level = mock_summary.get("results", [])
-        mock_lvl = defaultdict(lambda: {"valid": 0, "total": 0})
-        for r in by_level:
-            mock_lvl[r["level"]]["valid"] += r.get("valid", 0)
-            mock_lvl[r["level"]]["total"] += r.get("rounds", 0)
-        for lv in (1, 2, 3):
-            m = mock_lvl.get(lv, {"valid": 0, "total": 0})
-            m_rate = m["valid"] / m["total"] if m["total"] else 0.0
-            im = improved_lvl.get(lv, {"valid_rate": 0.0})
-            md.append(f"| L{lv} | {m_rate*100:.1f}% | "
-                      f"{im['valid_rate']*100:.1f}% | "
-                      f"{(im['valid_rate']-m_rate)*100:+.1f}pp |\n")
-        md.append("\n> mock（MockLLM）返回确定性 JSON，因此 valid 率接近 100%；\n")
-        md.append("> real（deepseek-flash）暴露了真实的生成器能力边界。\n\n")
-    else:
-        md.append("（未提供 mock 数据）\n\n")
+    md.append("\n## 5. 与 mock 数据对比（已移除）\n\n")
+    md.append("早期版本在本节并列过 mock smoke 的 valid 率（数据源 "
+              "`argus-workspace/improved_teacher_smoke/`，该目录已删除）。\n")
+    md.append("现在本仓库不再用 mock 结果做任何对照，理由有两条：\n\n")
+    md.append("1. **mock 测不出问题**。MockLLM 对 L2 返回的是手写的合法 payload，"
+              "因此它永远不会触发 §6 的护栏缺陷，会给出\"框架无问题\"的误导性结论。\n")
+    md.append("2. **对照本身没有信息量**。mock 的 valid 率接近 100% 只反映"
+              "「确定性 JSON 一定能解析」，不构成任何关于生成器能力的证据。\n\n")
+    md.append("唯一保留的 mock 材料是 τ_c 的 mock-vs-real 对比"
+              "（`reports/tau_c_gap_analysis.md` §1.1、论文 fig7 左panel）：\n")
+    md.append("mock 曾给出 τ_c(D)=0.90 > τ_c(B)=0.55，真实 API 未能复现该 gap。\n")
+    md.append("那是**纠错披露**——说明 mock 结论错在哪里——不是数据来源。\n\n")
 
     md.append("## 6. 真实 API 暴露并修复的一个框架缺陷（重要）\n\n")
     md.append("### 6.1 现象\n\n")
@@ -447,8 +438,6 @@ def main() -> None:
                     default="argus-workspace/full/logs")
     ap.add_argument("--improved_json", type=str,
                     default="reports/improvement_real.json")
-    ap.add_argument("--mock_json", type=str,
-                    default="argus-workspace/improved_teacher_smoke/summary.json")
     ap.add_argument("--out_md", type=str,
                     default="reports/improvement_validation_real.md")
     ap.add_argument("--out_png", type=str,
@@ -484,14 +473,10 @@ def main() -> None:
         state = data.get("state", {})
         state["rounds_per_level"] = data.get("args", {}).get("rounds_per_level")
 
-    # 加载 mock
-    mock_summary = None
-    mj = Path(args.mock_json)
-    if mj.exists():
-        mock_summary = json.loads(mj.read_text(encoding="utf-8"))
+    # 注：本报告不再加载任何 mock 数据（详见 §5）。
 
     render_markdown(improved_cells, legacy_cells, improved_lvl, legacy_lvl,
-                     state, mock_summary, Path(args.out_md))
+                     state, Path(args.out_md))
     render_fig6(improved_lvl, legacy_lvl, Path(args.out_png),
                  legacy_total_rounds=len(legacy))
     print(f"\nLegacy total rounds (all, incl. invalid): {len(legacy)}")

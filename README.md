@@ -81,9 +81,9 @@ regenerate every figure and data table:
     # Dual-bottleneck law → table4c
     python scripts/dual_bottleneck_law.py
 
-    # τ_c detection → tau_c_analysis.md / .json / tau_c_curve.png
-    # (summary.json sits beside the tau_* directories; --raw_root is derived from it)
-    python scripts/detect_tau_c.py --within-tau --summary logs/tau_sweep_real/summary.json
+    # τ_c detection → tau_c_analysis_real.md / tau_c_real.json / fig5_tau_c_curve_real.png
+    # (defaults point at the real P0-2 sweep in logs/tau_sweep_real/; --raw_root is derived from --summary)
+    python scripts/detect_tau_c.py --within-tau
 
     # τ_c reverse-intuition analysis → tau_c_gap_analysis.md, fig7
     python scripts/analyze_tau_c_gap.py
