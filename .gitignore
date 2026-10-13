@@ -9,6 +9,10 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 *.db
+# SQLite 在 WAL 模式下打开库时会生成这两个伴生文件（-shm 索引 / -wal 预写日志）。
+# 它们由"读取"动作就会产生，属于运行时残留，不应入库。
+*.db-shm
+*.db-wal
 llm_cache.db
 
 # 运行时工作区
