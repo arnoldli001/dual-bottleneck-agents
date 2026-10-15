@@ -98,9 +98,11 @@ $1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\m
 to machine precision (1.11e-16) on 2,400 real-API rounds. The law implies that the generator and
 judge bottlenecks share one budget: a condition with large $\Delta_t^{\mathrm{gen}}$ needs a more
 reliable judge for the same overall tolerance. If $\Delta_t^{\mathrm{gen}}$ alone exceeds the
-budget, no judge reliability can compensate. We empirically measure $\tau_c \approx 0.55$ on Level 1
-tasks using the real DeepSeek V4 Flash API, and derive the parameter-free formula
-$\tau_c = \sqrt{1-2\Delta_t^{\max}}$. We identify a pseudo-difficulty trap: when the difficulty
+budget, no judge reliability can compensate. We empirically measure the critical judge reliability
+$\tau_c \approx 0.55$ on Level 1 tasks using the real DeepSeek V4 Flash API, and derive the
+parameter-free design rule $\tau_c = \sqrt{1-2\Delta_t^{\max}}$, which returns the minimum judge
+reliability needed to hold the end-to-end bias at a tolerated level $\Delta_t^{\max}$. We identify a
+pseudo-difficulty trap: when the difficulty
 controller upgrades to Level 2/3, the LLM's task-generation validity collapses from $\sim$89\% to
 $<$10\%, causing the system to spin without progress. We propose a four-layer constraint generation
 framework that restores validity to 100\% at L1, 73.8\% at L2, and 83.8\% at L3 on real API.
@@ -129,8 +131,8 @@ population-based difficulty adaptation, and experience distillation. We ran 2,40
 controlled experiments (4 conditions $\times$ 200 rounds $\times$ 3 runs).
 
 \textbf{We expected to confirm that formal anchoring suppresses self-score drift, and we did}:
-condition A (LLM self-score) holds $\Delta_t = 0.15$ across 200 rounds while condition B (Z3 anchor)
-holds $0.00$. \textbf{But we also found something unexpected}: conditions C (population only) and D
+condition A (LLM self-score) holds the evaluation bias $\Delta_t = 0.15$ across 200 rounds while
+condition B (Z3 anchor) holds $0.00$. \textbf{But we also found something unexpected}: conditions C (population only) and D
 (full system) invalidate 85.5\% and 90.5\% of their tasks. The controller read high Level-1 success as
 readiness and upgraded to Level 2/3, where the LLM could not generate valid Z3 code --- so the system
 spun without progress, burning API budget on tasks that never reached verification.
@@ -142,8 +144,9 @@ independent bottlenecks}, not one:
 \begin{enumerate}
   \item \textbf{Judge-side bottleneck}: when judge reliability $\tau$ falls below a critical
         threshold $\tau_c$, accumulated experience contains corrupted signals.
-  \item \textbf{Generator-side bottleneck}: when generator validity $V$ falls below $V_c$, any
-        difficulty upgrade pushes the system into empty spinning.
+  \item \textbf{Generator-side bottleneck}: when generator validity $V$ --- the fraction of rounds
+        whose task passes the formal verifier --- falls below a critical value $V_c$, any difficulty
+        upgrade pushes the system into empty spinning.
 \end{enumerate}
 
 Neither bottleneck alone explains the failure. A perfect judge cannot rescue a system whose
@@ -214,13 +217,57 @@ Existing work either assumes a reliable judge, or studies judge reliability in a
 % ===========================================================================
 \section{Problem Setup}
 
-Let $\tau \in [0,1]$ denote judge reliability: the probability that the judge's binary verdict
-matches ground truth. Let $V \in [0,1]$ denote generator validity: the fraction of generated tasks
-that pass the formal verifier. Let $\Delta_t$ denote the gap between the system's self-assessed
-correctness and ground truth at round $t$.
+Let $\tau \in [0,1]$ parameterize judge reliability through its error rate: each binary verdict is
+flipped with probability $p = (1-\tau)/2$, so $\tau = 1$ is a perfect judge and $\tau = 0$ is a coin
+flip. Let $V \in [0,1]$ denote generator validity: the fraction of generated tasks that pass the
+formal verifier. Let $\Delta_t$ denote the evaluation bias at round $t$: the gap between the system's
+self-assessed correctness and ground truth, with tolerated upper bound $\Delta_t^{\max}$.
 
-\textbf{Definition 1 (Safe Zone).} A self-evolving system is in the safe zone if
-$\tau \ge \tau_c$ and $V \ge V_c$.
+\textbf{Definition 1 (Safe Zone).} A self-evolving system is in the safe zone if judge reliability
+$\tau \ge \tau_c$ and generator validity $V \ge V_c$, where $\tau_c$ is the minimum judge reliability
+that holds the evaluation bias at or below $\Delta_t^{\max}$ (Section~5), and $V_c = 0.5$ is the
+generator-validity floor used throughout.
+
+Table~\ref{tab:notation} collects this notation together with the failure rates derived from it in
+Section~4.
+
+\begin{table*}[t]
+  \centering
+  \caption{Notation. The first block defines the two bottleneck parameters and the evaluation bias;
+  the second lists the derived failure rates together with the bounds and counts computed from them;
+  the last two entries appear only in the appendices.}
+  \label{tab:notation}
+  \small
+  \begin{tabularx}{\textwidth}{@{}lX@{}}
+    \toprule
+    Symbol & Meaning \\
+    \midrule
+    $\tau \in [0,1]$ & Judge reliability. Each binary verdict is flipped with probability
+      $p = (1-\tau)/2$; $\tau = 1$ is a perfect judge and $\tau = 0$ is a coin flip. \\
+    $\tau_c$ & Critical judge reliability: the smallest $\tau$ that holds the evaluation bias at or
+      below $\Delta_t^{\max}$ (Section~5). \\
+    $p$ & Per-verdict flip probability, $p = (1-\tau)/2$. \\
+    $V \in [0,1]$ & Generator validity: the fraction of generated tasks that pass the formal
+      verifier. \\
+    $V_c$ & Generator-validity floor, $0.5$. \\
+    $\Delta_t$ & Evaluation bias at round $t$: the gap between the system's self-assessed
+      correctness and ground truth. \\
+    \midrule
+    $\Delta_t^{\mathrm{gen}}$ & Generator-side failure rate, $= 1 - V$. \\
+    $\Delta_t^{\mathrm{valid}}$ & Judge-side failure rate, conditional on the task being valid. \\
+    $\Delta_t^{\mathrm{global}}$ & End-to-end failure rate over all rounds, each invalid round
+      charged $\Delta_t = 1.0$. \\
+    $\Delta_t^{\max}$ & Tolerated upper bound on the end-to-end bias. \\
+    $\Delta_{\mathrm{judge}}^{\mathrm{budget}}$ & Share of the error budget left for judge noise once
+      $\Delta_t^{\mathrm{gen}}$ is charged. \\
+    $n$ & Number of rounds in a condition. \\
+    \midrule
+    $S, G, J$ & Indicator variables (Appendix~B): the round succeeds, the generator produced a valid
+      task, the judge evaluated it correctly. \\
+    $y, y^{*}$ & Submitted answer and its ground-truth label (Appendix~C). \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
 
 \textbf{Proposition 1 (Necessity of both conditions).} If $\tau < \tau_c$, the system accumulates
 corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the system generates mostly
@@ -776,11 +823,11 @@ This appendix collects the full figure set for reference. Figures~\ref{fig:delta
 % titled "Theorem 1 Proof Sketch" in the agreed structure, so the derivation is
 % carried here as a subsection. Rename the appendix if it should stand alone.
 
-Let $S = 1$ if the round succeeds (valid task + correct judgment), $0$ otherwise. Let $G = 1$ if the
-generator produces a valid task, $0$ otherwise. Let $V = 1$ if the judge correctly evaluates the
-round, $0$ otherwise. Then $S = G \cdot V$. By independence:
+Let $S = 1$ if the round succeeds (valid task and correct judgment), $0$ otherwise. Let $G = 1$ if the
+generator produces a valid task, $0$ otherwise, and let $J = 1$ if the judge evaluates the round
+correctly, $0$ otherwise. Then $S = G \cdot J$. By independence:
 \[
-  \mathbb{E}[S] = \mathbb{E}[G] \cdot \mathbb{E}[V]
+  \mathbb{E}[S] = \mathbb{E}[G] \cdot \mathbb{E}[J]
 \]
 \[
   1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
