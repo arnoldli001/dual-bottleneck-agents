@@ -221,7 +221,13 @@ Let $\tau \in [0,1]$ parameterize judge reliability through its error rate: each
 flipped with probability $p = (1-\tau)/2$, so $\tau = 1$ is a perfect judge and $\tau = 0$ is a coin
 flip. Let $V \in [0,1]$ denote generator validity: the fraction of generated tasks that pass the
 formal verifier. Let $\Delta_t$ denote the evaluation bias at round $t$: the gap between the system's
-self-assessed correctness and ground truth, with tolerated upper bound $\Delta_t^{\max}$.
+self-assessed correctness and ground truth.
+
+$\Delta_t^{\max}$ is a \emph{design input}, not a measured quantity. It is the largest end-to-end
+failure rate a deployer is willing to accept, fixed before the system is built; the design rule of
+Section~5 inverts it into the judge reliability that this choice implies. The useful range is bounded
+away from one half (Section~5), since a coin-flip judge already scores one half by agreement. The
+experiments below are read \emph{against} this budget rather than used to estimate it.
 
 \textbf{Definition 1 (Safe Zone).} A self-evolving system is in the safe zone if judge reliability
 $\tau \ge \tau_c$ and generator validity $V \ge V_c$, where $\tau_c$ is the minimum judge reliability
@@ -257,7 +263,8 @@ Section~4.
     $\Delta_t^{\mathrm{valid}}$ & Judge-side failure rate, conditional on the task being valid. \\
     $\Delta_t^{\mathrm{global}}$ & End-to-end failure rate over all rounds, each invalid round
       charged $\Delta_t = 1.0$. \\
-    $\Delta_t^{\max}$ & Tolerated upper bound on the end-to-end bias. \\
+    $\Delta_t^{\max}$ & Design input, not a measured quantity: the largest end-to-end failure rate a
+      deployer accepts, fixed before the system is built (Section~3). \\
     $\Delta_{\mathrm{judge}}^{\mathrm{budget}}$ & Share of the error budget left for judge noise once
       $\Delta_t^{\mathrm{gen}}$ is charged. \\
     $n$ & Number of rounds in a condition. \\
@@ -274,9 +281,23 @@ corrupted experience and $\Delta_t$ grows monotonically. If $V < V_c$, the syste
 invalid tasks, and the effective evolution rate approaches zero.
 
 We ran 4 conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 runs = 2400 rounds on DeepSeek V4
-Flash (\texttt{deepseek-flash}). Difficulty spans L1 (linear integer arithmetic, $\le$10 Int vars),
-L2 (bit-vectors, $\le$20 vars), and L3 (mixed LIA+BV+Array, $\le$30 vars). The primary metric is
-$\Delta_t$; the secondary metric is valid task rate.
+Flash (\texttt{deepseek-flash}). The primary metric is $\Delta_t$; the secondary metric is valid task
+rate.
+
+\textbf{Difficulty levels.} A level is a request written into the teacher's prompt, not a property
+the harness enforces. L1 is linear integer arithmetic ($\le$10 variables), L2 is bit-vectors
+($\le$20 variables), and L3 mixes LIA, bit-vectors and arrays ($\le$30 variables); the prompt
+additionally asks for 3--5, 3--8 and 3--10 constraints respectively, and the solver timeout is 5\,s at
+L1 against 15\,s at L2/L3. Only three things are checked in code --- at least one variable, at least
+one constraint, and a hard cap of 50 constraints --- so a level is a difficulty \emph{intention} whose
+realisation depends on the generator.
+
+Levels are set in two different ways, and the two are not interchangeable. The 2{,}400-round baseline
+is \emph{adaptive}: the controller raises the level after five consecutive correct rounds with a
+window success rate $\ge 0.8$, and lowers it when that rate drops below $0.3$. The 240-round framework
+validation instead treats the level as a \emph{fixed factor} (4 conditions $\times$ 3 levels
+$\times$ 20 rounds, each level requested explicitly), which is what makes its per-level validity rates
+interpretable where the baseline's are not.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
