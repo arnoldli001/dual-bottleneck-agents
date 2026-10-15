@@ -105,7 +105,8 @@ reliability needed to hold the end-to-end bias at a tolerated level $\Delta_t^{\
 pseudo-difficulty trap: when the difficulty
 controller upgrades to Level 2/3, the LLM's task-generation validity collapses from $\sim$89\% to
 $<$10\%, causing the system to spin without progress. We propose a four-layer constraint generation
-framework that restores validity to 100\% at L1, 73.8\% at L2, and 83.8\% at L3 on real API.
+framework and show that its first two layers --- a JSON skeleton and a deterministic renderer ---
+restore validity to 100\% at L1, 73.8\% at L2, and 83.8\% at L3 on real API.
 \end{abstract}
 
 % ===========================================================================
@@ -174,15 +175,16 @@ validation + answer verification), which is the setting of most self-evolving lo
 
 To address the generator-side bottleneck, we propose a four-layer constraint generation framework:
 JSON skeleton generation, deterministic rendering, symbolic feedback from Z3 error codes, and
-curriculum control with sub-level difficulty. On the real DeepSeek V4 Flash API, this framework lifts L1
-validity above 80\% and L2 validity above 30\%---compared to $<$10\% without it.
+curriculum control with sub-level difficulty. On the real DeepSeek V4 Flash API, its first two layers
+lift L1 validity above 80\% and L2 validity above 30\%---compared to $<$10\% without them.
 
 \textbf{Contributions.} (1) We formalize the Dual Bottleneck Framework and show that positive
 evolution requires $\tau \ge \tau_c \land V \ge V_c$ (Section 4). (2) We identify the
 pseudo-difficulty trap as a novel failure mode in self-evolving agents (Section 4). (3) We derive
 and empirically validate the analytical relationship $\Delta_t(\tau) = (1-\tau^2)/2$, yielding a
 parameter-free formula for $\tau_c$ (Section 5). (4) We propose a four-layer constraint generation
-framework and validate it with real API experiments (Section 6).
+framework and validate it on the real API; the measured gain comes from its first two layers
+(Section 6).
 
 The formula has a practical reading. Before deploying a self-evolving loop, one needs to answer two
 design questions: ``How reliable must the judge be?'' and ``Where should I invest, in the judge or in
@@ -634,12 +636,20 @@ therefore replace it with a four-layer pipeline:
         Python code, removing the bracket-matching and variable-declaration failure classes.
   \item \textbf{Deterministic rendering.} A templated renderer turns the skeleton into Z3 Python
         code, so the output is syntactically valid by construction.
-  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to symbolic constraints and injected
-        into the next attempt's prompt.
-  \item \textbf{Curriculum controller.} Sub-level variable counts are raised after five consecutive
-        rounds with valid rate $> 0.80$ and lowered after three below $0.50$, damping the oscillation
-        that produced the pseudo-difficulty trap.
+  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to symbolic constraints so that each
+        failure class has a named remedy. The mapping is implemented and unit-tested, but the harness
+        constructs the teacher prompt once per task and passes \texttt{extra\_constraints=None}, so
+        the accumulated hints do not reach the model in the runs reported below; what those runs
+        exercise is the per-task retry budget.
+  \item \textbf{Curriculum controller.} A sub-level controller that raises variable counts after five
+        consecutive rounds with valid rate $> 0.80$ and lowers them after three below $0.50$ is
+        implemented and unit-tested (\texttt{scripts/difficulty\_controller.py}), but it is not wired
+        into the round loop of either experiment: the validation below requests each level as a fixed
+        factor, and the baseline uses the population game's own escalation rule.
 \end{enumerate}
+
+Of the four layers, the first two carry the measured improvement reported below; the last two are
+implemented and tested but are not exercised by these runs.
 
 \subsection{Real API Validation}
 \label{sec:api}
