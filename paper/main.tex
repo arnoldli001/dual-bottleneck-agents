@@ -91,7 +91,9 @@ experience---have shown promise in code generation and mathematical reasoning. E
 predominantly focuses on the judge (the evaluator providing feedback), assuming that reliable
 judges suffice. Through 2,400 controlled experiments on Z3 constraint-solving tasks, we uncover a
 second, equally critical bottleneck: the generator (the LLM authoring new tasks). We formalize the
-Dual Bottleneck as a composition law on error budgets:
+Dual Bottleneck as a composition law on error budgets, in which generator-side
+($\Delta_t^{\mathrm{gen}}$), judge-side ($\Delta_t^{\mathrm{valid}}$), and end-to-end
+($\Delta_t^{\mathrm{global}}$) failure rates compose multiplicatively:
 $1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})$, verified
 to machine precision (1.11e-16) on 2,400 real-API rounds. The law implies that the generator and
 judge bottlenecks share one budget: a condition with large $\Delta_t^{\mathrm{gen}}$ needs a more
@@ -251,15 +253,30 @@ reliability $\tau \ge \tau_c$ \textbf{and} generator valid rate $\ge 0.5$. Outsi
 the system still produces logs, still reports success on the rounds it can complete, and still
 appears to run --- which is precisely why the failure is easy to miss.
 
-The intuition behind the second bottleneck is that the causal variable is not $\tau_c$ itself. A
-round succeeds only if a valid task exists \textit{and} the student's answer is judged correctly, so
-by the chain rule
+The intuition behind the second bottleneck is that the causal variable is not $\tau_c$ itself. Three
+failure rates share one scale, and they are worth naming before they are composed.
+
+\begin{itemize}
+  \item $\Delta_t^{\mathrm{gen}}$, the \textbf{generator-side failure rate}: the fraction of rounds in
+    which the teacher failed to produce a task the formal verifier would accept. Its complement
+    $1 - \Delta_t^{\mathrm{gen}}$ is the valid-task rate $V$ of Section~3.
+  \item $\Delta_t^{\mathrm{valid}}$, the \textbf{judge-side failure rate}, \emph{conditional on the
+    task being valid}. Only valid rounds enter its denominator, because an invalid task has no answer
+    that could have been judged.
+  \item $\Delta_t^{\mathrm{global}}$, the \textbf{end-to-end failure rate} over all rounds, with every
+    invalid round charged $\Delta_t = 1.0$ as described above.
+\end{itemize}
+
+A round succeeds only if a valid task exists \textit{and} the student's answer is judged correctly, so
+the two failures compose by the chain rule:
 
 \[
   1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
 \]
 
-This holds to machine precision on the 2400-round data (Appendix~D, Table~\ref{tab:table4c_appendix}).
+The equation is a statement about denominators: the valid-only success rate, rescaled by the fraction
+of rounds that produced a usable task at all. This holds to machine precision on the 2400-round data
+(Appendix~D, Table~\ref{tab:table4c_appendix}).
 
 \begin{figure}[t]
   \centering
