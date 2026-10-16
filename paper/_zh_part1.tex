@@ -1,0 +1,148 @@
+% ---------------------------------------------------------------------------
+% Dual-Bottleneck Agents
+%
+% Batch 2: real figures and tables wired in.
+%   - \includegraphics for all 12 published figures (figures_zh/ is self-contained
+%     so the paper/ directory can be uploaded to Overleaf as-is)
+%   - booktabs tables built from reports/paper_data_final/tables/*.md
+%   - figure captions below, table captions above (NeurIPS convention)
+%   - \label on every float; cite them with \ref, never with a hard-coded number
+%
+% Abstract / Introduction / Section 3 are verbatim author text.
+% Sections 4-8 carry no body prose yet: the prose was not supplied.
+%
+% Compile target: pdfLaTeX (works unchanged on Overleaf).
+% ---------------------------------------------------------------------------
+
+% ---------------------------------------------------------------------------
+% NeurIPS 2026 官方模板。
+% 注意：neurips_2026.sty 内部已经 RequirePackage 了 geometry / natbib / hyperref，
+% 因此下面这几行不能再各自加载，否则会 option clash 直接报错。
+% 原先的 \documentclass[11pt]{article} 与 \usepackage[margin=1in]{geometry}
+% 会让版面变成单栏 1 英寸边距，与 NeurIPS 双栏模板冲突，已移除。
+% ---------------------------------------------------------------------------
+\documentclass{article}
+% natbib is loaded by neurips_2026.sty via \RequirePackage{natbib} with no
+% options, which defaults to author-year. Passing the options here is the
+% mechanism the style file itself documents, so numeral citations work
+% without touching the style file.
+\PassOptionsToPackage{numbers,compress}{natbib}
+\usepackage[preprint]{neurips_2026}
+
+% --- encoding and fonts -----------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- math -------------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- figures and tables -----------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+
+% --- bibliography -----------------------------------------------------------
+% natbib 由 neurips_2026.sty 内部加载，此处不再重复；数字模式用
+% \PassOptionsToPackage{numbers,compress}{natbib} 传入（见文件开头）。
+% neurips_2026.sty 本身不设 \bibliographystyle，必须由正文提供；
+% 文末用 unsrtnat 让文献编号按首次引用顺序排列（plainnat 按作者字母序）。
+
+% ---------------------------------------------------------------------------
+\title{《双重瓶颈：自进化智能体中裁判可靠度与生成器能力的合成律》}
+\author{李 浩\\[2pt]\small 独立研究者\\[2pt]\small \texttt{lihao9108@outlook.com}}
+\date{\today}
+% ---------------------------------------------------------------------------
+
+% Equation spacing (global preamble settings; no per-equation \vspace).
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{3pt plus 1pt minus 1pt}
+\setlength{\belowdisplayshortskip}{3pt plus 1pt minus 1pt}
+
+% Float pages: \@fptop defaults to "0pt plus 1fil", which stretches a float down
+% from the top of a float page. Pinning it to 0pt sets floats flush with the top
+% of the text block. Preamble-only; no float-separation length is touched.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
+% Float quota per page. The LaTeX default is two top floats per page, which is
+% what defers Appendix D's third table (D.5) to the page after D.3/D.4. Raising
+% the quota lets D.3, D.4 and D.5 share one page. Both the single-column and the
+% double-column counters are raised, since figure*/table* pick between them
+% according to the column mode. Counters only; no length or fraction is touched.
+\setcounter{topnumber}{3}
+\setcounter{dbltopnumber}{3}
+\setcounter{totalnumber}{4}
+
+\begin{document}
+
+\maketitle
+
+% ===========================================================================
+% ABSTRACT
+% ===========================================================================
+\begin{摘要}
+自进化智能体（self-evolving agent）——即迭代地生成任务、求解任务并蒸馏经验的系统——在代码生成与数学推理任务上已展现出潜力。已有工作主要聚焦于裁判（judge），也就是提供反馈的评估者，并默认裁判只要足够可靠便万事大吉。通过在 Z3 约束求解任务上开展的 2,400 组受控实验，发现了第二个同等关键的瓶颈：生成器（generator），即撰写新任务的 LLM。把双重瓶颈（dual bottleneck）形式化为一条作用于误差预算（error budget）的合成律（composition law），其中生成侧（$\Delta_t^{\mathrm{gen}}$）、裁判侧（$\Delta_t^{\mathrm{valid}}$）与端到端（$\Delta_t^{\mathrm{global}}$）三个失败率相乘合成：$1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})$，并在 2,400 轮真实 API 实验上验证到机器精度（1.11e-16）。这条定律意味着生成器与裁判这两个瓶颈共享同一份预算：对于 $\Delta_t^{\mathrm{gen}}$ 较大的条件（condition），若要求总体容差不变，就需要更可靠的裁判；而如果 $\Delta_t^{\mathrm{gen}}$ 本身已经超出预算，那么任何裁判可靠度（judge reliability）都无法补偿。使用真实的 DeepSeek V4 Flash API 在 Level 1 任务上实测得到临界裁判可靠度 $\tau_c \approx 0.55$，并推导出无参数设计规则 $\tau_c = \sqrt{1-2\Delta_t^{\max}}$：它给出把端到端偏差控制在容忍上界 $\Delta_t^{\max}$ 之内所需的最低裁判可靠度。识别出伪难度陷阱（pseudo-difficulty trap）：当难度控制器（difficulty controller）升级到 Level 2/3 时，LLM 的任务生成有效率（valid task rate）从 $\sim$89\% 暴跌到 $<$10\%，致使系统空转、毫无进展。提出一个四层约束生成框架（four-layer constraint generation framework），并说明其中承重的是前两层——JSON 骨架与确定性渲染器——它们在真实 API 上把有效率恢复到 L1 的 100\%、L2 的 73.8\% 与 L3 的 83.8\%。
+\end{摘要}
+
+% ===========================================================================
+% 1. INTRODUCTION
+% ===========================================================================
+\section{引言}
+
+自进化智能体（self-evolving agent）——即迭代地生成任务、求解任务并蒸馏经验的系统——已成为持续改进的一条有前景的范式。主流叙事聚焦于\textit{裁判}（judge）：如何提供可靠反馈，以防止智能体漂移进自我确认的循环。
+
+这种担忧是有根据的。\textbf{自验证悬崖（self-verification cliff）}~\cite{self_verification_cliff}表明，生成器越强，其自选择（self-selection）缺口就越大：GPT-5.4-mini 能解出 54.7\% 的 AIME 问题，但自选择正确的比例只有 41.9\%，仅回收了其采样余量（sampling headroom）的 36\%。\textbf{Ratchet}~\cite{ratchet}给出了一个精确界：若裁判把失败判为通过的比例达到 $(1-\tau)/2$ 或更高，那么无论样本量多大，技能退役（skill retirement）都不会淘汰任何东西。\textbf{AgentJudgeBench}~\cite{agentjudgebench}揭示，LLM 裁判在困难查询上会收敛到 77--82\% 的准确率天花板，且与模型规模无关。
+
+最初也持同样的前提。构建了一个自进化智能体，配备形式化锚定（formal anchoring，Z3）、基于种群的难度自适应以及经验蒸馏（distillation）。跑了 2,400 轮受控实验（4 个条件 $\times$ 200 轮 $\times$ 3 次重复运行）。
+
+\textbf{原本预期能证实形式化锚定可以抑制自评分漂移，事实也确实如此}：条件 A（LLM 自评分）在 200 轮中把评估偏差（evaluation bias）$\Delta_t = 0.15$ 保持住，而条件 B（Z3 锚定）保持在 $0.00$。\textbf{但也发现了意料之外的现象}：条件 C（仅种群博弈）与条件 D（完整系统）分别使 85.5\% 与 90.5\% 的任务失效。控制器把 Level-1 的高成功率读作"已就绪"，于是升级到 Level 2/3；而在那里 LLM 无法生成有效的 Z3 代码——于是系统空转、毫无进展，把 API 预算烧在了从未走到验证环节的任务上。
+
+\textbf{这就是伪难度陷阱（pseudo-difficulty trap）。}它不是裁判失效——Z3 完全可靠。它是\textit{生成器}失效。而它揭示出：自进化系统面对的是\textbf{两个相互独立的瓶颈}，而不是一个：
+
+\begin{enumerate}
+  \item \textbf{裁判侧瓶颈}：当裁判可靠度 $\tau$ 跌破临界阈值（critical threshold）$\tau_c$ 时，累积的经验中就会含有被污染的信号。
+  \item \textbf{生成器侧瓶颈}：当生成器有效率 $V$——即产出任务通过形式化验证器的轮次占比——跌破临界值 $V_c$ 时，任何难度升级都会把系统推入空转。
+\end{enumerate}
+
+单看任何一个瓶颈都无法解释这次失败。裁判再完美，也救不了一个生成器无法产出有效任务的系统。生成器再完美，也救不了一个裁判只给出噪声信号的系统。\textbf{两个瓶颈会复合。}
+
+为了量化这一点，通过向 Z3 裁决（verdict）注入对称噪声来系统性地改变裁判可靠度，并测量由此产生的评估偏差 $\Delta_t$。对噪声扫描做拟合，可以得到一个无参数关系式：
+
+\[
+  \Delta_t(\tau) = \frac{1-\tau^2}{2}
+\]
+
+将其反解即得 $\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$。实测平均绝对误差（MAE）为 0.026（条件 B）与 0.052（条件 D）。在 Level 1 任务上，$\tau_c(B) = \tau_c(D) = 0.55$。
+
+\textbf{这个公式有三点含义。}第一，它把临界裁判可靠度确立为\textit{系统容差的函数}，而不是一个固定常数——一个能容忍更大评估偏差的系统，所需要的裁判反而更不可靠。第二，它定量地解释了"裁判稀缺"问题：只要系统的容差是 0.35，那么哪怕裁判只有 55\% 的可靠度也够用。第三，它指出了与既有工作的一个结构性区别：Ratchet 的 $(1-\tau)/2$ 支配的是\textit{单次}裁决（技能淘汰），而$(1-\tau^2)/2$ 支配的是\textit{双重}裁决（任务校验 + 答案验证），后者才是大多数自进化循环所处的设定。
+
+为应对生成器侧的瓶颈，提出一个四层约束生成框架（four-layer constraint generation framework）：JSON 骨架生成、确定性渲染、来自 Z3 错误码的符号反馈，以及带子级难度的课程控制。在真实的 DeepSeek V4 Flash API 上，其前两层把 L1 有效率抬升到 80\% 以上、L2 有效率抬升到 30\% 以上——相比之下，不用它们时低于 $<$10\%。
+
+\textbf{贡献。}（1）形式化了双重瓶颈框架，并证明正向演化要求 $\tau \ge \tau_c \land V \ge V_c$（第 4 节）。（2）识别出伪难度陷阱（pseudo-difficulty trap），将其作为自进化智能体中的一种新失效模式（第 4 节）。（3）推导并实证验证了解析关系式 $\Delta_t(\tau) = (1-\tau^2)/2$，从而得到一个关于 $\tau_c$ 的无参数公式（第 5 节）。（4）提出一个四层约束生成框架，在真实 API 上加以验证，并指出实测增益来自其前两层（第 6 节）。
+
+这个公式有一种实用的读法。在部署一个自进化循环之前，需要回答两个设计问题："裁判必须多可靠？"以及"我该往哪里投入，裁判还是生成器？"合成律（composition law）对两者都给出了答案。给定可容忍的端到端误差 $\Delta_t^{\max}$，所需的裁判可靠度是 $\tau_c = \sqrt{1 - 2\Delta_t^{\max}}$，一个不含自由参数的闭式表达式。而且，由于两个瓶颈共享同一份预算，生成器的误差 $\Delta_t^{\mathrm{gen}}$ 会被优先计入：如果 $\Delta_t^{\mathrm{gen}} \ge \Delta_t^{\max}$，那么再高的裁判可靠度也救不回这个循环。在自己的系统中，生成器瓶颈吃掉了整份预算（条件 C 的 $\Delta_t^{\mathrm{gen}} = 0.855$、条件 D 的 $0.905$，二者都由 L1$\to$L2 转换处的失效所驱动），这正是为什么在四层约束框架恢复生成器有效率之前，任何高于 0.55 的裁判可靠度都不可能奏效。
+
+% ===========================================================================
+% 2. RELATED WORK -- title only
+% ===========================================================================
+\section{相关工作}
+
+\paragraph{自我改进型智能体。}
+越来越多的研究让语言模型智能体在没有人类监督的情况下自我改进。Darwin Gödel Machine~\cite{dgm} 修改自身代码，并保留那些能通过自生成测试的变体；HyperAgents~\cite{hyperagents} 把这一点推进到元层面的自我指涉；EvolveR~\cite{evolver} 从成功与失败的轨迹中蒸馏出可复用的经验；PopuLoRA~\cite{populora} 让低秩适配器以种群方式演化。这些系统共享一个结构性假设：\emph{某个}组件必须能可靠地裁决一个被提出的改动是否为改进。把这个假设显式化，并量化了它在何时会失效。
+
+\paragraph{裁判一侧的瓶颈。}
+有三项近期结果框定了所研究的问题。自验证悬崖（self-verification cliff）~\cite{self_verification_cliff}表明，生成器产出候选解的能力可能超过它从中挑选的能力，因此即便原始能力在增长，自我改进仍会停滞。Ratchet~\cite{ratchet} 追问的是一个互补的问题——在技能可以被安全退役之前，LLM 裁判必须多可靠——并在一种特定的技能退役协议下推导出了阈值。Blind Curator~\cite{blind_curator} 报告称，当裁判的误通过率（false-pass rate）越过约 0.45 时（\textit{在其自身设定中}），技能退役会被无声地禁用，即便该裁判的总体准确率看起来尚可接受。定理（Theorem）~1 把这一结论从技能退役推广到迭代式自我改进，给出了一个闭式的 $\tau_c$，它取决于噪声注入（noise injection）协议，而非取决于某一条单一判决规则。
+
+\paragraph{智能体评估与约束引导的生成。}
+AgentJudgeBench~\cite{agentjudgebench} 为裁决智能体行为提供了一个多难度基准；而难度层级改由 Z3 理论定义，因此这两种分层彼此独立。TreeCoder~\cite{treecoder} 通过语法导向搜索来约束代码生成，InstructFlow~\cite{instructflow} 则用符号约束引导代码生成——这正是框架中骨架层与渲染层背后的同一设计原则。与面向基准的工作不同，不提出新的评测套件；利用既有的形式化信号，去定位自我改进在何处变成自我挫败。
+
+\paragraph{本文的定位。}
+已有工作要么假设裁判是可靠的，要么在单一判决设定下研究裁判可靠度。给出一个\emph{双重瓶颈}的说明：裁判侧的阈值 $\tau_c$ 与生成器侧的四层约束生成框架（four-layer constraint generation framework）源自同一条合成律，而预算分解展示了在固定的标注预算（annotation budget）下，可靠度与能力如何权衡。据所知，这是首次把两个瓶颈统一在同一条解析公式之下，并在真实 API 轨迹上加以验证的工作。
+
+% ===========================================================================
+% 3. PROBLEM SETUP
+% ===========================================================================

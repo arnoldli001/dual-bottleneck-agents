@@ -1,0 +1,244 @@
+\section{被否决的备择模型}
+
+对同一条 $\tau^{2}$ 形曲线还存在一种更简单的解释，值得明确写出，因为它最可能是读者读到这里时
+会自行带入的竞争性假设。它把第二次独立判定替换为一个接受门：系统以概率 $\tau$ 接受裁判的裁断，
+否则用自己的评估将其覆盖，而这一评估本身并不可靠。在该模型下，只有当\textbf{两个}事件都成功时
+一轮才算正确，因此
+
+\[
+  P(\text{correct}) = \tau \cdot \tau = \tau^{2}
+  \qquad\Longrightarrow\qquad
+  \Delta_t = 1 - \tau^{2}
+\]
+
+该模型的三条错误路径——裁判正确但被覆盖，$\tau(1-\tau)$；裁判错误但被接受，$(1-\tau)\tau$；
+以及两者皆错，$(1-\tau)^{2}$——之和为
+
+\[
+  \tau(1-\tau) + (1-\tau)\tau + (1-\tau)^{2} \;=\; (1-\tau)(1+\tau) \;=\; 1-\tau^{2}
+\]
+
+\textbf{判别性检验。}这两个模型在偏差尺度上恰好相差一个因子二，因为
+$(1-\tau^{2}) \big/ \bigl((1-\tau^{2})/2\bigr) = 2$，并且它们无需任何拟合即可区分。
+第~5.3 节将两者都与实测的 \texttt{correct\_rate} 作了比较：
+
+\begin{center}
+\small
+\begin{tabular}{@{}llr@{}}
+  \toprule
+  模型 & $P(\text{correct})$ & 相对实测 \texttt{correct\_rate} 的 MAE \\
+  \midrule
+  两次独立判定（\textbf{本文}） & $(1 + \tau^{2})/2$ & \textbf{0.0389} \\
+  裁判 $+$ 接受门（已否决） & $\tau^{2}$ & 0.2291 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+在 16 个 $(\tau, \text{condition})$ 单元上，双判定模型在 13 个单元上更接近，在 2 个单元上持平，
+仅在 1 个单元上落败。因此这项否决并不是在两个同样好的拟合之间做偏好选择：接受模型在 MAE 上
+差了六倍。
+
+\textbf{因子二从何而来。}接受模型没有\textit{两者皆错}的一致路径。在第~5.3 节中，只要两个裁断
+\textbf{一致}，该轮即记为正确，于是概率质量分成三条穷尽的路径：两者都未被翻转、恰好一个被
+翻转、两者都被翻转。第一条与第三条彼此一致，贡献的误差为零；只有中间那条概率为
+$2p(1-p) = (1-\tau^{2})/2$ 的路径带有偏差。与之相对，接受模型把两者皆错的情形也计为一次错误，
+正是这一点使 $\Delta_t$ 翻倍。$\tau$ 的指数由系统要求达成一致的独立判定次数决定——这是架构的
+性质，而非裁判的性质。
+
+在网格的下边缘 $\tau = 0.55$ 处，被否决的模型预测 $\Delta_t = 1 - 0.55^{2} = 0.6975$，而实测为
+0.3000（B）和 0.3200（D），闭式预测为 $(1 - 0.55^{2})/2 = 0.3488$。在边界 $\tau = 0.5$ 处，
+被否决的模型给出 $\Delta_t = 0.75$，而闭式给出 $0.375$——一个干净的因子二，不过扫描网格从
+$\tau = 0.55$ 开始，因此在该点上并没有测量值。\textbf{本文没有任何结果使用
+$\Delta_t = 1-\tau^{2}$。}
+
+\section{数据一致性检查}
+\label{app:data_consistency}
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{D.\arabic{table}}
+
+\subsection{$\Delta_t$ 的统一定义}
+
+\[
+  \Delta_t \;=\; \bigl| \text{score}(y) - \text{label}(y^{*}) \bigr|
+\]
+
+\begin{itemize}
+  \item $y$：该轮提交的答案（\texttt{z3\_result.status}）；
+  \item $\text{score}(y)$：系统对该答案给出的归一化评分，取值于 $[0, 1]$；
+  \item $\text{label}(y^{*})$：真值标签（\texttt{sat} $= 1.0$，\texttt{unsat} $= 0.0$）。
+\end{itemize}
+
+\subsection{各条件下系统评分的来源}
+
+表~\ref{tab:table2c_sources} 记录了在每个条件下，哪个量充当系统的评估，哪个量充当真值。
+
+\begin{table*}[t]
+  \centering
+  \caption{各条件下系统评分与真值标签的来源。在 B 与 D 中，Z3 裁断与自身相比较，因此在每个有效
+  轮上 $\Delta_t$ 恒为零；正是第~\ref{sec:calibers} 节的 global 口径重新引入了一个非零的平均值。}
+  \label{tab:table2c_sources}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l l l >{\raggedright\arraybackslash}X@{}}
+    \toprule
+    条件 & 系统评分 $\text{score}(y)$ & 真值 $\text{label}(y^{*})$ & $\Delta_t$ \\
+    \midrule
+    A & \texttt{llm\_self\_score}（LLM 自评分） & \texttt{expected}（Z3 真值） &
+        $\bigl|\texttt{llm\_self\_score} - \text{truth}\bigr|$ \\
+    B & \textbf{Z3 锚点} $=$ \texttt{z3\_result.status} & \texttt{expected} &
+        \textbf{0.00} —— Z3 裁断直接采用真值，因此它是与自身相比较 \\
+    C & \texttt{llm\_self\_score}，在总体上取平均 & \texttt{expected} &
+        $\bigl|\texttt{llm\_self\_score} - \text{truth}\bigr|$ \\
+    D & \textbf{Z3 锚点} $+$ 圆桌共识 & \texttt{expected} &
+        \textbf{0.00} —— Z3 裁断是自洽的 \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\subsection{两种统计口径}
+\label{sec:calibers}
+
+\textbf{口径 1：valid-only $\Delta_t$（表~\ref{tab:table2b_appendix}）。}分母是
+\texttt{len(records[r.valid])}。无效轮次——即教师生成失败、因而不存在真值标签的那些轮次——被
+排除在外。在该口径下，A 给出 $\Delta_t \approx 0.15$，因为 LLM 自评分仅在少数轮次上偏离 Z3
+真值；而 B 与 D 给出 $\Delta_t \equiv 0.00$，因为 Z3 裁断是与自身相比较的。
+
+\textbf{口径 2：global $\Delta_t$（本附录与图~\ref{fig:delta_t_global}）。}分母是所有轮次。无效
+轮次被保守地编码为 $\Delta_t = 1.0$，有效轮次保留其 valid-only 取值。在该口径下，A 升至
+$\approx 0.24$，由 $11\%$ 的无效轮次推动，而 B 升至 $\approx 0.25$，由 $24\%$ 的无效轮次推动。
+
+\subsection{表面矛盾的消解}
+
+对照两份报告的读者会发现，一份中 A $= 0.15$、B $= 0.00$，另一份中 A $= 0.2435$、
+B $= 0.2450$。二者\textbf{并不}冲突：它们是同一批轮次在上述两种口径下的读数，而
+表~\ref{tab:table2c_calibers} 同时验证了两者。
+
+\begin{table*}[t]
+  \centering
+  \caption{同一批轮次在两种口径下的结果。valid-only 各行即表~\ref{tab:table2b_appendix} 中的
+  条目；global 各行则对每个无效轮次额外计入 $\Delta_t = 1.0$。}
+  \label{tab:table2c_calibers}
+  \small
+  \begin{tabular}{@{}llrr@{}}
+    \toprule
+    口径 & 条件 & $n$ & 平均 $\Delta_t$ \\
+    \midrule
+    valid-only & A & 534 & 0.1500 \\
+    global     & A & 600 & 0.2435 \\
+    valid-only & B & 453 & 0.0000 \\
+    global     & B & 600 & 0.2450 \\
+    valid-only & C & 87  & 0.1500 \\
+    global     & C & 600 & 0.8767 \\
+    valid-only & D & 57  & 0.0000 \\
+    global     & D & 600 & 0.9050 \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+本文的主表使用\textbf{口径 1（valid-only）}，而在描述伪难度陷阱时使用\textbf{口径 2（global）}，
+因为在那里所关心的量恰恰是 C 与 D 使多少轮次失效。
+
+\subsection*{从正文移出的表格}
+
+此前位于正文中的三张表汇集于此，以便正文只保留它直接据以推理的那两张表：合成律核对
+（表~\ref{tab:table4c_appendix}）、valid-only 口径（表~\ref{tab:table2b_appendix}）
+与完整预算扫描（表~\ref{tab:table4cbudget_full}）。
+
+\begin{table*}[t]
+  \centering
+  \caption{合成律在全部四个条件上精确到机器精度
+  （2{,}400 个真实 API 轮次）。最大绝对误差 $1.11\times10^{-16}$。}
+  \label{tab:table4c_appendix}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{6}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    条件 & $n$ & $\Delta_t^{\mathrm{gen}}$ & $\Delta_t^{\mathrm{valid}}$ &
+    预测 $\Delta_t^{\mathrm{global}}$ & 实测 & 绝对误差 \\
+    \midrule
+    A & 600 & 0.1100 & 0.1500 & 0.2435 & 0.2435 & $5.55\times10^{-17}$ \\
+    B & 600 & 0.2450 & 0.0000 & 0.2450 & 0.2450 & $0$ \\
+    C & 600 & 0.8550 & 0.1500 & 0.8768 & 0.8767 & $1.11\times10^{-16}$ \\
+    D & 600 & 0.9050 & 0.0000 & 0.9050 & 0.9050 & $0$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\begin{table*}[t]
+  \centering
+  \caption{平均 $\Delta_t$（valid-only 口径）。}
+  \label{tab:table2b_appendix}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    条件 & $n$（有效） & 平均 $\Delta_t$（仅有效轮次） & 标准差 & 最小值 & 最大值 \\
+    \midrule
+    A & 534 & 0.1500 & 0.0000 & 0.1500 & 0.1500 \\
+    B & 453 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    C & 87  & 0.1500 & 0.0000 & 0.1500 & 0.1500 \\
+    D & 57  & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\begin{table*}[t]
+  \centering
+  \caption{对 $\Delta_t^{\max}$ 完整扫描区间的预算分解：在计入生成器瓶颈之后剩余的裁判预算，
+  以及它所要求的裁判可靠性。正文以文字陈述了 $\Delta_t^{\max} = 0.60$ 的情形；此处是完整的
+  扫描结果。}
+  \label{tab:table4cbudget_full}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+    \toprule
+    条件 & $\Delta_t^{\mathrm{gen}}$ & $\Delta_t^{\max}$ & 裁判预算
+    & 所需 $\tau_c$ \\
+    \midrule
+    A & 0.1100 & 0.60 & $0.5506$ & $\ge 0$（随机即可满足） \\
+    B & 0.2450 & 0.60 & $0.4702$ & 0.244 \\
+    C & 0.8550 & 0.60 & $-1.7586$ & 不可达 \\
+    D & 0.9050 & 0.60 & $-3.2105$ & 不可达 \\
+    \midrule
+    A & 0.1100 & 0.70 & $0.6629$ & $\ge 0$（随机即可满足） \\
+    B & 0.2450 & 0.70 & $0.6026$ & $\ge 0$（随机即可满足） \\
+    C & 0.8550 & 0.70 & $-1.0690$ & 不可达 \\
+    D & 0.9050 & 0.70 & $-2.1579$ & 不可达 \\
+    \midrule
+    A & 0.1100 & 0.80 & $0.7753$ & $\ge 0$（随机即可满足） \\
+    B & 0.2450 & 0.80 & $0.7351$ & $\ge 0$（随机即可满足） \\
+    C & 0.8550 & 0.80 & $-0.3793$ & 不可达 \\
+    D & 0.9050 & 0.80 & $-1.1053$ & 不可达 \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+% ---------------------------------------------------------------------------
+% 未安置的浮动体
+%
+% 已发布的数据包中共有 9 张表。其中七张现已各有着落（table4c
+% 提供了其中两张）；剩下这两张仍需安置。请把每一张移入应当引用它的
+% 那一节，并为其补上 \caption 与 \label。
+%
+%   table2a_delta_t_global        global 口径（在 4.2 中讨论）
+%   table4b_analytical_fit        各 tau 的残差（在 5.3 中讨论）
+%
+% 注意：table2c_delta_t_semantics 被放置在附录 D 中，作为
+% \ref{tab:table2c_sources} 与 \ref{tab:table2c_calibers}；第 4.2 节的
+% 指针 \ref{app:data_consistency} 所指向的正是它。
+%
+% 阶段 3 把四个浮动体从正文移入附录，并删除
+% 了两个正文浮动体：
+%   table1（实验设置）   已删除；其内容现为第 3 节中的正文
+%   table3（有效任务率） 已删除；它与
+%                               \ref{fig:validity_by_condition} 重复
+%   table4c（合成律）     -> 附录 D，\ref{tab:table4c_appendix}
+%   table2b（valid-only dt）     -> 附录 D，\ref{tab:table2b_appendix}
+%   table4cbudget               -> 正文只保留 0.60 那一段；完整
+%                                  扫描结果在附录 D，
+%                                  \ref{tab:table4cbudget_full}
+%   table4（tau_c）              已删除；现为第 5.2 节中的一句话
+%   fig5b（解析拟合）     -> 附录 A，
+%                                  \ref{fig:analytical_fit_appendix}
+%   fig3b（按层级的有效任务率）  -> 附录 A，
+%                                  \ref{fig:validity_by_level_appendix}
+% ---------------------------------------------------------------------------
+
+\end{document}

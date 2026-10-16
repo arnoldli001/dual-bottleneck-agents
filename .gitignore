@@ -108,7 +108,18 @@ paper_notes/
 #   生成脚本 _zh_figs.py + _zh_fig_terms.py 一并入库，克隆者才能重出这套图：
 #   它们不修改那 8 个英文生成脚本，而是拦下 matplotlib 的文字 API、按术语表
 #   把图内文字换成中文，再统一加边框输出。
-#   注意：main_zh.tex 仍排除（中文论文源码是否公开另议）。
+# 中文版正文自 2026-10-16 起入库（作者决定：全部入库，连产物一起）。
+#   在此之前 main_zh.tex / _zh_part*.tex 全部被忽略，后果是中文的每次修改
+#   都无法 diff、无法 review、无法回滚，提交里也看不到——曾因此误以为中文漏改。
+#   入库范围 = 构建必需集：
+#     main_zh.tex        拼装产物（作者选择连产物一起提交，clone 者不跑脚本即可编译）
+#     _zh_part1..4.tex   中文正文的真实源码（实际文字都在这里）
+#     _zh_assemble.py    拼装脚本（含 3 条中文规范检查与结构等价检查）
+#     _zh_pagecount.py   页数测量工具（正文是否落在 9 页内）
+#   paper/ 下另有约 20 个 _zh_*.py 一次性诊断脚本（_zh_mathdiff / _zh_spotcheck /
+#   _del_zh_appE 等），属于用过即弃的工具，不入库。
+#   注意：main_zh.tex 与 _zh_part1.tex 的 \author 含真实邮箱，与 main.tex 一致
+#   （作者已确认保留），因此入库不新增信息暴露。
 paper/*
 !paper/main.tex
 !paper/refs.bib
@@ -119,6 +130,13 @@ paper/*
 !paper/figures_zh/README.md
 !paper/_zh_figs.py
 !paper/_zh_fig_terms.py
+!paper/main_zh.tex
+!paper/_zh_part1.tex
+!paper/_zh_part2.tex
+!paper/_zh_part3.tex
+!paper/_zh_part4.tex
+!paper/_zh_assemble.py
+!paper/_zh_pagecount.py
 
 # 条件 C Δ_t 修正前的原始日志备份
 # scripts/rederive_condition_c_delta_t.py --apply 会把改动过的 round_*.jsonl
