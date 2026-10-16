@@ -73,6 +73,9 @@ def modal_font_size(page) -> float | None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--pdf", required=True, help="compiled Chinese PDF")
+    ap.add_argument("--lang", choices=["zh", "en"], default="zh",
+                    help="zh (default): ctex leading model, reports the f to scale. "
+                         "en: fixed NeurIPS style, reports how many characters to cut.")
     ap.add_argument("--target", type=int, default=TARGET_PAGES,
                     help="body pages allowed (default 9)")
     args = ap.parse_args()
@@ -130,6 +133,27 @@ def main() -> None:
     prose = extent - figs
     print(f"  正文字体占位      : {figs:.1f} pt ({figs / extent:.1%})，"
           f"可压缩散文 {prose:.1f} pt")
+
+    if args.lang == "en":
+        # The English submission uses the fixed NeurIPS style: neither font size
+        # nor leading is ours to change, so the actionable lever is cutting text.
+        # Measure this PDF's own characters-per-page rather than guessing a rate.
+        if body_pages <= args.target + 1e-6:
+            print(f"\n  已达标：正文 {body_pages:.2f} 页，不超过 {args.target} 页。")
+        else:
+            over = body_pages - args.target
+            n = int(body_pages) + 1
+            chars = sum(len(doc[i].get_text().replace("\n", "").replace(" ", ""))
+                        for i in range(n))
+            per_page = chars / body_pages
+            print(f"\n  超 {over:.2f} 页。")
+            print(f"  这份 PDF 实测 {chars} 正文可见字符 / {body_pages:.2f} 页 "
+                  f"= {per_page:.0f} 字符每页")
+            print(f"  => 需削减约 {over * per_page:.0f} 字符（或等量的浮动体高度）")
+            print("  英文版用固定 NeurIPS 版式，字号/行距不可调，只能删减文字，"
+                  "不要套用中文那套 f 缩放。")
+        doc.close()
+        return
 
     if body_pages <= args.target + 1e-6:
         print("\n  已达标：正文不超过 "

@@ -227,54 +227,43 @@ flip. Let $V \in [0,1]$ denote generator validity: the fraction of generated tas
 formal verifier. Let $\Delta_t$ denote the evaluation bias at round $t$: the gap between the system's
 self-assessed correctness and ground truth.
 
-$\Delta_t^{\max}$ is a \emph{design input}, not a measured quantity. It is the largest end-to-end
-failure rate a deployer is willing to accept, fixed before the system is built; the design rule of
-Section~5 inverts it into the judge reliability that this choice implies. The useful range is bounded
-away from one half (Section~5), since a coin-flip judge already scores one half by agreement. The
-experiments below are read \emph{against} this budget rather than used to estimate it.
+$\Delta_t^{\max}$ is a \emph{design input}, not a measured quantity: the largest end-to-end failure
+rate a deployer accepts, fixed before the system is built and inverted by Section~5 into a required
+judge reliability. It is read against the experiments below, never estimated from them, and the
+useful range stops short of one half.
 
 \textbf{Definition 1 (Safe Zone).} A self-evolving system is in the safe zone if judge reliability
 $\tau \ge \tau_c$ and generator validity $V \ge V_c$, where $\tau_c$ is the minimum judge reliability
 that holds the evaluation bias at or below $\Delta_t^{\max}$ (Section~5), and $V_c = 0.5$ is the
 generator-validity floor used throughout.
 
-Table~\ref{tab:notation} collects this notation together with the failure rates derived from it in
-Section~4.
+Table~\ref{tab:notation} collects this notation.
 
 \begin{table*}[t]
   \centering
-  \caption{Notation. The first block defines the two bottleneck parameters and the evaluation bias;
-  the second lists the derived failure rates together with the bounds and counts computed from them;
-  the last two entries appear only in the appendices.}
+  \caption{Notation. Sections~3 and~4 define these in prose; the last two entries are
+  appendix-only.}
   \label{tab:notation}
   \small
   \begin{tabularx}{\textwidth}{@{}lX@{}}
     \toprule
     Symbol & Meaning \\
     \midrule
-    $\tau \in [0,1]$ & Judge reliability. Each binary verdict is flipped with probability
-      $p = (1-\tau)/2$; $\tau = 1$ is a perfect judge and $\tau = 0$ is a coin flip. \\
-    $\tau_c$ & Critical judge reliability: the smallest $\tau$ that holds the evaluation bias at or
-      below $\Delta_t^{\max}$ (Section~5). \\
+    $\tau \in [0,1]$ & Judge reliability; each verdict is flipped with probability $p = (1-\tau)/2$. \\
+    $\tau_c$ & Critical $\tau$ holding the bias at or below $\Delta_t^{\max}$ (Section~5). \\
     $p$ & Per-verdict flip probability, $p = (1-\tau)/2$. \\
-    $V \in [0,1]$ & Generator validity: the fraction of generated tasks that pass the formal
-      verifier. \\
+    $V \in [0,1]$ & Generator validity: the fraction of tasks the verifier accepts. \\
     $V_c$ & Generator-validity floor, $0.5$. \\
-    $\Delta_t$ & Evaluation bias at round $t$: the gap between the system's self-assessed
-      correctness and ground truth. \\
+    $\Delta_t$ & Evaluation bias at round $t$. \\
     \midrule
     $\Delta_t^{\mathrm{gen}}$ & Generator-side failure rate, $= 1 - V$. \\
-    $\Delta_t^{\mathrm{valid}}$ & Judge-side failure rate, conditional on the task being valid. \\
-    $\Delta_t^{\mathrm{global}}$ & End-to-end failure rate over all rounds, each invalid round
-      charged $\Delta_t = 1.0$. \\
-    $\Delta_t^{\max}$ & Design input, not a measured quantity: the largest end-to-end failure rate a
-      deployer accepts, fixed before the system is built (Section~3). \\
-    $\Delta_{\mathrm{judge}}^{\mathrm{budget}}$ & Share of the error budget left for judge noise once
-      $\Delta_t^{\mathrm{gen}}$ is charged. \\
-    $n$ & Number of rounds in a condition. \\
+    $\Delta_t^{\mathrm{valid}}$ & Judge-side failure rate, given a valid task. \\
+    $\Delta_t^{\mathrm{global}}$ & End-to-end failure rate, invalid rounds charged $\Delta_t = 1.0$. \\
+    $\Delta_t^{\max}$ & Design input: the largest end-to-end failure rate a deployer accepts. \\
+    $\Delta_{\mathrm{judge}}^{\mathrm{budget}}$ & Budget left for judge noise once $\Delta_t^{\mathrm{gen}}$ is charged. \\
+    $n$ & Rounds in a condition. \\
     \midrule
-    $S, G, J$ & Indicator variables (Appendix~B): the round succeeds, the generator produced a valid
-      task, the judge evaluated it correctly. \\
+    $S, G, J$ & Indicators (Appendix~B): success, valid task, correct judgment. \\
     $y, y^{*}$ & Submitted answer and its ground-truth label (Appendix~C). \\
     \bottomrule
   \end{tabularx}
@@ -288,20 +277,14 @@ We ran 4 conditions (A/B/C/D) $\times$ 200 rounds $\times$ 3 runs = 2400 rounds 
 Flash (\texttt{deepseek-flash}). The primary metric is $\Delta_t$; the secondary metric is valid task
 rate.
 
-\textbf{Difficulty levels.} A level is a request written into the teacher's prompt, not a property
-the harness enforces. L1 is linear integer arithmetic ($\le$10 variables), L2 is bit-vectors
-($\le$20 variables), and L3 mixes LIA, bit-vectors and arrays ($\le$30 variables); the prompt
-additionally asks for 3--5, 3--8 and 3--10 constraints respectively, and the solver timeout is 5\,s at
-L1 against 15\,s at L2/L3. Only three things are checked in code --- at least one variable, at least
-one constraint, and a hard cap of 50 constraints --- so a level is a difficulty \emph{intention} whose
-realisation depends on the generator.
-
-Levels are set in two different ways, and the two are not interchangeable. The 2{,}400-round baseline
-is \emph{adaptive}: the controller raises the level after five consecutive correct rounds with a
-window success rate $\ge 0.8$, and lowers it when that rate drops below $0.3$. The 240-round framework
-validation instead treats the level as a \emph{fixed factor} (4 conditions $\times$ 3 levels
-$\times$ 20 rounds, each level requested explicitly), which is what makes its per-level validity rates
-interpretable where the baseline's are not.
+\textbf{Difficulty levels.} A level is a request in the teacher's prompt, not a property the harness
+enforces: L1 is linear integer arithmetic ($\le$10 variables), L2 is bit-vectors ($\le$20), and L3
+mixes LIA, bit-vectors and arrays ($\le$30), with 3--5, 3--8 and 3--10 constraints and solver
+timeouts of 5\,s at L1 against 15\,s at L2/L3. Only one variable, one constraint and a hard cap of 50
+are checked in code, so a level is an \emph{intention}. It is set adaptively in the 2{,}400-round
+baseline (raise after five consecutive correct rounds at window success $\ge 0.8$, lower below $0.3$)
+but as a \emph{fixed factor} in the 240-round validation, which is why only the latter's per-level
+rates are interpretable.
 
 % ===========================================================================
 % 4. THE DUAL BOTTLENECK FRAMEWORK
@@ -325,22 +308,15 @@ reliability $\tau \ge \tau_c$ \textbf{and} generator valid rate $\ge 0.5$. Outsi
 the system still produces logs, still reports success on the rounds it can complete, and still
 appears to run --- which is precisely why the failure is easy to miss.
 
-The intuition behind the second bottleneck is that the causal variable is not $\tau_c$ itself. Three
-failure rates share one scale, and they are worth naming before they are composed.
-
-\begin{itemize}
-  \item $\Delta_t^{\mathrm{gen}}$, the \textbf{generator-side failure rate}: the fraction of rounds in
-    which the teacher failed to produce a task the formal verifier would accept. Its complement
-    $1 - \Delta_t^{\mathrm{gen}}$ is the valid-task rate $V$ of Section~3.
-  \item $\Delta_t^{\mathrm{valid}}$, the \textbf{judge-side failure rate}, \emph{conditional on the
-    task being valid}. Only valid rounds enter its denominator, because an invalid task has no answer
-    that could have been judged.
-  \item $\Delta_t^{\mathrm{global}}$, the \textbf{end-to-end failure rate} over all rounds, with every
-    invalid round charged $\Delta_t = 1.0$ as described above.
-\end{itemize}
-
-A round succeeds only if a valid task exists \textit{and} the student's answer is judged correctly, so
-the two failures compose by the chain rule:
+The intuition behind the second bottleneck is that the causal variable is not $\tau_c$ itself. Write
+$\Delta_t^{\mathrm{gen}}$ for the \textbf{generator-side failure rate} --- the fraction of rounds whose
+teacher produced no task the verifier would accept, so that $1 - \Delta_t^{\mathrm{gen}}$ is the
+valid-task rate $V$ of Section~3 --- and $\Delta_t^{\mathrm{valid}}$ for the \textbf{judge-side failure
+rate conditional on the task being valid}; only valid rounds enter the latter's denominator, since an
+invalid task has no answer to judge. $\Delta_t^{\mathrm{global}}$ is the \textbf{end-to-end failure
+rate} over all rounds, each invalid round charged $\Delta_t = 1.0$. A round succeeds only if a valid
+task exists \textit{and} the student's answer is judged correctly, so the two failures compose by the
+chain rule:
 
 \[
   1 - \Delta_t^{\mathrm{global}} = (1 - \Delta_t^{\mathrm{gen}})(1 - \Delta_t^{\mathrm{valid}})
@@ -638,20 +614,18 @@ therefore replace it with a four-layer pipeline:
         Python code, removing the bracket-matching and variable-declaration failure classes.
   \item \textbf{Deterministic rendering.} A templated renderer turns the skeleton into Z3 Python
         code, so the output is syntactically valid by construction.
-  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to symbolic constraints so that each
-        failure class has a named remedy. The mapping is implemented and unit-tested, but the harness
-        constructs the teacher prompt once per task and passes \texttt{extra\_constraints=None}, so
-        the accumulated hints do not reach the model in the runs reported below; what those runs
-        exercise is the per-task retry budget.
-  \item \textbf{Curriculum controller.} A sub-level controller that raises variable counts after five
-        consecutive rounds with valid rate $> 0.80$ and lowers them after three below $0.50$ is
-        implemented and unit-tested (\texttt{scripts/difficulty\_controller.py}), but it is not wired
-        into the round loop of either experiment: the validation below requests each level as a fixed
-        factor, and the baseline uses the population game's own escalation rule.
+  \item \textbf{Symbolic feedback.} Z3 error codes are mapped to named remedies. The mapping is
+        implemented and unit-tested, but the harness builds the teacher prompt once per task and
+        passes \texttt{extra\_constraints=None}, so the hints never reach the model in the runs below;
+        what those runs exercise is the retry budget.
+  \item \textbf{Curriculum controller.} A sub-level controller (raise after five valid rounds at rate
+        $> 0.80$, lower after three below $0.50$) is implemented and unit-tested
+        (\texttt{scripts/difficulty\_controller.py}) but is not wired into either round loop: the
+        validation below requests each level as a fixed factor.
 \end{enumerate}
 
-Of the four layers, the first two carry the measured improvement reported below; the last two are
-implemented and tested but are not exercised by these runs.
+The first two layers carry the measured improvement below; the last two are implemented and tested
+but not exercised by these runs.
 
 \subsection{Real API Validation}
 \label{sec:api}
